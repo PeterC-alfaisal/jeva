@@ -84,7 +84,7 @@ items:
       visible: (text)
 
     - name:  SupportTab
-      title: Interpreting Support S (log <i>S</i>)
+      title: Interpreting Support S (log LR)
       type: Table
       rows:  7
       visible: (text)
