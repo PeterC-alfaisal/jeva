@@ -1,0 +1,201 @@
+---
+name:  mcnem
+title: Paired Samples
+menuGroup: jeva
+menuSubgroup: Categorical Data
+menuTitle: Paired Samples
+menuSubtitle: McNemar test
+
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: |
+        Paired samples analysis (McNemar test) where null and alternative odds can be
+        specified.
+    R:
+        dontrun: false
+        usage: |
+            dat <- data.frame(
+                `1st survey` = c('Approve', 'Approve', 'Disapprove', 'Disapprove'),
+                `2nd survey` = c('Approve', 'Disapprove', 'Approve', 'Disapprove'),
+                `Counts` = c(794, 150, 86, 570),
+                check.names=FALSE)
+
+            jeva::mcnem(formula = Counts ~ `1st survey`:`2nd survey`, data = dat)
+            
+              #
+              # PAIRED SAMPLES - MCNEMAR TEST
+              #
+              # Contingency Tables                               
+              # ──────────────────────────────────────────────── 
+              #   1st survey    Approve    Disapprove    Total   
+              # ──────────────────────────────────────────────── 
+              #   Approve           794           150      944   
+              #   Disapprove         86           570      656   
+              #   Total             880           720     1600   
+              # ──────────────────────────────────────────────── 
+              #
+              #
+              # Support                                                                                          
+              # ──────────────────────────────────────────────────────────────────────────────────────────────── 
+              #                          Odds Value    Difference    S            G            df    p           
+              # ──────────────────────────────────────────────────────────────────────────────────────────────── 
+              #   H₀ vs observed odds      1.000000     0.4266667    -8.787590    17.575180     1    0.0000276   
+              #   Hₐ vs observed odds      1.000000     0.4266667    -8.787590    17.575180     1    0.0000276   
+              #   Hₐ vs H₀                              0.0000000     0.000000     0.000000     1    1.0000000   
+              # ──────────────────────────────────────────────────────────────────────────────────────────────── 
+              #
+              #
+              # Intervals                                                                             
+              # ───────────────────────────────────────────────────────────────────────────────────── 
+              #   Type of interval                  Level    Statistic     Lower         Upper        
+              # ───────────────────────────────────────────────────────────────────────────────────── 
+              #   Support for Odds                  2         0.5733333     0.4358143     0.7492639   
+              #   Likelihood-based for Odds    ᵃ    95%       0.5733333     0.4382493     0.7452969   
+              #   Likelihood-based for Logodds      95%      -0.5562880    -0.8249674    -0.2939726   
+              # ───────────────────────────────────────────────────────────────────────────────────── 
+              #            
+
+completeWhenFilled: true
+
+formula:
+    counts:
+        from: lhs
+        type: vars
+        subset: 1
+    rows:
+        from: rhs
+        type: vars
+        subset: 1
+    cols:
+        from: rhs
+        type: vars
+        subset: 2
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    - name: rows
+      title: Rows
+      type: Variable
+      suggested:
+        - nominal
+        - ordinal
+      permitted:
+        - factor
+      description:
+          R: >
+              the variable to use as the rows in the contingency table
+
+    - name: cols
+      title: Columns
+      type: Variable
+      suggested:
+        - nominal
+        - ordinal
+      permitted:
+        - factor
+      description:
+          R: >
+              the variable to use as the columns in the contingency table
+
+    - name: counts
+      title: Counts
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      default:
+      description:
+          R: >
+              the variable to use as the counts in the contingency table (not
+              necessary when providing a formula, see the examples)
+
+    - name: nul
+      title: <i>H</i>₀  Odds
+      type: Number
+      min: 10e-10
+      max: 10e+10
+      default: 1
+      description:
+          R: >
+              value for the null hypothesis, default = 1
+      
+    - name: alt
+      title: <i>H</i>ₐ Odds
+      type: Number
+      min: 10e-10
+      max: 10e+10
+      default: 1
+      description:
+          R: >
+              value for the alternative hypothesis, default = 1
+
+    - name: lint
+      type: Number
+      title: Likelihood interval support level
+      min: 1
+      max: 10
+      default: 2
+      description:
+          R: >
+            likelihood interval given as support value, e.g. 2 or 3, default = 2
+      
+    - name: ciWidth
+      title: Likelihood-based confidence interval
+      type: Number
+      min: 50
+      max: 99.9
+      default: 95
+      description:
+          R: >
+            a number between 50 and 99.9 (default: 95), width of the confidence
+            intervals to provide
+
+    - name: pll
+      title: Likelihood function
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), give the likelihood function showing null hypothesis (black line), 
+            alternative hypothesis (blue line), mean (dashed line), and specified support interval 
+            (horizontal red line)
+
+    - name: pcRow
+      title: Row
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), provide row percentages
+
+    - name: pcCol
+      title: Column
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), provide column percentages
+      
+    - name: varA
+      title: Variance analysis
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), perform variance analysis for null and alternative hypotheses
+
+    - name: text
+      title: Explanatory text
+      type: Bool
+      default: true
+      description:
+          R: >
+            `TRUE` (default) or `FALSE`, how to report the results
+...

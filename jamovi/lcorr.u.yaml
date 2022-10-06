@@ -1,0 +1,80 @@
+title: Correlation
+name: lcorr
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: First Variable
+        children:
+          - type: VariablesListBox
+            name: depa
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Second Variable
+        children:
+          - type: VariablesListBox
+            name: depb
+            maxItemCount: 1
+            isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: LayoutBox
+        cell:
+          column: 0
+          row: 0
+        stretchFactor: 1
+        children:
+          - type: Label
+            label: Settings
+            children:
+              - type: TextBox
+                name: alt
+                format: number
+              - type: TextBox
+                name: lint
+                format: number
+              - type: TextBox
+                name: ciWidth
+                suffix: '%'
+                format: number
+
+          - type: Label
+            label: Plots
+            children:
+              - type: CheckBox
+                name: pll
+              - type: CheckBox
+                name: plt
+                children:
+                  - type: LayoutBox
+                    children:
+                      - type: ComboBox
+                        name: line
+                        enable: (plt)
+                      - type: LayoutBox
+                        children:
+                          - type: CheckBox
+                            name: se
+                            enable: (plt)
+
+  - type: LayoutBox
+    margin: large
+    cell:
+      column: 1
+      row: 1
+    stretchFactor: 1
+    horizontalAlignment: center
+    children:
+      - type: Label
+        label: Additional Options
+        children:
+          - type: CheckBox
+            name: text
+        verticalAlignment: bottom

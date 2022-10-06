@@ -1,0 +1,137 @@
+title: Independent Samples
+name: contab
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Rows
+        children:
+          - type: VariablesListBox
+            name: rows
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Columns
+        children:
+          - type: VariablesListBox
+            name: cols
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Counts (required)
+        children:
+          - type: VariablesListBox
+            name: counts
+            maxItemCount: 1
+            isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: LayoutBox
+        cell:
+          column: 0
+          row: 0
+        stretchFactor: 1
+        children:
+          - type: Label
+            label: Percentages
+            children:
+              - type: CheckBox
+                name: pcRow
+              - type: CheckBox
+                name: pcCol
+          - type: Label
+            label: Additional Analysis
+            children:
+              - type: CheckBox
+                name: varA
+                verticalAlignment: center
+  - type: LayoutBox
+    margin: large
+    cell:
+      column: 1
+      row: 1
+    stretchFactor: 1
+    horizontalAlignment: center
+    children:
+      - type: Label
+        label: Additional Options
+        children:
+          - type: CheckBox
+            name: text
+        verticalAlignment: bottom
+
+  - type: CollapseBox
+    label: Plots
+    stretchFactor: 1
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        stretchFactor: 1
+        children:
+          - type: LayoutBox
+            cell:
+              column: 0
+              row: 0
+            stretchFactor: 1
+            children:
+              - type: Label
+                label: Plots
+                fitToGrid: true
+                children:
+                  - type: CheckBox
+                    name: barplot
+              - type: Label
+                label: Bar Type
+                fitToGrid: true
+                children:
+                  - type: RadioButton
+                    name: dodge
+                    optionName: bartype
+                    optionPart: dodge
+                  - type: RadioButton
+                    name: stack
+                    optionName: bartype
+                    optionPart: stack
+          - type: LayoutBox
+            cell:
+              column: 1
+              row: 0
+            stretchFactor: 1
+            children:
+              - type: Label
+                label: Y-Axis
+                fitToGrid: true
+                children:
+                  - name: ycounts
+                    type: RadioButton
+                    optionName: yaxis
+                    optionPart: ycounts
+                  - type: RadioButton
+                    name: ypc
+                    optionName: yaxis
+                    optionPart: ypc
+                    style: inline
+                    verticalAlignment: center
+                    children:
+                      - type: ComboBox
+                        name: yaxisPc
+                        enable: (ypc)
+              - type: Label
+                label: X-Axis
+                fitToGrid: true
+                children:
+                  - type: RadioButton
+                    name: xrows
+                    optionName: xaxis
+                    optionPart: xrows
+                  - type: RadioButton
+                    name: xcols
+                    optionName: xaxis
+                    optionPart: xcols

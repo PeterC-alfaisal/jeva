@@ -1,0 +1,140 @@
+---
+name:  Lreg
+title: Polynomial Regression
+menuGroup: jeva
+menuSubgroup: Regression & Correlation
+menuTitle: Polynomial Regression
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: |
+        Polynomial regression of two variables where different orders are compared. Akaike corrected support values are calculated hierarchically. R-squared and AIC values are given. P values are calculated in the usual way from the residual mean sums of squares from the highest polynomial in the model, but these are not comparable with the support values. Model coefficients are given with their specified likelihood support level. Plots for different polynomial orders can be plotted. 
+    R:
+        dontrun: false
+        usage: |
+            data('Prestige', package='carData')
+            jeva::Lreg(data = Prestige, dep = income, pred = education)
+            
+            #
+            # POLYNOMIAL REGRESSION
+            
+            # Support                                                                                                            
+            # ────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+            #   Model Comparisons          S             Sc             Param    R²           AIC         df        p            
+            # ────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+            #   H₀ vs Linear               -20.699042    -19.6990419     2, 3    0.3335989    1957.218    1, 100    < .0000001   
+            #   Quadratic vs Linear          3.931699      2.9316990     3, 4    0.3830428    1951.355     1, 97     0.0048170   
+            #   Cubic vs Lower Orders        2.078532      1.0785316     4, 5    0.4076818    1949.198     1, 97     0.0443862   
+            #   Quartic vs Lower Orders      1.420330      0.4203303     5, 6    0.4239500    1948.357     1, 97     0.1011348   
+            # ────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+            #   Note. S is calculated hierarchically from all remaining SSq, while p values are calculated using residual
+            #   MSq from the highest polynomial model.  Sc uses Akaike correction for parameters (Param)
+            #
+            #
+            # Model Coefficients - income                                                                                 
+            # ─────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+            #   Predictor    Estimate        SE               S             Lower             Upper           p           
+            # ─────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+            #   Intercept    124417.37122    100841.862332    -0.7941328     -74205.080195    323039.82263    0.2202634   
+            #   Linear       -50575.91460     38772.519128    -0.8868626    -126943.929025     25792.09981    0.1951747   
+            #   Quadratic      7733.55748      5452.012647    -1.0470743      -3004.960159     18472.07511    0.1592564   
+            #   Cubic          -509.11758       332.656469    -1.2168895      -1164.332014       146.09685    0.1291576   
+            #   Quartic          12.31439         7.440234    -1.4203303         -2.340217        26.96899    0.1011348   
+            # ─────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+            #    
+            #        
+
+completeWhenFilled: true
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    - name: dep
+      title: Dependent Variable
+      type: Variable
+      required: true
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      rejectInf: false
+      description:
+          R: >
+            the dependent variable from `data`, variable must be numeric
+
+    - name: pred
+      title: Predictor Variable
+      type: Variable
+      required: true
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      rejectInf: false
+      description:
+          R: >
+            the predictor variable, must be numeric
+            
+    - name: plt
+      title: Scatterplot
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), do a scatter plot of the data
+
+    - name: lin
+      title: Linear
+      type: Bool
+      default: true
+      description:
+          R: >
+            `TRUE` (default) or `FALSE`, plot line for linear relationship
+
+    - name: quad
+      title: Quadratic
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), plot curve for quadratic relationship
+
+    - name: cub
+      title: Cubic
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), plot curve for cubic relationship
+
+    - name: quart
+      title: Quartic
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), plot curve for quartic relationship
+
+    - name: lint
+      title: Support level
+      type: Number
+      min: 1
+      max: 100
+      default: 2
+      description:
+          R: >
+            a number between 1 and 100 (default: 2) specifying the likelihood
+            support interval width
+
+    - name: text
+      title: Explanatory text
+      type: Bool
+      default: true
+      description:
+          R: >
+            `TRUE` (default) or `FALSE`, how to report the results
+...

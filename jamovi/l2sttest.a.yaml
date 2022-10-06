@@ -1,0 +1,144 @@
+---
+name:  l2sttest
+title: Independent Samples T-Test
+menuGroup: jeva
+menuSubgroup: T-Tests
+menuTitle: Independent Samples T-Test
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: |
+        Independent samples analysis where null and alternative hypotheses can
+        be specified. Likelihood interval support level can be specified and plotted with the means.
+        A likelihood function for the difference in means can be plotted. 
+    R:
+        dontrun: false
+        usage: |
+            data('ToothGrowth')
+            jeva::l2sttest(data = ToothGrowth, dep = len, group = supp)
+    
+            #        
+            #        INDEPENDENT SAMPLES T-TEST
+            #
+            # Support                                                                                                         
+            # ─────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+            #                     Value       Difference    SE difference    S            t           df          p           
+            # ─────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+            #   H₀ vs observed    0.000000     -3.700000         1.931844    -1.926471    1.915268    55.30943    0.0606345   
+            #   Hₐ vs observed    0.000000     -3.700000         1.931844    -1.926471    1.915268    55.30943    0.0606345   
+            #   Hₐ vs H₀                        0.000000         1.931844     0.000000                                        
+            # ─────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+            #   Note. Uses Welch's procedure for unequal variances
+            #
+            #
+            # Support Interval for mean difference      
+            # ───────────────────────────────────────── 
+            #   Difference    Lower          Upper      
+            # ───────────────────────────────────────── 
+            #     3.700000    -0.07228534    7.472285   
+            # ───────────────────────────────────────── 
+            #
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    - name: dep
+      title: Dependent Variable
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      rejectInf: false
+      description:
+          R: > 
+            a (non-empty) numeric vector of data values
+
+    - name: group
+      title: Grouping Variable
+      type: Variable
+      suggested:
+        - nominal
+        - ordinal
+      permitted:
+        - factor
+      description:
+          R: >
+            an integer vector the same length as data, coding for 2 groups
+
+    - name: welch
+      title: Welch's
+      type: Bool
+      default: true
+      description:
+          R: >
+            `TRUE` (default) or `FALSE`, perform Welch's t-test
+
+    - name: nul
+      title: '<i>H</i>₀ difference value'
+      type: Number
+      min: -10e+10
+      max: 10e+10
+      default: 0
+      description:
+          R: >
+            difference value for the null hypothesis, default = 0
+      
+    - name: alt
+      title: '<i>H</i>ₐ difference value'
+      type: Number
+      min: -10e+10
+      max: 10e+10
+      default: 0
+      description:
+          R: >
+            difference value for an alternative hypothesis, default = 0
+
+    - name: lint
+      type: Number
+      title: Likelihood interval support level
+      min: 1
+      max: 10
+      default: 2
+      description:
+          R: >
+            likelihood interval given as support value, e.g. 2 or 3, default = 2
+
+    - name: dtab
+      title: Descriptives
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), provide descriptive statistics
+      
+    - name: plt
+      title: Descriptives Plot
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), give a plot of means with specified support intervals
+            
+    - name: pll
+      title: Likelihood function
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), give the likelihood function showing null hypothesis (black line), 
+            alternative hypothesis (blue line), mean (dashed line), and specified support interval 
+            (horizontal red line)
+
+    - name: text
+      title: Explanatory text
+      type: Bool
+      default: true
+      description:
+          R: >
+            `TRUE` (default) or `FALSE`, how to report the results
+...

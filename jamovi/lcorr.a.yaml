@@ -1,0 +1,156 @@
+---
+name:  lcorr
+title: Correlation
+menuGroup: jeva
+menuSubgroup: Regression & Correlation
+menuTitle: Correlation
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: |
+        Bivariate correlation analysis where an alternative hypothesis correlation can be specified. Likelihood support and likelihood based confidence intervals can be specified. 
+    R:
+        dontrun: false
+        usage: |
+            data('mtcars')
+            jeva::lcorr(data = mtcars, depa = mpg, depb = cyl)
+            
+            #
+            # CORRELATION
+            #
+            # Support                                                                                                                                
+            # ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+            #                                     Value       Difference    S             t            df    p             z            p(z)         
+            # ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+            #   H₀ vs observed correlation        0.000000     0.8521620    -23.166436    -8.919699    30    < .0000001    -6.806825    < .0000001   
+            #   Hₐ versus observed correlation    0.000000     0.8521620    -23.166436                                     -6.806825    < .0000001   
+            #   Hₐ vs H₀                                       0.0000000      0.000000                                                               
+            # ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+            #   Note. The last column p(z) gives the p value for the preceding z value
+            #
+            #
+            # Intervals                                                                 
+            # ───────────────────────────────────────────────────────────────────────── 
+            #   Type of interval      Level    r             Lower         Upper        
+            # ───────────────────────────────────────────────────────────────────────── 
+            #   Support               2        -0.8521620    -0.9268248    -0.7126780   
+            #   Likelihood-based ᵃ    95%      -0.8521620    -0.9257632    -0.7163143   
+            # ───────────────────────────────────────────────────────────────────────── 
+            #            
+            #
+
+completeWhenFilled: true
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    - name: depa
+      title: First Variable
+      type: Variable
+      required: true
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      rejectInf: false
+      description:
+          R: >
+            the first variable from `data`, plotted on vertical axis, variable must be numeric
+
+    - name: depb
+      title: Second Variable
+      type: Variable
+      required: true
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      rejectInf: false
+      description:
+          R: >
+            the second variable from `data`, plotted on horizontal axis, variable must be numeric
+
+    - name: alt
+      title: <i>H</i>ₐ correlation value
+      type: Number
+      min: -1
+      max: 1
+      default: 0
+      description:
+          R: >
+            a specified value for the alternative hypothesis, range -1 to +1, default 0
+            
+    - name: lint
+      type: Number
+      title: Likelihood interval support level
+      min: 1
+      max: 100
+      default: 2
+      description:
+          R: >
+            likelihood interval given as support value, e.g. 2 or 3, default = 2
+      
+    - name: ciWidth
+      title: Likelihood-based confidence interval
+      type: Number
+      min: 50
+      max: 99.99
+      default: 95
+      description:
+          R: >
+            a number between 50 and 99.9 (default: 95), width of the confidence
+            intervals to provide
+
+    - name: pll
+      title: Likelihood function
+      type: Bool
+      default: false
+      description:
+          R: >
+            plot the likelihood function displaying observed correlation, 
+            alternative hypothesis and support interval
+            
+    - name: plt
+      title: Scatterplot
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), do a scatter plot of the data
+      
+    - name: line
+      title: Regression Line
+      type: List
+      options:
+        - title: None
+          name: none
+        - title: Linear
+          name: linear
+        - title: Smooth
+          name: smooth
+      default: none
+      description:
+          R: >
+            `none` (default), `linear`, or `smooth`, provide respectively no regression line, 
+            a linear regression line, or a smoothed regression line
+
+    - name: se
+      title: Standard error
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), show the standard error for the regression line
+
+    - name: text
+      title: Explanatory text
+      type: Bool
+      default: true
+      description:
+          R: >
+            `TRUE` (default) or `FALSE`, how to report the results
+...
