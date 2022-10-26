@@ -18,8 +18,9 @@ can simply be added together to give their combined support. Unlike *p* values,
 support values are insensitive to transforms.
 
 ##		S value -- Interpretation of *H*1 vs *H*2
-	0	No evidence either way
-	1	Weak evidence
+	S	LR	Interpretation
+	0	1	No evidence either way
+	1	2.72	Weak evidence
 	2	Moderate evidence
 	3	Strong evidence
 	4	Extremely strong evidence
