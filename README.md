@@ -1,11 +1,20 @@
 # jeva :dromedary_camel: 
 
-A jamovi module for log likelihood ratio analyses of common statistical tests (jeva :arrow_backward: **j**amovi **ev**idential **a**nalyses)
+This is a [jamovi](https://www.jamovi.org/) module for log likelihood ratio analyses of common statistical tests (jeva :arrow_backward: **j**amovi **ev**idential **a**nalyses)
 
-The likelihood approach is one of several approaches to making
+[jamovi](https://www.jamovi.org/) is a brilliant way to do statistics. It is open statistical software built on top of the powerful [R](https://cran.r-project.org/) statistical language. Moreover, it is free.
+
+The likelihood/evidential approach is one of several approaches to making
 inferences from data. The best description and justification for the
 approach is given by [Edwards, A.W.F. (1992) Likelihood, Johns Hopkins
-Press](https://www.amazon.co.uk/Likelihood-W-F-Edwards/dp/0801844436/). Others, such as [R. Royall (1997)](https://www.amazon.co.uk/Statistical-Evidence-Likelihood-Monographs-Probability/dp/0412044110/), [S. Goodman (1988)](https://ajph.aphapublications.org/doi/abs/10.2105/AJPH.78.12.1568), [Z. Dienes (2008)](https://www.amazon.co.uk/Understanding-Psychology-Science-Introduction-Statistical/dp/023054231X/), [S. Glover & P. Dixon (2004)](https://link.springer.com/article/10.3758/BF03196706) have subsequently made important contributions. More recently, useful contributions are by [Dennis et al (2019](https://www.frontiersin.org/articles/10.3389/fevo.2019.00372/full), and [Taper et al (2022)](https://www.frontiersin.org/articles/10.3389/fevo.2022.883456/full) 
+Press](https://www.amazon.co.uk/Likelihood-W-F-Edwards/dp/0801844436/). 
+Others, such as [R. Royall (1997)](https://www.amazon.co.uk/Statistical-Evidence-Likelihood-Monographs-Probability/dp/0412044110/), 
+[S. Goodman (1988)](https://ajph.aphapublications.org/doi/abs/10.2105/AJPH.78.12.1568), 
+[Z. Dienes (2008)](https://www.amazon.co.uk/Understanding-Psychology-Science-Introduction-Statistical/dp/023054231X/), 
+[S. Glover & P. Dixon (2004)](https://link.springer.com/article/10.3758/BF03196706) have subsequently 
+made important contributions. More recently, useful contributions are by 
+[Dennis et al (2019](https://www.frontiersin.org/articles/10.3389/fevo.2019.00372/full), 
+and [Taper et al (2022)](https://www.frontiersin.org/articles/10.3389/fevo.2022.883456/full) 
 
 The likelihood approach focusses on the observed data, using maximum
 likelihood for estimates, and calculates likelihood ratios for specific
@@ -73,7 +82,7 @@ The analyses in the module complement my recent book: [Cahusac, P.M.B.
 In jamovi the **.jmo** file can be sideloaded, and the module will appear among the other modules.
 Example jamovi analyses with data from the book are given in the **Test Data Analyses - Blank** folder.
 
-I would be interested in feedback <pcahusac@alfaisal.edu>          Peter Cahusac  
+I would be interested in feedback <pcahusac@alfaisal.edu>  or   <peteqsac@gmail.com>     Peter Cahusac  
 
 Below is a sample screenshot from jamovi showing the acquisition and results for an odds ratio analysis of the MRC study (1991) of neural tube
 defects in babies born to mothers receiving either folic acid or placebo (double-blind randomized study), see pp 146 - 151 in Cahusac (2020) book.
