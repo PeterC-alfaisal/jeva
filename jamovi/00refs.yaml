@@ -1,0 +1,434 @@
+---
+refs:
+
+    Aitkin:
+        type: 'book'
+        title: Statistical Modelling in GLIM, pp 112-118
+        year: 1989
+        author: Aitkin, M. et al
+        publisher: Clarendon Press
+        ISBN: 978-0198522034
+        url: https://www.amazon.com/Statistical-Modelling-GLIM-Oxford-Science-dp-0198522037/dp/0198522037
+
+    Book:
+        type: 'book'
+        title: Evidence-Based Statistics
+        year: 2020
+        author: Cahusac, P.M.B.
+        publisher:  John Wiley & Sons
+        ISBN: 978-1119549802
+        doi: 10.1002/9781119549833
+        url: https://onlinelibrary.wiley.com/doi/book/10.1002/9781119549833
+
+    CahusacEv:
+       author: Cahusac, P.M.B.
+       title: Data as evidence
+       journal: Experimental Physiology
+       volume: 105
+       number: 7
+       pages: 1071-1080
+       ISSN: 0958-0670
+       DOI: 10.1113/ep088664
+       url: https://physoc.onlinelibrary.wiley.com/doi/abs/10.1113/EP088664
+       year: 2020
+       type: Journal Article
+    
+    Dienes:
+       author: Dienes, Z.
+       title: Understanding Psychology as a Science, An introduction to scientific and statistical inference
+       publisher: Palgrave MacMillan
+       ISBN: 978-0-230-54230-3
+       year: 2008
+       url: https://www.amazon.co.uk/Understanding-Psychology-Science-Introduction-Statistical/dp/023054231X
+
+    DixonPV:
+       author: Dixon, Peter
+       title: The p-value fallacy and how to avoid it
+       journal: Canadian Journal of Experimental Psychology/Revue canadienne de psychologie exp?rimentale
+       volume: 57
+       number: 3
+       pages: 189-202
+       ISSN: 1878-7290(Electronic),1196-1961(Print)
+       DOI: 10.1037/h0087425
+       year: 2003
+       type: Journal Article
+       doi: https://doi.org/10.1037/h0087425
+    
+    DixonPa:
+       author: Dixon, Peter
+       title: The effective number of parameters in post hoc models
+       journal: Behavior research methods
+       volume: 45
+       number: 3
+       pages: 604-612
+       ISSN: 1554-3528
+       year: 2013
+       type: Journal Article
+       url: https://link.springer.com/article/10.3758/s13428-013-0373-7
+
+    Edwards_OR:
+       author: Edwards, A. W. F.
+       title: Occam's Bonus
+       booktitle: Simplicity, Inference and Modelling; Keeping it Sophisticatedly Simple
+       editor: Zellner, A.; Keuzenkamp, H.A.; McAleer, M.
+       publisher: Cambridge University Press
+       address: Cambridge
+       pages: 128-132
+       year: 2001
+       type: 'Book Section'
+       url: https://books.google.com.sa/books?hl=en&lr=&id=-YdbBN-O-JAC&oi=fnd&pg=PA128&dq=edwards+occams+bonus&ots=xqofxHovyX&sig=KYhC8R1_rf2Ky-0ZNWu8WgYnxuY&redir_esc=y#v=onepage&q=edwards%20occams%20bonus&f=false
+
+    Edwards:
+       author: Edwards, A. W. F.
+       title: Likelihood
+       publisher: John Hopkins University Press
+       address: Baltimore
+       volume: 2nd edition
+       ISBN: 0801844436
+       year: 1992
+       type: 'book'
+       url: https://www.hfsbooks.com/books/likelihood-2nd-edition-edwards/
+
+    EdwardsCT:
+       author: Edwards, A. W. F.
+       title: Likelihood, pp 193-194
+       publisher: John Hopkins University Press
+       address: Baltimore
+       volume: 2nd edition
+       ISBN: 0801844436
+       year: 1992
+       type: 'book'
+       url: https://www.hfsbooks.com/books/likelihood-2nd-edition-edwards/
+
+    EdwardsF:
+       author: Edwards, A. W. F.
+       title: Likelihood, pp 196-197
+       publisher: John Hopkins University Press
+       address: Baltimore
+       volume: 2nd edition
+       ISBN: 0801844436
+       year: 1992
+       type: 'book'
+       url: https://www.hfsbooks.com/books/likelihood-2nd-edition-edwards/
+
+    EdwardsVA:
+       author: Edwards, A. W. F.
+       title: Likelihood, pp 192
+       publisher: John Hopkins University Press
+       address: Baltimore
+       volume: 2nd edition
+       ISBN: 0801844436
+       year: 1992
+       type: 'book'
+       url: https://www.hfsbooks.com/books/likelihood-2nd-edition-edwards/
+    
+    EdwardsSI:
+       author: Edwards, A. W. F.
+       title: Statistical Methods in Scientific Inference
+       journal: Nature
+       volume: 222
+       number: 5200
+       pages: 1233-1237
+       ISSN: 1476-4687
+       DOI: 10.1038/2221233a0
+       url: https://doi.org/10.1038/2221233a0
+       year: 1969
+       type: Journal Article
+    
+    
+    EdwardsLinS:
+       author: Edwards, A.W.F.
+       title: Likelihood in Statistics
+       booktitle: International Encyclopedia of the Social & Behavioral Sciences (Second Edition)
+       editor: Wright, James D.
+       publisher: Elsevier
+       address: Oxford
+       pages: 116-119
+       ISBN: 978-0-08-097087-5
+       DOI: https://doi.org/10.1016/B978-0-08-097086-8.42137-9
+       url: http://www.sciencedirect.com/science/article/pii/B9780080970868421379
+       year: 2015
+       type: Book Section
+    
+    
+    GloverDixon:
+       author: Glover, S. and Dixon, P.
+       title: Likelihood ratios, A simple and flexible statistic for empirical psychologists
+       journal: Psychonomic bulletin & review
+       volume: 11
+       number: 5
+       pages: 791-806
+       ISSN: 1069-9384
+       DOI: 10.3758/BF03196706
+       year: 2004
+       type: Journal Article
+       url: https://link.springer.com/article/10.3758/BF03196706
+
+    GoodmanPV:
+       author: Goodman, S. N.
+       title: Toward evidence-based medical statistics. 1 The p value fallacy
+       journal: Annals of Internal Medicine
+       volume: 130
+       number: 12
+       pages: 995-1004
+       ISSN: 0003-4819
+       DOI: 10.7326/0003-4819-130-12-199906150-00008
+       url: http://dx.doi.org/10.7326/0003-4819-130-12-199906150-00008
+       year: 1999
+       type: Journal Article
+    
+    GoodmanBF:
+       author: Goodman, S. N.
+       title: Toward evidence-based medical statistics. 2 The bayes factor
+       journal: Annals of Internal Medicine
+       volume: 130
+       number: 12
+       pages: 1005-1013
+       ISSN: 0003-4819
+       DOI: 10.7326/0003-4819-130-12-199906150-00019
+       url: http://dx.doi.org/10.7326/0003-4819-130-12-199906150-00019
+       year: 1999
+       type: Journal Article
+    
+    GoodmanRoyall:
+       author: Goodman, S.N. and Royall, R.M.
+       title: Evidence and Scientific Research
+       journal: American Journal of Public Health
+       volume: 78
+       number: 12
+       pages: 1568-1574
+       ISSN: 0090-0036
+       DOI: 10.2105/AJPH.78.12.1568
+       year: 1988
+       type: Journal Article
+
+    Pritikin:
+       author: Pritikin, J. N., Rappaport, L. M. and Neale, M. C.
+       title: Likelihood-based confidence intervals for a parameter with an upper or lower bound
+       journal: Structural equation modeling
+       volume: 24
+       number: 3
+       pages: 395-401
+       ISSN: 1070-5511
+       DOI: 10.1080/10705511.2016.1275969
+       url: https://doi.org/10.1080/10705511.2016.1275969
+       year: 2017
+       type: Journal Article
+        
+    Royall:
+        type: 'book'
+        author: Royall, R.
+        title: Statistical Evidence
+        year: 1997
+        publisher: Chapman & Hall
+        doi: 10.1201/9780203738665
+        url: https://doi.org/10.1201/9780203738665
+    
+    RoyallMisL:
+       author: Royall, R.M.
+       title: On the Probability of Observing Misleading Statistical Evidence
+       journal: Journal of the American Statistical Association
+       volume: 95
+       number: 451
+       pages: 760-768
+       ISSN: 0162-1459
+       DOI: 10.1080/01621459.2000.10474264
+       url: https://www.tandfonline.com/doi/abs/10.1080/01621459.2000.10474264
+       year: 2000
+       type: Journal Article
+
+    RoyallSciEv:
+       author: Royall, R.
+       title: The Likelihood paradigm for statistical evidence
+       booktitle: The Nature of Scientific Evidence
+       editor: Taper, M. L. and Lele, S. R.
+       publisher: University of Chicago
+       address: Chicago
+       pages: 119-152
+       ISBN: 0226789578
+       year: 2004
+       type: Book Section
+    
+    RoyallTsou:
+       author: Royall, Richard and Tsou, Tsung-Shan
+       title: Interpreting statistical evidence by using imperfect models, robust adjusted likelihood functions
+       journal: Journal of the Royal Statistical Society Series B (Statistical Methodology)
+       volume: 65
+       number: 2
+       pages: 391-404
+       ISSN: 1467-9868
+       DOI: 10.1111/1467-9868.00392
+       url: http://dx.doi.org/10.1111/1467-9868.00392
+       year: 2003
+       type: Journal Article
+
+    emmeans:
+        type: 'software'
+        author: Lenth, R.
+        year: 2020
+        title: 'emmeans: Estimated Marginal Means, aka Least-Squares Means'
+        publisher: '[R package]. Retrieved from https://cran.r-project.org/package=emmeans'
+        url: https://cran.r-project.org/package=emmeans
+
+    afex:
+        type: 'software'
+        author: Singmann, H.
+        year: 2018
+        title: 'afex: Analysis of Factorial Experiments'
+        publisher: '[R package]. Retrieved from https://cran.r-project.org/package=afex'
+        url: https://cran.r-project.org/package=afex
+
+    R:
+        type: 'software'
+        author: R Core Team
+        year: 2018
+        title: 'A Language and Envionment for Statistical Computing'
+        publisher: '[Computer software]. Retrieved from https://cran.r-project.org/'
+        url: https://cran.r-project.org/
+
+    BF:
+        type: 'software'
+        author: Morey, R. D., & Rouder, J. N.
+        year: 2018
+        title: 'BayesFactor: Computation of Bayes Factors for Common Designs'
+        publisher: '[R package]. Retrieved from https://cran.r-project.org/package=BayesFactor'
+        url: https://cran.r-project.org/package=BayesFactor
+
+    btt:
+        type: 'article'
+        author: Rouder, J. N., Speckman, P. L., Sun, D., Morey, R. D., & Iverson, G.
+        year: 2009
+        title: Bayesian t tests for accepting and rejecting the null hypothesis
+        publisher: Psychonomic Bulletin & Review
+        volume: 16
+        pages: 225-237
+
+    car:
+        type: 'software'
+        author: Fox, J., & Weisberg, S.
+        year: 2020
+        title: 'car: Companion to Applied Regression'
+        publisher: '[R package]. Retrieved from https://cran.r-project.org/package=car'
+        url: https://cran.r-project.org/package=car
+
+    ggplot2:
+        type: 'software'
+        author: Wickham, H., Chang, W., Henry, L., Pedersen, T. L., Takahashi, K., Wilke, C., Woo, K., & RStudio
+        year: 2018
+        title: 'ggplot2: Create Elegant Data Visualisations Using the Grammar of Graphics'
+        publisher: '[R package]. Retrieved from https://cran.r-project.org/package=ggplot2'
+        url: https://cran.r-project.org/package=ggplot2
+
+    ggridges:
+        type: 'software'
+        author: Wilke, C., & RStudio
+        year: 2018
+        title: 'ggridges: Ridgeline Plots in ggplot2'
+        publisher: '[R package]. Retrieved from https://cran.r-project.org/package=ggridges'
+        url: https://cran.r-project.org/package=ggridges
+
+    mvnormtest:
+        type: 'software'
+        author: Jarek, S.
+        year: 2012
+        title: 'mvnormtest: Normality test for multivariate variables'
+        publisher: '[R package]. Retrieved from https://cran.r-project.org/package=mvnormtest'
+        url: https://cran.r-project.org/package=mvnormtest
+
+    PMCMR:
+        type: 'software'
+        author: Pohlert, T.
+        year: 2018
+        title: 'PMCMR: Calculate Pairwise Multiple Comparisons of Mean Rank Sums'
+        publisher: '[R package]. Retrieved from https://cran.r-project.org/package=PMCMR'
+        url: https://cran.r-project.org/package=PMCMR
+
+    ROCR:
+        type: 'software'
+        author: Sing, T., Sander, O., Beerenwinkel, N., & Lengauer, T.
+        year: 2015
+        title: 'ROCR: Visualizing the Performance of Scoring Classifiers'
+        publisher: '[R package]. Retrieved from https://cran.r-project.org/package=ROCR'
+        url: https://cran.r-project.org/package=ROCR
+
+    nnet:
+        type: 'software'
+        author: Ripley, B., Venables W.
+        year: 2016
+        title: 'nnet: Feed-Forward Neural Networks and Multinomial Log-Linear Models'
+        publisher: '[R package]. Retrieved from https://cran.r-project.org/package=nnet'
+        url: https://cran.r-project.org/package=nnet
+
+    MASS:
+        type: 'software'
+        author: Ripley, B., Venables W., Bates, D. M., Hornik, K., Gebhardt, A., & Firth, D.
+        year: 2018
+        title: "MASS: Support Functions and Datasets for Venables and Ripley's MASS"
+        publisher: '[R package]. Retrieved from https://cran.r-project.org/package=MASS'
+        url: https://cran.r-project.org/package=MASS
+
+    vcd:
+        type: 'software'
+        author: Meyer, D., Zeileis, A., Hornik, K., Gerber, F., & Friendly, M.
+        year: 2017
+        title: "vcd: Visualizing Categorical Data"
+        publisher: '[R package]. Retrieved from https://cran.r-project.org/package=vcd'
+        url: https://cran.r-project.org/package=vcd
+
+    vcdExtra:
+        type: 'software'
+        author: Friendly M., Turner, H., Zeileis, A., Murdoch, D., & Firth, D.
+        year: 2017
+        title: "vcdExtra: 'vcd' Extensions and Additions"
+        publisher: '[R package]. Retrieved from https://cran.r-project.org/package=vcdExtra'
+        url: https://cran.r-project.org/package=vcdExtra
+
+    exact2x2:
+        type: 'software'
+        author: Fay, M. P., Hunsberger, S. A., Nason, M., & Gabriel, E.
+        year: 2018
+        title: "exact2x2: Exact Tests and Confidence Intervals for 2x2 Tables"
+        publisher: '[R package]. Retrieved from https://cran.r-project.org/package=exact2x2'
+        url: https://cran.r-project.org/package=exact2x2
+
+    psych:
+        type: 'software'
+        author: Revelle, W.
+        year: 2019
+        title: "psych: Procedures for Psychological, Psychometric, and Personality Research"
+        publisher: '[R package]. Retrieved from https://cran.r-project.org/package=psych'
+        url: https://cran.r-project.org/package=psych
+
+    lavaan:
+        type: 'software'
+        author: Rosseel, Y., et al.
+        year: 2018
+        title: "lavaan: Latent Variable Analysis"
+        publisher: '[R package]. Retrieved from https://cran.r-project.org/package=lavaan'
+        url: https://cran.r-project.org/package=lavaan
+
+    semPlot:
+        type: 'software'
+        author: Epskamp, S.
+        year: 2017
+        title: "semPlot: Path Diagrams and Visual Analysis of Various SEM Packages' Output"
+        publisher: '[R package]. Retrieved from https://cran.r-project.org/package=semPlot'
+        url: https://cran.r-project.org/package=semPlot
+
+    Kerby2014:
+        type: 'article'
+        author: Kerby, D. S.
+        year: 2014
+        title: "The simple difference formula: An approach to teaching nonparametric correlation"
+        publisher: Comprehensive Psychology
+        volume: 3
+        pages: 2165–2228
+
+    ppcor:
+        type: 'software'
+        author: Kim, S.
+        year: 2015
+        title: "ppcor: Partial and Semi-Partial (Part) Correlation"
+        publisher: '[R package]. Retrieved from https://cran.r-project.org/package=ppcor'
+        url: https://cran.r-project.org/package=ppcor
+...

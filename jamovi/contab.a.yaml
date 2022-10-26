@@ -1,0 +1,205 @@
+---
+name:  contab
+title: Independent Samples
+menuGroup: jeva
+menuSubgroup: Categorical Data
+menuTitle: Independent Samples
+menuSubtitle: Two-way association
+
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: |
+        Two-way analysis of a contingency table where main effects and
+        interaction can be assessed.
+    R:
+        dontrun: false
+        usage: |
+            dat <- data.frame(
+              Infested = c('Yes', 'Yes', 'Yes', 'Yes', 'Yes', 'No', 'No', 'No', 'No', 'No'),
+              Age = c(1,2,3,4,5),
+              Eggs = c(14, 16, 14, 7, 6, 87, 33, 66, 34, 11),
+              check.names=FALSE)
+            
+            jeva::contab(formula = Eggs ~ Infested:Age, data = dat)
+            
+            # INDEPENDENT SAMPLES
+            #
+            # Contingency Table                                    
+            # ──────────────────────────────────────────────────── 
+            #   Infested    1      2     3     4     5     Total   
+            # ──────────────────────────────────────────────────── 
+            #   No           87    33    66    34    11      231   
+            #   Yes          14    16    14     7     6       57   
+            #   Total       101    49    80    41    17      288   
+            # ──────────────────────────────────────────────────── 
+            #
+            #
+            # Support: Marginal main effects and interaction analyses, against the Null model                     
+            # ─────────────────────────────────────────────────────────────────────────────────────────────────── 
+            #   Component           Expected value    S             Sc           G             df    p            
+            # ─────────────────────────────────────────────────────────────────────────────────────────────────── 
+            #   Infested                 144.00000     56.346183    56.346183    112.692366     1    < .0000001   
+            #   Age                       57.60000     40.395080    38.895080     77.790159     4    < .0000001   
+            #   Infested  ⨯  Age                        4.806653     3.306653      6.613306     4     0.1577897   
+            #   Total                     28.80000    101.547916    97.547916    195.095832     9    < .0000001   
+            # ─────────────────────────────────────────────────────────────────────────────────────────────────── 
+            #   Note. Sc is S corrected for degrees of freedom using Edwards's Occam's bonus, see reference
+            #
+
+completeWhenFilled: true
+
+formula:
+    counts:
+        from: lhs
+        type: vars
+        subset: 1
+    rows:
+        from: rhs
+        type: vars
+        subset: 1
+    cols:
+        from: rhs
+        type: vars
+        subset: 2
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    - name: rows
+      title: Rows
+      type: Variable
+      suggested:
+        - nominal
+        - ordinal
+      permitted:
+        - factor
+      description:
+          R: >
+              the variable to use as the rows in the contingency table
+
+    - name: cols
+      title: Columns
+      type: Variable
+      suggested:
+        - nominal
+        - ordinal
+      permitted:
+        - factor
+      description:
+          R: >
+              the variable to use as the columns in the contingency table
+
+    - name: counts
+      title: Counts
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      default:
+      description:
+          R: >
+              the variable for counts, required
+
+    - name: pcRow
+      title: Row
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), provide row percentages
+
+    - name: pcCol
+      title: Column
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), provide column percentages
+
+    - name: varA
+      title: Variance analysis
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), perform variance analysis against the null model
+
+    - name: text
+      title: Explanatory text
+      type: Bool
+      default: true
+      description:
+          R: >
+            `TRUE` (default) or `FALSE`, how to report the results
+
+    - name: barplot
+      title: Bar Plot
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), show barplots
+
+    - name: yaxis
+      title: Y-axis
+      type: List
+      options:
+        - name: ycounts
+          title: "Counts"
+        - name: ypc
+          title: "Percentages"
+      default: ycounts
+      description:
+          R: >
+            ycounts (default) or ypc. Use respectively `counts` or `percentages`
+            for the bar plot y-axis
+
+    - name: yaxisPc
+      title: ''
+      type: List
+      options:
+        - name: total_pc
+          title: "of total"
+        - name: column_pc
+          title: "within column"
+        - name: row_pc
+          title: "within rows"
+      default: total_pc
+      description:
+          R: >
+            total_pc (default), column_pc, or row_pc. Use respectively
+            percentages `of total`, `within columns`, or `within rows` for the
+            bar plot y-axis.
+
+    - name: xaxis
+      title: X-axis
+      type: List
+      options:
+        - name: xrows
+          title: "Rows"
+        - name: xcols
+          title: "Columns"
+      default: xrows
+      description:
+          R: >
+            rows (default), or columns in bar plot X axis
+
+    - name: bartype
+      title: Bar Type
+      type: List
+      options:
+        - name: dodge
+          title: "Side by side"
+        - name: stack
+          title: "Stacked"
+      default: dodge
+      description:
+          R: >
+            stack or side by side (default), barplot type
+...

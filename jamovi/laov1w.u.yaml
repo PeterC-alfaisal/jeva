@@ -1,0 +1,99 @@
+title: One-Way ANOVA
+name: laov1w
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Dependent Variable
+        children:
+          - type: VariablesListBox
+            name: deps
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Grouping Variable
+        children:
+          - type: VariablesListBox
+            name: group
+            maxItemCount: 1
+            isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: LayoutBox
+        cell:
+          column: 0
+          row: 0
+        stretchFactor: 1
+        children:
+          - type: Label
+            label: Settings
+            children:
+              - type: Label
+                label: Contrasts (use comma-separated lists)
+                children:
+                  - type: LayoutBox
+                    children:
+                      - type: CheckBox
+                        name: ct1
+                        label: Contrast 1
+                        children:
+                          - type: TextBox
+                            name: Ct1Values
+                            label: ''
+                            format: string
+                            width: large
+                            enable: (ct1)
+                  - type: LayoutBox
+                    margin: large
+                    children:
+                      - type: CheckBox
+                        name: ct2
+                        label: Contrast 2
+                        children:
+                          - type: TextBox
+                            name: Ct2Values
+                            label: ''
+                            format: string
+                            width: large
+                            enable: (ct2)
+              - type: TextBox
+                name: lint
+                format: number
+  - type: LayoutBox
+    margin: large
+    cell:
+      column: 1
+      row: 1
+    stretchFactor: 1
+    horizontalAlignment: center
+    children:
+      - type: Label
+        label: Descriptives
+        children:
+          - type: CheckBox
+            name: desc
+          - type: CheckBox
+            name: descPlot
+      - type: Label
+        label: Additional Options
+        children:
+          - type: CheckBox
+            name: text
+        verticalAlignment: bottom
+  - type: CollapseBox
+    label: Assumption Checks
+    collapsed: true
+    stretchFactor: 1
+    children:
+      - type: CheckBox
+        name: eqv
+      - type: CheckBox
+        name: norm
+      - type: CheckBox
+        name: qq

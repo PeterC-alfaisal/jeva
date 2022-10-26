@@ -1,0 +1,141 @@
+---
+name:  contab
+title: Independent Samples
+jrs:   '1.1'
+
+items:
+    - name: freqs
+      title: Contingency Table
+      type: Table
+      description: a proportions table
+      columns: [ ]
+      clearWith:
+        - rows
+        - cols
+        - counts
+
+    - name:  text
+      title: Log likelihood ratio analysis
+      type:  Preformatted
+
+    - name:  cttma
+      title: main results
+      type: Table
+      rows:  4
+      clearWith:
+        - rows
+        - cols
+        - counts
+      columns:
+        - name: var
+          title: Component
+          type: text
+        - name: Value
+          title: Expected value
+          type: number
+        - name: S
+          title: <i>S</i>
+          type: number
+        - name: Sc
+          title: <i>S</ic
+          type: number
+        - name: G
+          title: <i>G</i>
+          type: number
+        - name: df
+          title: <i>df</i>
+          type: integer
+        - name: p
+          title: <i>p</i>
+          type: number
+          format: zto,pvalue
+          refs:
+              - EdwardsCT
+              - Edwards_OR
+
+    - name: tabText
+      title: 'Summarizing an evidential analysis'
+      type: Html
+      clearWith:
+          - varA
+          - data
+          - counts
+          - rows
+          - cols
+      visible: (text)
+
+    - name:  SupportTab
+      title: Interpreting Support S (log LR)
+      type: Table
+      rows:  7
+      visible: (text)
+      columns:
+        - name: SS
+          title: <i>S</i>
+          type: number
+
+        - name: LR
+          title: <i>LR</i>
+          type: number
+
+        - name: Interp
+          title: 'Interpretation Comparing Hypotheses'
+          type: text
+
+    - name: MoretabText
+      title: 'More details about summaries'
+      type: Html
+      visible: (text)
+      refs: 
+          - Book
+
+    - name:  ctt3
+      title: Variance analysis versus Null model
+      type: Table
+      visible: (varA)
+      rows:  3
+      clearWith:
+          - counts
+          - rows
+          - cols
+      columns:
+        - name: var
+          title: ''
+          type: text
+        - name: Sv
+          title: <i>S</i>
+          type: number
+        - name: X2
+          title: χ²
+          type: number
+        - name: dfv
+          title: <i>df</i>
+          type: integer
+        - name: pv
+          title: <i>p</i>
+          type: number
+          format: zto,pvalue
+        - name: pv1
+          title: 1 - <i>p</i>
+          type: number
+          format: zto,pvalue
+          refs:
+              - EdwardsVA
+
+    - name: barplot
+      title: Plots
+      type: Image
+      width: 450
+      height: 400
+      renderFun: .barPlot
+      visible: (barplot)
+      requiresData: true
+      clearWith:
+        - rows
+        - cols
+        - counts
+        - yaxis
+        - yaxisPc
+        - xaxis
+        - bartype
+...
