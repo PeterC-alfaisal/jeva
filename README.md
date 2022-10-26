@@ -18,14 +18,14 @@ can simply be added together to give their combined support. Unlike *p* values,
 support values are insensitive to transforms.
 
 ##		S value -- Interpretation of *H*1 vs *H*2
-	S	LR	Interpretation
+	**S	LR	Interpretation**
 	0	1	No evidence either way
 	1	2.72	Weak evidence
-	2	Moderate evidence
-	3	Strong evidence
-	4	Extremely strong evidence
-	7	More than a thousand to one
-	14	More than a million to one
+	2	7.39	Moderate evidence
+	3	20.10	Strong evidence
+	4	54.60	Extremely strong evidence
+	7	1097	More than a thousand to one
+	14	1.2x10^6^	More than a million to one
 **Table 1:** _Interpretation for values of S, the support, calculated as the natural logarithm of the likelihood
 ratio. Negative values would represent support for hypothesis values H2 vs H1. Typically, it is
 sufficient to give S to one decimal place._
