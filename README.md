@@ -40,13 +40,7 @@ A support of 2 represents moderate evidence, and is roughly equivalent to the
 strong evidence and 4 represents extremely strong evidence, and so on. 
 Negative values represent the same strength of evidence, except for the 
 second hypothesis value versus the first. Support values for a given likelihood
-function can be compared with each other simply by subtracting them. In the 
-example below, the support for d versus the 2nd hypothesis can be obtained 
-by subtracting the support for the 2nd hypothesis versus null (4.115) from the support
-for d versus the null (2.191) giving -1.924, as listed in the 3rd line of output.
-The support for d versus the observed mean would be 2.191 - 4.352 = -2.161, negative
-as expected since d lower on the likelihood function curve from the maximum
-represented by the observed mean (MLE). 
+function can be compared with each other simply by subtracting them.
 
 The log likelihood ratio interval (support interval) identifies a supported range of values which are 
 consistent with the observed statistic. In jeva it is denoted as *S*-*X*, where *X* can 
