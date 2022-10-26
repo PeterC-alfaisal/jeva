@@ -1,0 +1,16 @@
+Package: jeva
+Type: Package
+Title: Evidential Analyses for Common Statistical Tests
+Version: 0.0.2
+Author: Peter Cahusac
+Maintainer: Peter Cahusac <peteqsac@gmail.com>
+Description: Analyses that calculate the log likelihood (support) for a 
+    range of statistical tests. Where possible the likelihood
+    function and support interval for the observed data are displayed.
+    Intended as a companion to Evidence-Based Statistics by P. Cahusac 
+    (2020, ISBN-13 : 978-1119549802).
+License: What license is it under?
+Encoding: UTF-8
+LazyData: true
+Imports: jmvcore (>= 0.8.5), R6, ggplot2, graphics, stats
+RoxygenNote: 7.2.1
