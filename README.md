@@ -1,10 +1,11 @@
-# jeva
-A jamovi module for log likelihood ratio analyses of common statistical tests
+# jeva :dromedary_camel: 
+
+A jamovi module for log likelihood ratio analyses of common statistical tests (jeva :arrow_backward: **j**amovi **ev**idential **a**nalyses)
 
 The likelihood approach is one of several approaches to making
 inferences from data. The best description and justification for the
 approach is given by [Edwards, A.W.F. (1992) Likelihood, Johns Hopkins
-Press](https://www.amazon.co.uk/Likelihood-W-F-Edwards/dp/0801844436/). Others, such as [R. Royall (1997)](https://www.amazon.co.uk/Statistical-Evidence-Likelihood-Monographs-Probability/dp/0412044110/), [S. Goodman (1988)](https://ajph.aphapublications.org/doi/abs/10.2105/AJPH.78.12.1568), [Z. Dienes (2008)](https://www.amazon.co.uk/Understanding-Psychology-Science-Introduction-Statistical/dp/023054231X/), [S. Glover & P. Dixon (2004)](https://link.springer.com/article/10.3758/BF03196706) have subsequently made important contributions. More recently useful contributions are by [Dennis et al (2019](https://www.frontiersin.org/articles/10.3389/fevo.2019.00372/full), and [Taper et al (2022)](https://www.frontiersin.org/articles/10.3389/fevo.2022.883456/full) 
+Press](https://www.amazon.co.uk/Likelihood-W-F-Edwards/dp/0801844436/). Others, such as [R. Royall (1997)](https://www.amazon.co.uk/Statistical-Evidence-Likelihood-Monographs-Probability/dp/0412044110/), [S. Goodman (1988)](https://ajph.aphapublications.org/doi/abs/10.2105/AJPH.78.12.1568), [Z. Dienes (2008)](https://www.amazon.co.uk/Understanding-Psychology-Science-Introduction-Statistical/dp/023054231X/), [S. Glover & P. Dixon (2004)](https://link.springer.com/article/10.3758/BF03196706) have subsequently made important contributions. More recently, useful contributions are by [Dennis et al (2019](https://www.frontiersin.org/articles/10.3389/fevo.2019.00372/full), and [Taper et al (2022)](https://www.frontiersin.org/articles/10.3389/fevo.2022.883456/full) 
 
 The likelihood approach focusses on the observed data, using maximum
 likelihood for estimates, and calculates likelihood ratios for specific
@@ -17,23 +18,24 @@ parameter value). Support values obtained from independent studies
 can simply be added together to give their combined support. Unlike *p* values, 
 support values are insensitive to transforms.
 
-##		S value -- Interpretation of *H*~~1~~ vs *H*2
-	S	LR	Interpretation
-	0	1	No evidence either way
-	1	2.72	Weak evidence
-	2	7.39	Moderate evidence
-	3	20.10	Strong evidence
-	4	54.60	Extremely strong evidence
-	7	1097	More than a thousand to one
-	14	1.2m	More than a million to one
+| *S* | *Likelihood Ratio* | *Interpretation - evidence for H<sub>1</sub> versus H<sub>2</sub>* | 
+| ----------- | :-----------: | --------------- |
+| 0 | 1 | No evidence either way |
+| 1 | 		2.72 | Weak evidence |
+| 2 | 7.39 | Moderate evidence |
+| 3 | 20.10 | Strong evidence |
+| 4 | 54.60 | Extremely strong evidence |
+| 7 | 1097 | More than a thousand to one |
+| 14 | 1.2 x 10<sup>6</sup> | More than a million to one|
+
 **Table 1:** _Interpretation for values of S, the support, calculated as the natural logarithm of the likelihood
-ratio. Negative values would represent support for hypothesis values H2 vs H1. Typically, it is
+ratio. Negative values would represent support for hypothesis values H<sub>2</sub> vs H<sub>1</sub>. Typically, it is
 sufficient to give S to one decimal place._
 
 Support values give the relative strength of evidence for one hypothesis 
-value versus another, see Table 1. They range from negative infinity to positive infinity. 
+value versus another, see **Table 1**. They range from negative infinity to positive infinity. 
 There is no specific threshold value (unlike 0.05 in frequentist testing), and
-values can be rounded to the nearest 1 decimal place, e.g. -2.161 -> -2.2.
+values can be rounded to the nearest 1 decimal place, e.g. -2.161 :arrow_right: -2.2.
 A support of 0 shows no support for either hypothesis, while a support of 1 
 represents weak evidence for the first hypothesis versus the second. 
 A support of 2 represents moderate evidence, and is roughly equivalent to the 
@@ -48,9 +50,9 @@ consistent with the observed statistic. In jeva it is denoted as *S*-*X*, where 
 be any number between 1 and 100. The *S*-2 interval is commonly used since it is numerically 
 close to the 95% confidence interval. For this interval, it means that the values within the 
 interval have likelihood ratios with each other in the range 0.135 to 7.38, corresponding to 
-e^-2^ to e^2^. Simply put, within an *S*-2 interval, no likelihoods are more than 7.38 times 
+e<sup>-2</sup> to e<sup>2</sup>. Simply put, within an *S*-2 interval, no likelihoods are more than 7.38 times 
 different from each other. Similarly for the *S*-3 interval, likelihood ratios will range 
-from 0.050 to 20.09, corresponding to e^-3^ to e^3^, and no likelihoods are more than 20.09 
+from 0.050 to 20.09, corresponding to e<sup>-3</sup> to e<sup>3</sup>, and no likelihoods are more than 20.09 
 times different from each other.
 
 The support interval is different from the confidence interval. The latter represents the 
