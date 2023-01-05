@@ -88,12 +88,19 @@ propClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           df <- (length(counts)-1)
           exp_n <- exp.p*n
           exp_ntext <- paste(round(exp_n,2),collapse=" | ")
-          Sup_n <- -sum(counts*(log(counts)-log(exp_n)))
+          
+          count1 <- counts               # removing zero counts for support calculations
+          for (i in 1:length(count1)) {
+            count1[i] <- counts[i]
+            if (counts[i] < 1) count1[i]=1   # turn 0s into 1s for one table used for log
+          }
+          
+          Sup_n <- -sum(counts*(log(count1)-log(exp_n)))
           Supc_n <- Sup_n+(df-1)/2 # corrected for df
-
+          
           exp <- expProps*n
           exp_text <- paste(round(exp,2),collapse=" | ")
-          Sup <- -sum(counts*(log(counts)-log(exp)))
+          Sup <- -sum(counts*(log(count1)-log(exp)))
           Supc <- Sup+(df-1)/2 # corrected for df
           
           Sup_an <- Sup - Sup_n

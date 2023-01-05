@@ -196,7 +196,7 @@ contabResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="number"),
                     list(
                         `name`="Sc", 
-                        `title`="<i>S</ic", 
+                        `title`="<i>S</i>c", 
                         `type`="number"),
                     list(
                         `name`="G", 

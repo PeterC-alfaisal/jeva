@@ -229,7 +229,14 @@ contabClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         # calculating the interaction support
         S2way <- 0
         suppressWarnings(lt <- try(chisq.test(tabt, correct=FALSE))) # ignore warning message
-        S2way <- sum( lt$observed * log(lt$observed/lt$expected) )
+
+        tabt1=lt$observed
+        for (i in 1:length(tabt)) {
+          tabt1[i] <- lt$observed[i]
+          if (lt$observed[i] < 1) tabt1[i]=1   # turn 0s into 1s for one table used for log
+        }
+        
+        S2way <- sum( lt$observed * log(tabt1/lt$expected))
         dfi <- lt$parameter
         S2way_c <- S2way - (dfi-1)/2  # corrected for df
 
@@ -249,7 +256,8 @@ contabClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         exp_cell <- grandtot/(nRows*nCols)
 
         # Total S
-        Tot_S <- sum(tabt*log(tabt))-sum(tabt)*log(sum(tabt)/(nRows*nCols))
+        Tot_S <- sum(lt$observed*log(tabt1))-sum(lt$observed)*log(sum(lt$observed)/(nRows*nCols))
+        
         # same as components added together (without correction for df)
         Tot_S_c <- Tot_S - (dft-1)/2 # corrected for column df
         
@@ -270,17 +278,17 @@ contabClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 #        }
         
         gt_p <- 1-pchisq(2*Tot_S,dft)
-        gr_p <- 1-pchisq(2*RowMain_c,dfr)
-        gc_p <- 1-pchisq(2*ColMain_c,dfc)
-        gi_p <- 1-pchisq(2*S2way_c,dfi)
+        gr_p <- 1-pchisq(2*RowMain,dfr)
+        gc_p <- 1-pchisq(2*ColMain,dfc)
+        gi_p <- 1-pchisq(2*S2way,dfi)
         
         int_text <- paste(rowVarName," \u2A2F ", colVarName)
         
         table <- self$results$cttma
-        table$setRow(rowNo=1, values=list(Value=exp_row, S=RowMain, Sc=RowMain_c, G=2*RowMain_c, df=dfr, p=gr_p))
-        table$setRow(rowNo=2, values=list(Value=exp_col, S=ColMain, Sc=ColMain_c, G=2*ColMain_c, df=dfc, p=gc_p))
-        table$setRow(rowNo=3, values=list(Value="", S=S2way, Sc=S2way_c, G=2*S2way_c, df=dfi, p=gi_p))
-        table$setRow(rowNo=4, values=list(Value=exp_cell, S=Tot_S, Sc=Tot_S_c, G=2*Tot_S_c, df=dft, p=gt_p))
+        table$setRow(rowNo=1, values=list(Value=exp_row, S=RowMain, Sc=RowMain_c, G=2*RowMain, df=dfr, p=gr_p))
+        table$setRow(rowNo=2, values=list(Value=exp_col, S=ColMain, Sc=ColMain_c, G=2*ColMain, df=dfc, p=gc_p))
+        table$setRow(rowNo=3, values=list(Value="", S=S2way, Sc=S2way_c, G=2*S2way, df=dfi, p=gi_p))
+        table$setRow(rowNo=4, values=list(Value=exp_cell, S=Tot_S, Sc=Tot_S_c, G=2*Tot_S, df=dft, p=gt_p))
 
         table <- self$results$ctt3
         table$setNote('Note', "Unlike the \u03C7\u00B2 statistic, a large <i>S</i> value indicates 

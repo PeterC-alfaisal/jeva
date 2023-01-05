@@ -14,11 +14,14 @@ cttOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             lint = 2,
             ciWidth = 95,
             pll = FALSE,
-            pcRow = FALSE,
-            pcCol = FALSE,
             varA = FALSE,
             cc = FALSE,
-            text = TRUE, ...) {
+            text = TRUE,
+            obs = TRUE,
+            exp = FALSE,
+            pcRow = FALSE,
+            pcCol = FALSE,
+            pcTot = FALSE, ...) {
 
             super$initialize(
                 package="jeva",
@@ -78,14 +81,6 @@ cttOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "pll",
                 pll,
                 default=FALSE)
-            private$..pcRow <- jmvcore::OptionBool$new(
-                "pcRow",
-                pcRow,
-                default=FALSE)
-            private$..pcCol <- jmvcore::OptionBool$new(
-                "pcCol",
-                pcCol,
-                default=FALSE)
             private$..varA <- jmvcore::OptionBool$new(
                 "varA",
                 varA,
@@ -98,6 +93,26 @@ cttOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "text",
                 text,
                 default=TRUE)
+            private$..obs <- jmvcore::OptionBool$new(
+                "obs",
+                obs,
+                default=TRUE)
+            private$..exp <- jmvcore::OptionBool$new(
+                "exp",
+                exp,
+                default=FALSE)
+            private$..pcRow <- jmvcore::OptionBool$new(
+                "pcRow",
+                pcRow,
+                default=FALSE)
+            private$..pcCol <- jmvcore::OptionBool$new(
+                "pcCol",
+                pcCol,
+                default=FALSE)
+            private$..pcTot <- jmvcore::OptionBool$new(
+                "pcTot",
+                pcTot,
+                default=FALSE)
 
             self$.addOption(private$..rows)
             self$.addOption(private$..cols)
@@ -107,11 +122,14 @@ cttOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..lint)
             self$.addOption(private$..ciWidth)
             self$.addOption(private$..pll)
-            self$.addOption(private$..pcRow)
-            self$.addOption(private$..pcCol)
             self$.addOption(private$..varA)
             self$.addOption(private$..cc)
             self$.addOption(private$..text)
+            self$.addOption(private$..obs)
+            self$.addOption(private$..exp)
+            self$.addOption(private$..pcRow)
+            self$.addOption(private$..pcCol)
+            self$.addOption(private$..pcTot)
         }),
     active = list(
         rows = function() private$..rows$value,
@@ -122,11 +140,14 @@ cttOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         lint = function() private$..lint$value,
         ciWidth = function() private$..ciWidth$value,
         pll = function() private$..pll$value,
-        pcRow = function() private$..pcRow$value,
-        pcCol = function() private$..pcCol$value,
         varA = function() private$..varA$value,
         cc = function() private$..cc$value,
-        text = function() private$..text$value),
+        text = function() private$..text$value,
+        obs = function() private$..obs$value,
+        exp = function() private$..exp$value,
+        pcRow = function() private$..pcRow$value,
+        pcCol = function() private$..pcCol$value,
+        pcTot = function() private$..pcTot$value),
     private = list(
         ..rows = NA,
         ..cols = NA,
@@ -136,11 +157,14 @@ cttOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..lint = NA,
         ..ciWidth = NA,
         ..pll = NA,
-        ..pcRow = NA,
-        ..pcCol = NA,
         ..varA = NA,
         ..cc = NA,
-        ..text = NA)
+        ..text = NA,
+        ..obs = NA,
+        ..exp = NA,
+        ..pcRow = NA,
+        ..pcCol = NA,
+        ..pcTot = NA)
 )
 
 cttResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -148,7 +172,6 @@ cttResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         freqs = function() private$.items[["freqs"]],
-        text = function() private$.items[["text"]],
         ctt = function() private$.items[["ctt"]],
         cttma = function() private$.items[["cttma"]],
         ctt2 = function() private$.items[["ctt2"]],
@@ -167,17 +190,12 @@ cttResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Table$new(
                 options=options,
                 name="freqs",
-                title="Contingency Table",
+                title="Contingency Tables",
                 columns=list(),
                 clearWith=list(
                     "rows",
                     "cols",
-                    "counts",
-                    "data")))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="text",
-                title="Log likelihood ratio analysis"))
+                    "counts")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="ctt",
@@ -459,9 +477,12 @@ cttBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' #
 #'
 #' @param data the data as a data frame
-#' @param rows the variable to use as the rows in the contingency table
+#' @param rows the variable to use as the rows in the contingency table (not
+#'   necessary when providing a formula, see the examples)
 #' @param cols the variable to use as the columns in the contingency table
-#' @param counts the variable for counts, required
+#'   (not necessary when providing a formula, see the examples)
+#' @param counts the variable to use as the counts in the contingency table
+#'   (not necessary when providing a formula, see the examples)
 #' @param nul value for the null hypothesis, default = 1
 #' @param alt value for the alternative hypothesis, default = 0
 #' @param lint likelihood interval given as support value, e.g. 2 or 3,
@@ -472,19 +493,24 @@ cttBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   function showing null hypothesis (black line),  alternative hypothesis
 #'   (blue line), mean (dashed line), and specified support interval
 #'   (horizontal red line)
-#' @param pcRow \code{TRUE} or \code{FALSE} (default), provide row percentages
-#' @param pcCol \code{TRUE} or \code{FALSE} (default), provide column
-#'   percentages
 #' @param varA \code{TRUE} or \code{FALSE} (default), perform variance
 #'   analysis for null and alternative hypothesis
 #' @param cc \code{TRUE} or \code{FALSE} (default), use continuity correction
 #' @param text \code{TRUE} (default) or \code{FALSE}, how to report the
 #'   results
+#' @param obs \code{TRUE} or \code{FALSE} (default), provide the observed
+#'   counts
+#' @param exp \code{TRUE} or \code{FALSE} (default), provide the expected
+#'   counts
+#' @param pcRow \code{TRUE} or \code{FALSE} (default), provide row percentages
+#' @param pcCol \code{TRUE} or \code{FALSE} (default), provide column
+#'   percentages
+#' @param pcTot \code{TRUE} or \code{FALSE} (default), provide total
+#'   percentages
 #' @param formula (optional) the formula to use, see the examples
 #' @return A results object containing:
 #' \tabular{llllll}{
-#'   \code{results$freqs} \tab \tab \tab \tab \tab a proportions table \cr
-#'   \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$freqs} \tab \tab \tab \tab \tab a table of proportions \cr
 #'   \code{results$ctt} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$cttma} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$ctt2} \tab \tab \tab \tab \tab a table \cr
@@ -512,11 +538,14 @@ ctt <- function(
     lint = 2,
     ciWidth = 95,
     pll = FALSE,
-    pcRow = FALSE,
-    pcCol = FALSE,
     varA = FALSE,
     cc = FALSE,
     text = TRUE,
+    obs = TRUE,
+    exp = FALSE,
+    pcRow = FALSE,
+    pcCol = FALSE,
+    pcTot = FALSE,
     formula) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
@@ -544,6 +573,13 @@ ctt <- function(
                 from="rhs",
                 type="vars",
                 subset="2")
+        if (missing(layers))
+            layers <- jmvcore::marshalFormula(
+                formula=formula,
+                data=`if`( ! missing(data), data, NULL),
+                from="rhs",
+                type="vars",
+                subset="3:")
     }
 
     if ( ! missing(rows)) rows <- jmvcore::resolveQuo(jmvcore::enquo(rows))
@@ -568,11 +604,14 @@ ctt <- function(
         lint = lint,
         ciWidth = ciWidth,
         pll = pll,
-        pcRow = pcRow,
-        pcCol = pcCol,
         varA = varA,
         cc = cc,
-        text = text)
+        text = text,
+        obs = obs,
+        exp = exp,
+        pcRow = pcRow,
+        pcCol = pcCol,
+        pcTot = pcTot)
 
     analysis <- cttClass$new(
         options = options,

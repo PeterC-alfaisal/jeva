@@ -18,24 +18,37 @@ lrttestClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         
         private$.initSupportTab()
         
+        data1 <- jmvcore::toNumeric(self$data[[self$options$depa]])
+        data2 <- jmvcore::toNumeric(self$data[[self$options$depb]])
+#        if (is.null(data1) || is.null(data2))
+#          return()
+        
+#          self$results$tabText$setContent(NULL)
+        
       },
       .run = function() {
         
         data1 <- jmvcore::toNumeric(self$data[[self$options$depa]])
         data2 <- jmvcore::toNumeric(self$data[[self$options$depb]])
-        adata <- data1 - data2
+        
+        if (is.null(data1) || is.null(data2))
+          return()
+        
+        data <- data.frame(data1,data2)
+        pairsData <- naOmit(data)       # remove missing listwise
+        adata <- pairsData[1] - pairsData[2]
         
         results <- t.test(adata, mu = self$options$nul)
         m.obs <- results$estimate
         se.obs <- results$stderr
         df <- results$parameter
         N=df+1
-        m1.obs <- mean(data1[1:N])
-        m2.obs <- mean(data2[1:N])
-        med1.obs <- median(data1[1:N])
-        med2.obs <- median(data2[1:N])
-        sd1 <- sd(data1[1:N])
-        sd2 <- sd(data2[1:N])
+        m1.obs <- mean(pairsData$data1)
+        m2.obs <- mean(pairsData$data2)
+        med1.obs <- median(pairsData$data1)
+        med2.obs <- median(pairsData$data2)
+        sd1 <- sd(pairsData$data1)
+        sd2 <- sd(pairsData$data2)
         sed1 <- sd1/sqrt(N)
         sed2 <- sd2/sqrt(N)
         
@@ -243,16 +256,7 @@ lrttestClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         
         html <- self$results$MoretabText
         
-        str1 <- "<i>Support Intervals</i> 
-          <br> The log likelihood ratio interval identifies a supported range of values which are consistent with the observed statistic. 
-          In jeva it is denoted as <i>S</i>-<i>X</i>, where <i>X</i> can be any number between 1 and 100. The <i>S</i>-2 interval is 
-          commonly used since it is numerically close to the 95% confidence interval. For the <i>S</i>-2 interval, it means that the values 
-          within the interval have likelihood ratios in the range 0.135 to 7.38, corresponding to e\u207B\u00B2 to e\u00B2. 
-          Simply put, within an <i>S</i>-2 interval, no likelihoods are more than 7.38 times different from each other. Similarly, for the 
-          <i>S</i>-3 interval, likelihood ratios will range from 0.050 to 20.09, corresponding to e\u207B\u00B3 to e\u00B3, and no 
-          likelihoods will be more than 20.09 times different from each other.
-          <br> <i>Advantages of the Evidential Approach</i> 
-          <br> One advantage of the evidential approach is that <i>S</i> quantifies the strength of evidence 
+        str1 <- "One advantage of the evidential approach is that <i>S</i> quantifies the strength of evidence 
           for or against the null hypothesis. "
         str2 <- "Another advantage is that we can select hypothesis values that reflect our research interests. "
         str3 <- "For example, we could choose a meaningful effect size <i>H</i>\u2090 to compare with any <i>H</i>\u2080. 
