@@ -5,30 +5,28 @@ stage: 0
 compilerMode: tame
 children:
   - type: VariableSupplier
+    name: variablesupplier
     persistentItems: false
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: Rows
         children:
           - type: VariablesListBox
             name: rows
-            maxItemCount: 1
             isTarget: true
+            maxItemCount: 1
       - type: TargetLayoutBox
-        label: Columns
         children:
           - type: VariablesListBox
             name: cols
-            maxItemCount: 1
             isTarget: true
+            maxItemCount: 1
       - type: TargetLayoutBox
-        label: Counts (required)
         children:
           - type: VariablesListBox
             name: counts
-            maxItemCount: 1
             isTarget: true
+            maxItemCount: 1
   - type: LayoutBox
     margin: large
     children:
@@ -59,14 +57,48 @@ children:
                 children:
                   - type: CheckBox
                     name: pll
-          - type: Label
-            label: Percentages
+      - type: CollapseBox
+        label: Cells
+        stretchFactor: 1
+        collapsed: true
+        children:
+          - type: LayoutBox
+            margin: large
+            stretchFactor: 1
             children:
-              - type: CheckBox
-                name: pcRow
-              - type: CheckBox
-                name: pcCol
-
+              - type: LayoutBox
+                cell:
+                  column: 0
+                  row: 0
+                stretchFactor: 1
+                children:
+                  - type: Label
+                    label: Counts
+                    fitToGrid: true
+                    children:
+                      - type: CheckBox
+                        name: obs
+                      - type: CheckBox
+                        name: exp
+              - type: LayoutBox
+                cell:
+                  column: 1
+                  row: 0
+                stretchFactor: 1
+                children:
+                  - type: Label
+                    label: Percentages
+                    fitToGrid: true
+                    cell:
+                      column: 1
+                      row: 0
+                    children:
+                      - type: CheckBox
+                        name: pcRow
+                      - type: CheckBox
+                        name: pcCol
+                      - type: CheckBox
+                        name: pcTot
   - type: LayoutBox
     margin: large
     cell:

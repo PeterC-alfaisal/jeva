@@ -80,6 +80,10 @@ formula:
         from: rhs
         type: vars
         subset: 2
+    layers:
+        from: rhs
+        type: vars
+        subset: '3:'
 
 options:
     - name: data
@@ -97,7 +101,8 @@ options:
         - factor
       description:
           R: >
-              the variable to use as the rows in the contingency table 
+              the variable to use as the rows in the contingency table (not
+              necessary when providing a formula, see the examples)
 
     - name: cols
       title: Columns
@@ -109,7 +114,8 @@ options:
         - factor
       description:
           R: >
-              the variable to use as the columns in the contingency table
+              the variable to use as the columns in the contingency table (not
+              necessary when providing a formula, see the examples)
 
     - name: counts
       title: Counts (optional)
@@ -121,7 +127,9 @@ options:
       default:
       description:
           R: >
-              the variable for counts, required
+              the variable to use as the counts in the contingency table (not
+              necessary when providing a formula, see the examples)
+
 
     - name: nul
       title: '<i>H</i>₀ <i>OR</i>'
@@ -174,22 +182,6 @@ options:
             alternative hypothesis (blue line), mean (dashed line), and specified support interval 
             (horizontal red line)
 
-    - name: pcRow
-      title: Row
-      type: Bool
-      default: false
-      description:
-          R: >
-            `TRUE` or `FALSE` (default), provide row percentages
-
-    - name: pcCol
-      title: Column
-      type: Bool
-      default: false
-      description:
-          R: >
-            `TRUE` or `FALSE` (default), provide column percentages
-
     - name: varA
       title: Variance analysis
       type: Bool
@@ -213,4 +205,45 @@ options:
       description:
           R: >
             `TRUE` (default) or `FALSE`, how to report the results
+    - name: obs
+      title: Observed counts
+      type: Bool
+      default: true
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), provide the observed counts
+
+    - name: exp
+      title: Expected counts
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), provide the expected counts
+
+    - name: pcRow
+      title: Row
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), provide row percentages
+
+    - name: pcCol
+      title: Column
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), provide column percentages
+
+    - name: pcTot
+      title: Total
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), provide total percentages
+
+
 ...

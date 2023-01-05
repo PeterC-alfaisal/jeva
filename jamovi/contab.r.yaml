@@ -37,7 +37,7 @@ items:
           title: <i>S</i>
           type: number
         - name: Sc
-          title: <i>S</ic
+          title: <i>S</i>c
           type: number
         - name: G
           title: <i>G</i>

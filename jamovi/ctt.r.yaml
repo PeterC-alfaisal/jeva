@@ -4,21 +4,15 @@ title: Odds Ratio
 jrs:   '1.1'
 
 items:
-
     - name: freqs
-      title: Contingency Table
+      title: Contingency Tables
       type: Table
-      description: a proportions table
+      description: a table of proportions
       columns: [ ]
       clearWith:
         - rows
         - cols
         - counts
-        - data
-
-    - name:  text
-      title: Log likelihood ratio analysis
-      type:  Preformatted
 
     - name:  ctt
       title: Odds Ratio analyses
@@ -199,5 +193,3 @@ items:
         - nul
         - alt
       visible: (pll)
-      
-...
