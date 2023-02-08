@@ -1,12 +1,12 @@
 ---
 title: Evidential Analyses for Common Statistical Tests
 name: jeva
-version: 0.0.3
+version: 0.0.5
 jms: '1.0'
 authors:
   - Peter Cahusac
 maintainer: Peter Cahusac <peteqsac@gmail.com>
-date: 2022-11-5
+date: '2023-01-21'
 type: R
 description: >-
   Analyses that calculate the log likelihood ratio (support) for a  range of
