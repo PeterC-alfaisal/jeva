@@ -366,6 +366,19 @@ cttClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             if (lt$observed[i] < 1) tabt1[i]=1   # turn 0s into 1s for one table used for log
           }
           
+          # main marginal totals
+          row_sum <- rowSums(tab)
+          col_sum <- colSums(tab)
+          
+          # do not allow 0 marginal totals
+          for (i in 1:length(row_sum)) {
+            if (row_sum[i] < 1) jmvcore::reject(.("Margin '{var}' has 0 total"), code='', var=rowVarName)
+          }
+          for (i in 1:length(col_sum)) {
+            if (col_sum[i] < 1) jmvcore::reject(.("Margin '{var}' has 0 total"), code='', var=colVarName)
+          }
+          
+          
           orv <- (a*d)/(b*c) # actual odds ratio from the contingency table
           f <- function(x,a,b,c,d,c1tot,r1tot,r2tot,goal) {
             (-sum(a*log(a/x), b*log(b/(c1tot-x)), c*log(c/(r1tot-x)),
@@ -381,7 +394,7 @@ cttClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           arry[!is.finite(arry)] <- 0
           ind <- which(arry > 0)
           aa <- split(ind, cumsum(c(0, diff(ind) > 1)))
-          dvs <- min(aa$'0')
+          dvs <- min(aa$'0')-1
           dve <- max(aa$'0')+1
           
           goal = -qchisq(self$options$ciWidth/100,1)/2
@@ -457,7 +470,7 @@ cttClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           ga_p <- 1-pchisq(ga,1)
           gan <- 2*abs(SexOR_null)
           gan_p <- 1-pchisq(gan,1)
-          gt_p <- 1-pchisq(2*Sgt,1)
+          gt_p <- 1-pchisq(2*Sgt,3)
           gr_p <- 1-pchisq(2*Srow,1)
           gc_p <- 1-pchisq(2*Scol,1)
           gi_p <- 1-pchisq(2*Sint,1)
@@ -471,10 +484,10 @@ cttClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                                             S=SexOR_null, G=gan, df=df, p=gan_p))
           
           table <- self$results$cttma
-          table$setRow(rowNo=1, values=list(Value=exp_row, S=Srow, G=2*Srow, df=1, p=gr_p))
-          table$setRow(rowNo=2, values=list(Value=exp_col, S=Scol, G=2*Scol, df=1, p=gc_p))
-          table$setRow(rowNo=3, values=list(Value="", S=Sint, G=2*Sint, df=1, p=gi_p))
-          table$setRow(rowNo=4, values=list(Value=exp_int, S=Sgt, G=2*Sgt, df=1, p=gt_p))
+          table$setRow(rowNo=1, values=list(Value=exp_row, S=Srow, G=2*Srow, df=as.integer(df), p=gr_p))
+          table$setRow(rowNo=2, values=list(Value=exp_col, S=Scol, G=2*Scol, df=as.integer(df), p=gc_p))
+          table$setRow(rowNo=3, values=list(Value="", S=Sint, G=2*Sint, df=as.integer(df), p=gi_p))
+          table$setRow(rowNo=4, values=list(Value=exp_int, S=Sgt, G=2*Sgt, df=as.integer(3), p=gt_p))
           table <- self$results$ctt2
           table$setRow(rowNo=1, values=list(Level=lintlev, OR = orv, Lower=begL, Upper=endL))
           table$setRow(rowNo=2, values=list(Level=conflev, OR = orv, Lower=beg, Upper=end))

@@ -66,6 +66,9 @@ propClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 #  likelihood code
           toler=0.0001
           len <- length(counts)
+          if (len < 2)
+            jmvcore::reject(.("Error: fewer than 2 levels"))
+        
           n <- sum(counts)
 
           tests <- self$results$tests

@@ -236,13 +236,22 @@ contabClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           if (lt$observed[i] < 1) tabt1[i]=1   # turn 0s into 1s for one table used for log
         }
         
-        S2way <- sum( lt$observed * log(tabt1/lt$expected))
+        S2way <- sum(lt$observed * log(tabt1/lt$expected))
         dfi <- lt$parameter
         S2way_c <- S2way - (dfi-1)/2  # corrected for df
 
         # main marginal totals
         row_sum <- rowSums(tabt)
         col_sum <- colSums(tabt)
+        
+        # do not allow 0 marginal totals
+        for (i in 1:length(row_sum)) {
+          if (row_sum[i] < 1) jmvcore::reject(.("Margin '{var}' has 0 total"), code='', var=rowVarName)
+        }
+        for (i in 1:length(col_sum)) {
+          if (col_sum[i] < 1) jmvcore::reject(.("Margin '{var}' has 0 total"), code='', var=colVarName)
+        }
+        
         grandtot <- sum(tabt)
         dfr <- length(row_sum)-1; dfc <- length(col_sum)-1; dft <- nRows*nCols-1
         RowMain <- sum(row_sum*log(row_sum))-grandtot*log(grandtot) + grandtot*log(length(row_sum))

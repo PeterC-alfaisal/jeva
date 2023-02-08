@@ -9,8 +9,8 @@ l2sttestClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       table <- self$results$l2sttest
       if(isTRUE (self$options$welch))
         table$setNote('Note', "Uses Welch's procedure for unequal variances") 
-      table$setRow(rowNo=1, values=list(var= "<i>H</i>\u2080 vs observed means"))
-      table$setRow(rowNo=2, values=list(var="<i>H</i>\u2090 vs observed means"))
+      table$setRow(rowNo=1, values=list(var= "<i>H</i>\u2080 vs observed mean difference"))
+      table$setRow(rowNo=2, values=list(var="<i>H</i>\u2090 vs observed mean difference"))
       table$setRow(rowNo=3, values=list(var="<i>H</i>\u2090 vs <i>H</i>\u2080"))
 
       table <- self$results$l2sttest2
