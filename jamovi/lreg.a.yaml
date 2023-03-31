@@ -14,7 +14,7 @@ description:
         dontrun: false
         usage: |
             data('Prestige', package='carData')
-            jeva::Lreg(data = Prestige, dep = income, pred = education)
+            jeva::Lreg(data = Prestige, dep = income, pred = education, text = FALSE)
             
             #
             # POLYNOMIAL REGRESSION
@@ -28,8 +28,9 @@ description:
             #   Cubic vs Lower Orders        2.078532      1.0785316     4, 5    0.4076818    1949.198     1, 97     0.0443862   
             #   Quartic vs Lower Orders      1.420330      0.4203303     5, 6    0.4239500    1948.357     1, 97     0.1011348   
             # ────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
-            #   Note. S is calculated hierarchically from all remaining SSq, while p values are calculated using residual
-            #   MSq from the highest polynomial model.  Sc uses Akaike correction for parameters (Param)
+            #   Note. S uses Occam's Bonus correction for parameters (Param). S is calculated hierarchically
+            #   from all remaining SSq, while p values are calculated using residual MSq from the highest
+            #   polynomial model.
             #
             #
             # Model Coefficients - income                                                                                 
@@ -79,6 +80,21 @@ options:
           R: >
             the predictor variable, must be numeric
             
+    - name: correction
+      title: Correction for parameters
+      type: List
+      options:
+        - name: nc
+          title: "None"
+        - name: ob
+          title: "Occam's Bonus"
+        - name: aic
+          title: "AIC"
+      default: ob
+      description:
+          R: >
+            correction for parameters, none, Occam's bonus (default) or AIC
+
     - name: plt
       title: Scatterplot
       type: Bool

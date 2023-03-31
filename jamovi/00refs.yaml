@@ -149,7 +149,19 @@ refs:
        url: http://www.sciencedirect.com/science/article/pii/B9780080970868421379
        year: 2015
        type: Book Section
-    
+
+    Glover_Tut:
+       author: Glover, S.
+       title: Likelihood Ratios; A Tutorial
+       journal: MetaArXiv Preprints
+       volume: 
+       number:
+       pages: 
+       ISSN: 
+       DOI: doi.org/10.31222/osf.io/g3j2k
+       year: 2018
+       type: Journal Article
+       url: https://osf.io/preprints/metaarxiv/g3j2k/
     
     GloverDixon:
        author: Glover, S. and Dixon, P.

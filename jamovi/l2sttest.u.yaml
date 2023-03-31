@@ -27,8 +27,8 @@ children:
     children:
       - type: LayoutBox
         cell:
-            column: 0
-            row: 0
+          column: 0
+          row: 0
         stretchFactor: 1
         children:
           - type: Label
@@ -50,12 +50,22 @@ children:
                       - type: TextBox
                         name: lint
                         format: number
-                      - type: LayoutBox
-                        margin: large
-                        children:
-                          - type: CheckBox
-                            name: pll
-
+          - type: Label
+            label: Correction for Parameters
+            fitToGrid: true
+            children:
+              - type: RadioButton
+                name: nc
+                optionName: correction
+                optionPart: nc
+              - type: RadioButton
+                name: ob
+                optionName: correction
+                optionPart: ob
+              - type: RadioButton
+                name: aic
+                optionName: correction
+                optionPart: aic
   - type: LayoutBox
     margin: large
     cell:
@@ -64,6 +74,26 @@ children:
     stretchFactor: 1
     horizontalAlignment: center
     children:
+      - type: Label
+        label: Likelihood Curve
+        children:
+          - type: CheckBox
+            name: pll
+            children:
+              - type: RadioButton
+                name: lplot
+                optionName: plotype
+                optionPart: lplot
+                enable: (pll)
+              - type: RadioButton
+                name: logplot
+                optionName: plotype
+                optionPart: logplot
+                enable: (pll)
+              - type: TextBox
+                name: supplot
+                format: number
+                enable: (pll)
       - type: Label
         label: Descriptives
         children:
@@ -77,5 +107,3 @@ children:
           - type: CheckBox
             name: text
         verticalAlignment: bottom
-            
-            

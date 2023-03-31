@@ -22,7 +22,6 @@ children:
             name: pred
             maxItemCount: 1
             isTarget: true
-
   - type: LayoutBox
     margin: large
     children:
@@ -39,25 +38,22 @@ children:
                 name: lint
                 label: Likelihood interval support level
                 format: number
-
           - type: Label
-            label: Plots
+            label: Correction for Parameters
+            fitToGrid: true
             children:
-              - type: CheckBox
-                name: plt
-                children:
-                  - type: CheckBox
-                    name: lin
-                    enable: (plt)
-                  - type: CheckBox
-                    name: quad
-                    enable: (plt)
-                  - type: CheckBox
-                    name: cub
-                    enable: (plt)
-                  - type: CheckBox
-                    name: quart
-                    enable: (plt)
+              - type: RadioButton
+                name: nc
+                optionName: correction
+                optionPart: nc
+              - type: RadioButton
+                name: ob
+                optionName: correction
+                optionPart: ob
+              - type: RadioButton
+                name: aic
+                optionName: correction
+                optionPart: aic
 
   - type: LayoutBox
     margin: large
@@ -67,6 +63,25 @@ children:
     stretchFactor: 1
     horizontalAlignment: center
     children:
+      - type: Label
+        label: Plots
+        children:
+          - type: CheckBox
+            name: plt
+            children:
+              - type: CheckBox
+                name: lin
+                enable: (plt)
+              - type: CheckBox
+                name: quad
+                enable: (plt)
+              - type: CheckBox
+                name: cub
+                enable: (plt)
+              - type: CheckBox
+                name: quart
+                enable: (plt)
+
       - type: Label
         label: Additional Options
         children:

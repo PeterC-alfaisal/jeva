@@ -17,8 +17,11 @@ items:
           - depb
           - alt
           - data
+          - correction
       refs:
           - Book
+          - Glover_Tut
+          - Edwards_OR
       columns:
         - name: var
           title: ''
@@ -29,23 +32,25 @@ items:
           title: Difference
           type: number
         - name: S
-          title: <i>S</i>
+          title: S
+          type: number
+        - name: Param
           type: number
         - name: t
-          title: <i>t</i>
+          title: t
           type: number
         - name: df
-          title: <i>df</i>
+          title: df
           type: number
         - name: p
-          title: <i>p</i>
+          title: p
           type: number
           format: zto,pvalue
         - name: z
-          title: <i>z</i>
+          title: z
           type: number
         - name: pz
-          title: p(<i>z</i>)
+          title: p(z)
           type: number
           format: zto,pvalue
 
@@ -69,7 +74,7 @@ items:
         - name: Level
           type: text
         - name: r
-          title: <i>r</i>
+          title: r
           type: number
         - name: Lower
           type: number
@@ -86,6 +91,7 @@ items:
         - lint
         - alt
         - data
+        - correction
 
     - name:  SupportTab
       title: Interpreting Support S (log LR)
@@ -94,11 +100,11 @@ items:
       visible: (text)
       columns:
         - name: SS
-          title: <i>S</i>
+          title: S
           type: number
 
         - name: LR
-          title: <i>LR</i>
+          title: LR
           type: number
 
         - name: Interp
@@ -113,16 +119,20 @@ items:
           - Book
 
     - name: plotc
-      title: '`Likelihood function with S-{lint} support interval`'
+      title: '`Likelihood curve with S-{lint} support interval`'
       type: Image
       width:  500
       height: 400
       clearWith:
-          - depa
-          - depb
-          - alt
-          - data
-          - lint
+        - depa
+        - depb
+        - alt
+        - data
+        - lint
+        - logplot
+        - lplot
+        - plotype
+        - supplot
       renderFun: .plotc
       visible: (pll)
 
@@ -132,12 +142,12 @@ items:
       width:  500
       height: 450
       clearWith:
-          - depa
-          - depb
-          - data
-          - lint
-          - line
-          - se
+        - depa
+        - depb
+        - data
+        - lint
+        - line
+        - se
       renderFun: .plot
       visible: (plt)
 

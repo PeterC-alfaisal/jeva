@@ -34,37 +34,37 @@ children:
           - type: Label
             label: Settings
             children:
-              - type: Label
-                label: Contrasts (use comma-separated lists)
-                children:
-                  - type: LayoutBox
-                    children:
-                      - type: CheckBox
-                        name: ct1
-                        label: Contrast 1
-                        children:
-                          - type: TextBox
-                            name: Ct1Values
-                            label: ''
-                            format: string
-                            width: large
-                            enable: (ct1)
-                  - type: LayoutBox
-                    margin: large
-                    children:
-                      - type: CheckBox
-                        name: ct2
-                        label: Contrast 2
-                        children:
-                          - type: TextBox
-                            name: Ct2Values
-                            label: ''
-                            format: string
-                            width: large
-                            enable: (ct2)
               - type: TextBox
                 name: lint
                 format: number
+          - type: Label
+            label: Contrasts (use comma-separated lists)
+            children:
+              - type: LayoutBox
+                children:
+                  - type: CheckBox
+                    name: ct1
+                    label: Contrast 1
+                    children:
+                      - type: TextBox
+                        name: Ct1Values
+                        label: ''
+                        format: string
+                        width: large
+                        enable: (ct1)
+              - type: LayoutBox
+                margin: large
+                children:
+                  - type: CheckBox
+                    name: ct2
+                    label: Contrast 2
+                    children:
+                      - type: TextBox
+                        name: Ct2Values
+                        label: ''
+                        format: string
+                        width: large
+                        enable: (ct2)
   - type: LayoutBox
     margin: large
     cell:
@@ -73,6 +73,26 @@ children:
     stretchFactor: 1
     horizontalAlignment: center
     children:
+      - type: Label
+        label: Correction for Parameters
+        fitToGrid: true
+        children:
+          - type: RadioButton
+            name: nc
+            optionName: correction
+            optionPart: nc
+          - type: RadioButton
+            name: ob
+            optionName: correction
+            optionPart: ob
+          - type: RadioButton
+            name: aic
+            optionName: correction
+            optionPart: aic
+          - type: RadioButton
+            name: aicsm
+            optionName: correction
+            optionPart: aicsm
       - type: Label
         label: Descriptives
         children:

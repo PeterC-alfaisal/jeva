@@ -21,30 +21,30 @@ items:
         - Ct2Values
         - ct1
         - ct2
+        - correction
       columns:
         - name: var
           title: Model Comparisons
           type: text
         - name: S
-          title: <i>S</i>
-          type: number
-        - name: Sc
-          title: <i>S</i>c
+          title: S
           type: number
         - name: Param
-          type: text
+          title: Param
+          type: number
         - name: F
-          title: <i>F</i>
+          title: F
           type: number
         - name: df
-          title: <i>df</i>
-          type: text
+          title: df
+          type: number
         - name: p
-          title: <i>p</i>
+          title: p
           type: number
           format: zto,pvalue
           refs:
-              - GloverDixon
+            - Edwards_OR
+            - GloverDixon
 
     - name: desc
       title: Group Descriptives
@@ -93,6 +93,7 @@ items:
         - deps
         - Ct1Values
         - Ct2Values
+        - correction
 
     - name:  SupportTab
       title: Interpreting Support S (log LR)
@@ -101,11 +102,11 @@ items:
       visible: (text)
       columns:
         - name: SS
-          title: <i>S</i>
+          title: S
           type: number
 
         - name: LR
-          title: <i>LR</i>
+          title: LR
           type: number
 
         - name: Interp
@@ -143,19 +144,19 @@ items:
               type: text
 
             - name: S
-              title: <i>S</i>
+              title: S
               type: number
 
             - name: F
-              title: <i>F</i>
+              title: F
               type: number
 
             - name: df
-              title: <i>df</i>
+              title: df
               type: text
 
             - name: p
-              title: <i>p</i>
+              title: p
               type: number
               format: zto,pvalue
 

@@ -7,13 +7,12 @@ items:
     - name: freqs
       title: Contingency Tables
       type: Table
-      description: a proportions table
+      description: a table of proportions
       columns: [ ]
       clearWith:
         - rows
         - cols
         - counts
-        - data
 
     - name:  text
       title: Log likelihood ratio analysis
@@ -22,6 +21,9 @@ items:
     - name:  ctt
       title: Support
       type: Table
+      refs:
+        - Glover_Tut
+        - Edwards_OR
       rows:  3
       clearWith:
         - rows
@@ -30,6 +32,7 @@ items:
         - data
         - nul
         - alt
+        - correction
       columns:
         - name: var
           title: ''
@@ -41,16 +44,19 @@ items:
           title: Difference
           type: number
         - name: S
-          title: <i>S</i>
+          title: S
+          type: number
+        - name: Param
+          title: Param
           type: number
         - name: G
-          title: <i>G</i>
+          title: G
           type: number
         - name: df
-          title: <i>df</i>
+          title: df
           type: integer
         - name: p
-          title: <i>p</i>
+          title: p
           type: number
           format: zto,pvalue
 
@@ -90,6 +96,7 @@ items:
         - cols
         - counts
         - data
+        - correction
 
     - name:  SupportTab
       title: Interpreting Support S (log LR)
@@ -98,11 +105,11 @@ items:
       visible: (text)
       columns:
         - name: SS
-          title: <i>S</i>
+          title: S
           type: number
 
         - name: LR
-          title: <i>LR</i>
+          title: LR
           type: number
 
         - name: Interp
@@ -131,27 +138,27 @@ items:
           title: ''
           type: text
         - name: Sv
-          title: <i>S</i>
+          title: S
           type: number
         - name: X2
           title: χ²
           type: number
         - name: dfv
-          title: <i>df</i>
+          title: df
           type: integer
         - name: pv
-          title: <i>p</i>
+          title: p
           type: number
           format: zto,pvalue
         - name: pv1
-          title: 1 - <i>p</i>
+          title: 1 - p
           type: number
           format: zto,pvalue
           refs:
               - EdwardsVA
 
     - name: plotc
-      title: '`Likelihood function for Odds with S-{lint} support interval`'
+      title: '`Likelihood curve for Odds with S-{lint} support interval`'
       type: Image
       width:  500
       height: 400
@@ -164,6 +171,28 @@ items:
         - lint
         - nul
         - alt
+        - plotype
+        - supplot
       visible: (pll)
       
+    - name: barplot
+      title: Plots
+      type: Image
+      width: 450
+      height: 400
+      renderFun: .barPlot
+      visible: (barplot)
+      requiresData: true
+      clearWith:
+        - rows
+        - cols
+        - counts
+        - barplot
+        - yaxis
+        - yaxisPc
+        - xaxis
+        - bartype
+        - pcTot
+        - pcCol
+        - pcRow
 ...

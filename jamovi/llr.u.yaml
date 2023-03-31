@@ -1,34 +1,32 @@
-title: Paired Samples
-name: mcnem
+title: Relative Risk
+name: llr
 jus: '3.0'
 stage: 0
 compilerMode: tame
 children:
   - type: VariableSupplier
+    name: variablesupplier
     persistentItems: false
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: Rows
         children:
           - type: VariablesListBox
             name: rows
-            maxItemCount: 1
             isTarget: true
+            maxItemCount: 1
       - type: TargetLayoutBox
-        label: Columns
         children:
           - type: VariablesListBox
             name: cols
-            maxItemCount: 1
             isTarget: true
+            maxItemCount: 1
       - type: TargetLayoutBox
-        label: Counts (optional)
         children:
           - type: VariablesListBox
             name: counts
-            maxItemCount: 1
             isTarget: true
+            maxItemCount: 1
   - type: LayoutBox
     margin: large
     children:
@@ -70,7 +68,6 @@ children:
                 name: aic
                 optionName: correction
                 optionPart: aic
-
   - type: LayoutBox
     margin: large
     cell:
@@ -104,13 +101,18 @@ children:
         children:
           - type: CheckBox
             name: varA
-            children: []
+            children:
+              - type: CheckBox
+                name: cc
+                enable: (varA)
+                verticalAlignment: bottom
       - type: Label
         label: Additional Options
         children:
           - type: CheckBox
             name: text
         verticalAlignment: bottom
+
   - type: CollapseBox
     label: Cells
     stretchFactor: 1

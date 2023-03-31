@@ -14,9 +14,11 @@ items:
       rows:  3
       clearWith:
           - group
+          - dep
           - nul
           - alt
           - data
+          - correction
       columns:
         - name: var
           title: ''
@@ -30,18 +32,24 @@ items:
           title: SE difference
           type: number
         - name: S
-          title: <i>S</i>
+          title: S
+          type: number
+        - name: Param
+          title: Param
           type: number
         - name: t
-          title: <i>t</i>
+          title: t
           type: number
         - name: df
-          title: <i>df</i>
+          title: df
           type: number
         - name: p
-          title: <i>p</i>
+          title: p
           type: number
           format: zto,pvalue
+          refs:
+            - Edwards_OR
+            - Glover_Tut
 
     - name:  l2sttest2
       title: Support Interval for mean difference
@@ -50,6 +58,7 @@ items:
       clearWith:
         - lint
         - data
+        - dep
         - group
       columns:
         - name: mdiff
@@ -67,6 +76,7 @@ items:
       rows:  2
       clearWith:
         - group
+        - dep
         - data
       columns:
         - name: gp
@@ -102,11 +112,11 @@ items:
       visible: (text)
       columns:
         - name: SS
-          title: <i>S</i>
+          title: S
           type: number
 
         - name: LR
-          title: <i>LR</i>
+          title: LR
           type: number
 
         - name: Interp
@@ -118,7 +128,7 @@ items:
       type: Html
       visible: (text)
       refs: 
-          - Book
+        - Book
 
     - name: plot
       title: '`Means with S-{lint} support intervals`'
@@ -128,22 +138,28 @@ items:
       renderFun: .plot
       clearWith:
         - group
+        - dep
         - data
         - lint
       visible: (plt)
 
     - name: plotc
-      title: '`Likelihood function with S-{lint} support interval`'
+      title: '`Likelihood curve with S-{lint} support interval`'
       type: Image
       width:  500
       height: 400
       renderFun: .plotc
       clearWith:
         - group
+        - dep
         - data
         - lint
         - nul
         - alt
+        - logplot
+        - lplot
+        - plotype
+        - supplot
       visible: (pll)
 
 ...

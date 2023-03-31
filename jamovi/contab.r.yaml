@@ -10,9 +10,17 @@ items:
       description: a proportions table
       columns: [ ]
       clearWith:
+        - data
         - rows
         - cols
         - counts
+        - exp
+        - obs
+        - sr
+        - ss
+        - pcRow
+        - pcCol
+        - pcTot
 
     - name:  text
       title: Log likelihood ratio analysis
@@ -26,6 +34,7 @@ items:
         - rows
         - cols
         - counts
+        - correction
       columns:
         - name: var
           title: Component
@@ -34,24 +43,24 @@ items:
           title: Expected value
           type: number
         - name: S
-          title: <i>S</i>
+          title: S
           type: number
-        - name: Sc
-          title: <i>S</i>c
+        - name: Param
           type: number
         - name: G
-          title: <i>G</i>
+          title: G
           type: number
         - name: df
-          title: <i>df</i>
+          title: df
           type: integer
         - name: p
-          title: <i>p</i>
+          title: p
           type: number
           format: zto,pvalue
           refs:
-              - EdwardsCT
-              - Edwards_OR
+            - EdwardsCT
+            - Edwards_OR
+            - Glover_Tut
 
     - name: tabText
       title: 'Summarizing an evidential analysis'
@@ -62,6 +71,7 @@ items:
           - counts
           - rows
           - cols
+          - correction
       visible: (text)
 
     - name:  SupportTab
@@ -71,11 +81,11 @@ items:
       visible: (text)
       columns:
         - name: SS
-          title: <i>S</i>
+          title: S
           type: number
 
         - name: LR
-          title: <i>LR</i>
+          title: LR
           type: number
 
         - name: Interp
@@ -103,20 +113,20 @@ items:
           title: ''
           type: text
         - name: Sv
-          title: <i>S</i>
+          title: S
           type: number
         - name: X2
           title: χ²
           type: number
         - name: dfv
-          title: <i>df</i>
+          title: df
           type: integer
         - name: pv
-          title: <i>p</i>
+          title: p
           type: number
           format: zto,pvalue
         - name: pv1
-          title: 1 - <i>p</i>
+          title: 1 - p
           type: number
           format: zto,pvalue
           refs:
@@ -134,8 +144,12 @@ items:
         - rows
         - cols
         - counts
+        - barplot
         - yaxis
         - yaxisPc
         - xaxis
         - bartype
+        - pcTot
+        - pcCol
+        - pcRow
 ...

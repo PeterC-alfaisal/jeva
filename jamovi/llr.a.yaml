@@ -1,63 +1,25 @@
 ---
-name:  mcnem
-title: Paired Samples
+name:  llr
+title: Relative Risk
 menuGroup: jeva
 menuSubgroup: Categorical Data
-menuTitle: Paired Samples
-menuSubtitle: McNemar test
-
+menuTitle: Relative Risk
 version: '1.0.0'
 jas: '1.2'
 
 description:
     main: |
-        Paired samples analysis (McNemar test) where null and alternative odds can be specified.
+        Analysis of a 2 x 2 contingency table using relative risk, choose null and alternative values
     R:
         dontrun: false
         usage: |
             dat <- data.frame(
-            First = c('Approve', 'Approve', 'Disapprove', 'Disapprove'),
-            Second = c('Approve', 'Disapprove', 'Approve', 'Disapprove'),
-            Counts = c(794, 150, 86, 570))
-
-            jeva::mcnem(formula = Counts ~ First:Second, data = dat, text=FALSE)
+              Treatment = c('Folic acid', 'Folic acid', 'Placebo', 'Placebo'),
+              Defect = c('Yes', 'No','Yes', 'No'),
+              count = c(6, 587, 21, 581),
+              check.names=FALSE)
             
-              #
-              # PAIRED SAMPLES - MCNEMAR TEST
-              #
-              # Contingency Tables                               
-              # ──────────────────────────────────────────────── 
-              #   First         Approve    Disapprove    Total   
-              # ──────────────────────────────────────────────── 
-              #   Approve           794           150      944   
-              #   Disapprove         86           570      656   
-              #   Total             880           720     1600   
-              # ──────────────────────────────────────────────── 
-              #
-              #
-              # Support                                                                                                    
-              # ────────────────────────────────────────────────────────────────────────────────────────────────────────── 
-              #                          Odds Value    Difference    S             Param    G            df    p           
-              # ────────────────────────────────────────────────────────────────────────────────────────────────────────── 
-              #   H₀ vs observed Odds      1.000000     0.4266667    -8.2875901     1, 2    16.575180     1    0.0000468   
-              #   Hₐ vs observed Odds      1.000000     0.4266667    -8.7875901     2, 2    17.575180     1    0.0000276   
-              #   Hₐ vs H₀                              0.0000000    -0.5000000     2, 1     1.000000     1    0.3173105   
-              # ────────────────────────────────────────────────────────────────────────────────────────────────────────── 
-              #   Note. S uses Occam's Bonus correction for parameters (Param).
-              #
-              #
-              # Intervals                                                                             
-              # ───────────────────────────────────────────────────────────────────────────────────── 
-              #   Type of interval                  Level    Statistic     Lower         Upper        
-              # ───────────────────────────────────────────────────────────────────────────────────── 
-              #   Support for Odds                  2         0.5733333     0.4358143     0.7492639   
-              #   Likelihood-based for Odds    ᵃ    95%       0.5733333     0.4382493     0.7452969   
-              #   Likelihood-based for Logodds      95%      -0.5562880    -0.8249674    -0.2939726   
-              # ───────────────────────────────────────────────────────────────────────────────────── 
-              #   ᵃ See reference Pritikin et al (2017) likelihood-based intervals are more
-              #   accurate and are parameterization-invariant compared to conventional confidence
-              #   intervals
-              #            
+              jeva::llr(formula = count ~ Treatment:Defect, data = dat, text = FALSE)
 
 completeWhenFilled: true
 
@@ -74,6 +36,10 @@ formula:
         from: rhs
         type: vars
         subset: 2
+    layers:
+        from: rhs
+        type: vars
+        subset: '3:'
 
 options:
     - name: data
@@ -91,7 +57,8 @@ options:
         - factor
       description:
           R: >
-              the variable to use as the rows in the contingency table
+              the variable to use as the rows in the contingency table (not
+              necessary when providing a formula, see the examples)
 
     - name: cols
       title: Columns
@@ -103,10 +70,11 @@ options:
         - factor
       description:
           R: >
-              the variable to use as the columns in the contingency table
+              the variable to use as the columns in the contingency table (not
+              necessary when providing a formula, see the examples)
 
     - name: counts
-      title: Counts
+      title: Counts (optional)
       type: Variable
       suggested:
         - continuous
@@ -118,10 +86,11 @@ options:
               the variable to use as the counts in the contingency table (not
               necessary when providing a formula, see the examples)
 
+
     - name: nul
-      title: <i>H</i>₀  Odds
+      title: '<i>H</i>₀ <i>RR</i>'
       type: Number
-      min: 10e-10
+      min: -10e+10
       max: 10e+10
       default: 1
       description:
@@ -129,9 +98,9 @@ options:
               value for the null hypothesis, default = 1
       
     - name: alt
-      title: <i>H</i>ₐ Odds
+      title: '<i>H</i>ₐ <i>RR</i'
       type: Number
-      min: 10e-10
+      min: -10e+10
       max: 10e+10
       default: 1
       description:
@@ -207,6 +176,30 @@ options:
             To set the minimum likelihood display value in plot, in log units (default = -10) 
             affects the x-axis range
 
+    - name: varA
+      title: Variance analysis
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), perform variance analysis for null and alternative hypothesis
+
+    - name: cc
+      title: χ² continuity correction
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), use continuity correction
+
+    - name: text
+      title: Explanatory text
+      type: Bool
+      default: true
+      description:
+          R: >
+            `TRUE` (default) or `FALSE`, how to report the results
+
     - name: obs
       title: Observed counts
       type: Bool
@@ -238,7 +231,7 @@ options:
       description:
           R: >
             `TRUE` or `FALSE` (default), provide column percentages
-      
+
     - name: pcTot
       title: Total
       type: Bool
@@ -246,22 +239,6 @@ options:
       description:
           R: >
             `TRUE` or `FALSE` (default), provide total percentages
-
-    - name: varA
-      title: Variance analysis
-      type: Bool
-      default: false
-      description:
-          R: >
-            `TRUE` or `FALSE` (default), perform variance analysis for null and alternative hypotheses
-
-    - name: text
-      title: Explanatory text
-      type: Bool
-      default: true
-      description:
-          R: >
-            `TRUE` (default) or `FALSE`, how to report the results
 
     - name: barplot
       title: Bar Plot

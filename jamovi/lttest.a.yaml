@@ -9,27 +9,25 @@ jas: '1.2'
 
 description:
     main: |
-        One sample analysis where null and alternative hypotheses can be specified.
-        Likelihood interval support level can be specified and plotted with the mean.
-        A likelihood function for the mean can be plotted.
+        One sample analysis where null and alternative hypotheses can be specified. Likelihood interval support level can be specified and plotted with the mean. A likelihood function for the mean can be plotted.
     R:
         dontrun: false
         usage: |
             data('ToothGrowth')
-            jeva::lttest(data = ToothGrowth, dep = len)
+            jeva::lttest(data = ToothGrowth, dep = len, text = FALSE)
             
             #
             # ONE SAMPLE T-TEST
             #
             # Support                                                                                                 
-            # ─────────────────────────────────────────────────────────────────────────────────────────────────────── 
-            #                     Value       Difference    SE           S             t           df    p            
-            # ─────────────────────────────────────────────────────────────────────────────────────────────────────── 
-            #   H₀ vs observed    0.000000    -18.813333    0.9875223    -59.019937    19.05105    59    < .0000001   
-            #   Hₐ vs observed    0.000000    -18.813333    0.9875223    -59.019937    19.05105    59    < .0000001   
-            #   Hₐ vs H₀                        0.000000    0.9875223      0.000000                                   
-            # ─────────────────────────────────────────────────────────────────────────────────────────────────────── 
-            #
+            # ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+            #                          Value       Difference    SE           S              Param    t           df    p            
+            # ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+            #   H₀ vs observed mean    0.000000    -18.813333    0.9875223    -58.5199371     2, 3    19.05105    59    < .0000001   
+            #   Hₐ vs observed mean    0.000000    -18.813333    0.9875223    -59.0199371     3, 3    19.05105    59    < .0000001   
+            #   Hₐ vs H₀                             0.000000    0.9875223     -0.5000000     3, 2                                   
+            # ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+            #   Note. S uses Occam's Bonus correction for parameters (Param).
             #
             # Support Interval for mean            
             # ──────────────────────────────────── 
@@ -90,6 +88,54 @@ options:
           R: >
             likelihood interval given as support values, e.g. 2 or 3, default = 2
 
+    - name: correction
+      title: Correction for parameters
+      type: List
+      options:
+        - name: nc
+          title: "None"
+        - name: ob
+          title: "Occam's Bonus"
+        - name: aic
+          title: "AIC"
+      default: ob
+      description:
+          R: >
+            correction for parameters, none, Occam's bonus (default) or AIC
+
+    - name: pll
+      title: Plot curve
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), give the likelihood or log likelihood function showing 
+            null hypothesis (black line), alternative hypothesis (blue line), mean (dashed line), 
+            and specified support interval (horizontal red line)
+
+    - name: plotype
+      type: List
+      options:
+        - name: lplot
+          title: "Likelihood function"
+        - name: logplot
+          title: "Support function"
+      default: lplot
+      description:
+          R: >
+            choose type of plot, likelihood function (default), support function
+
+    - name: supplot
+      type: Number
+      title: Minimum LL display value
+      min: -100
+      max: -1
+      default: -10
+      description:
+          R: >
+            To set the minimum likelihood display value in plot, in log units (default = -10) 
+            affects the x-axis range
+
     - name: dtab
       title: Descriptives
       type: Bool
@@ -106,16 +152,6 @@ options:
           R: >
             `TRUE` or `FALSE` (default), give a plot of means with specified support intervals
       
-    - name: pll
-      title: Likelihood function
-      type: Bool
-      default: false
-      description:
-          R: >
-            `TRUE` or `FALSE` (default), give the likelihood function showing null hypothesis (black line), 
-            alternative hypothesis (blue line), mean (dashed line), and specified support interval 
-            (horizontal red line)
-
     - name: text
       title: Explanatory text
       type: Bool

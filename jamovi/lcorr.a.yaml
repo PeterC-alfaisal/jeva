@@ -14,21 +14,19 @@ description:
         dontrun: false
         usage: |
             data('mtcars')
-            jeva::lcorr(data = mtcars, depa = mpg, depb = cyl)
+            jeva::lcorr(data = mtcars, depa = mpg, depb = cyl, text = FALSE)
             
             #
             # CORRELATION
             #
             # Support                                                                                                                                
-            # ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
-            #                                     Value       Difference    S             t            df    p             z            p(z)         
-            # ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
-            #   H₀ vs observed correlation        0.000000     0.8521620    -23.166436    -8.919699    30    < .0000001    -6.806825    < .0000001   
-            #   Hₐ versus observed correlation    0.000000     0.8521620    -23.166436                                     -6.806825    < .0000001   
-            #   Hₐ vs H₀                                       0.0000000      0.000000                                                               
-            # ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
-            #   Note. The last column p(z) gives the p value for the preceding z value
-            #
+            #                                     Value       Difference    S              Param    t            df    p             z            p(z)         
+            # ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+            #   H₀ vs observed correlation        0.000000     0.8521620    -22.6664364     2, 3    -8.919699    30    < .0000001    -6.806825    < .0000001   
+            #   Hₐ versus observed correlation    0.000000     0.8521620    -23.1664364     3, 3                                     -6.806825    < .0000001   
+            #   Hₐ vs H₀                                       0.0000000     -0.5000000     3, 2                                                               
+            # ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+            #   Note. S uses Occam's Bonus correction for parameters (Param). The last column p(z) gives the p value for the preceding z value
             #
             # Intervals                                                                 
             # ───────────────────────────────────────────────────────────────────────── 
@@ -105,6 +103,21 @@ options:
             a number between 50 and 99.9 (default: 95), width of the confidence
             intervals to provide
 
+    - name: correction
+      title: Correction for parameters
+      type: List
+      options:
+        - name: nc
+          title: "None"
+        - name: ob
+          title: "Occam's Bonus"
+        - name: aic
+          title: "AIC"
+      default: ob
+      description:
+          R: >
+            correction for parameters, none, Occam's bonus (default) or AIC
+
     - name: pll
       title: Likelihood function
       type: Bool
@@ -114,8 +127,31 @@ options:
             plot the likelihood function displaying observed correlation, 
             alternative hypothesis and support interval
             
+    - name: plotype
+      type: List
+      options:
+        - name: lplot
+          title: "Likelihood function"
+        - name: logplot
+          title: "Support function"
+      default: lplot
+      description:
+          R: >
+            choose type of plot, likelihood function (default), support function
+
+    - name: supplot
+      type: Number
+      title: Minimum LL display value
+      min: -100
+      max: -1
+      default: -10
+      description:
+          R: >
+            To set the minimum likelihood display value in plot, in log units (default = -10) 
+            affects the x-axis range
+
     - name: plt
-      title: Scatterplot
+      title: Plot
       type: Bool
       default: false
       description:

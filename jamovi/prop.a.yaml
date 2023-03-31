@@ -16,12 +16,10 @@ description:
     R:
         dontrun: false
         usage: |
-            dat <- data.frame(
-              Sex = c('Female', 'Male'),
-              Students = c(60, 40),
-              check.names=FALSE)
+            dat <- data.frame(Sex = c('Female', 'Male'), Students = c(60, 40))
+
             
-            jeva::prop(formula = Students ~ Sex, data = dat, ratio = c(1, 1))
+            jeva::prop(formula = Students ~ Sex, data = dat, ratio = c(1, 1), text = FALSE)
             
             # N OUTCOMES
             #
@@ -36,13 +34,13 @@ description:
             #
             # Support                                                                                                    
             # ────────────────────────────────────────────────────────────────────────────────────────────────────────── 
-            #   Hypotheses                    Expected values    S            Sc           G           df    p           
-            # ────────────────────────────────────────────────────────────────────────────────────────────────────────── 
-            #   H₀ vs observed proportions    50 | 50            -2.013551    -2.013551    4.027103     1    0.0447748   
-            #   Hₐ vs observed proportion     50 | 50            -2.013551    -2.013551    4.027103     1    0.0447748   
-            #   Hₐ vs H₀                                          0.000000     0.000000    0.000000     1    1.0000000   
-            # ────────────────────────────────────────────────────────────────────────────────────────────────────────── 
-            #   Note. Sc is S corrected for degrees of freedom using Edwards's Occam's bonus, see reference
+            #   Hypotheses                    Expected values    S             Param    G           df    p           
+            # ─────────────────────────────────────────────────────────────────────────────────────────────────────── 
+            #   H₀ vs observed proportions    50 | 50            -1.5135514     1, 2    4.027103     1    0.0447748   
+            #   Hₐ vs observed proportion     50 | 50            -2.0135514     2, 2    4.027103     1    0.0447748   
+            #   Hₐ vs H₀                                         -0.5000000     2, 1    0.000000     1    1.0000000   
+            # ─────────────────────────────────────────────────────────────────────────────────────────────────────── 
+            #   Note. S uses Occam's Bonus correction for parameters (Param).
             #
 
 completeWhenFilled: true
@@ -124,13 +122,51 @@ options:
             support interval width
 
     - name: pll
-      title: Likelihood function
+      title: Plot curve
       type: Bool
       default: false
       description:
           R: >
             for binomial only: plot the likelihood function displaying observed proportion, 
             alternative hypothesis and support interval
+
+    - name: plotype
+      type: List
+      options:
+        - name: lplot
+          title: "Likelihood function"
+        - name: logplot
+          title: "Support function"
+      default: lplot
+      description:
+          R: >
+            choose type of plot, likelihood function (default), support function
+
+    - name: supplot
+      type: Number
+      title: Minimum LL display value
+      min: -100
+      max: -1
+      default: -10
+      description:
+          R: >
+            To set the minimum likelihood display value in plot, in log units (default = -10) 
+            affects the x-axis range
+
+    - name: correction
+      title: Correction for parameters
+      type: List
+      options:
+        - name: nc
+          title: "None"
+        - name: ob
+          title: "Occam's Bonus"
+        - name: aic
+          title: "AIC"
+      default: ob
+      description:
+          R: >
+            correction for parameters, none, Occam's bonus (default) or AIC
 
     - name: ratio
       title: Expected Proportions for Hₐ

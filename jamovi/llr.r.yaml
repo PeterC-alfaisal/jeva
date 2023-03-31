@@ -1,81 +1,48 @@
 ---
-name:  prop
-title: N Outcomes
+name:  llr
+title: Relative Risk
 jrs:   '1.1'
 
 items:
-    - name: props
-      title: '`Proportions - ${var}`'
+    - name: freqs
+      title: Contingency Tables
       type: Table
-      description: a table of the proportions
-      rows: (levels(var))
+      description: a table of proportions
+      columns: [ ]
       clearWith:
-          - var
-          - ratio
-          - counts
-          - data
-      refs:
-          - Book
-          - Glover_Tut
-          - Edwards_OR
-      columns:
-          - name: level
-            title: Level
-            type: text
-            content: ($key)
-
-          - name: name[obs]
-            title: ''
-            type: text
-            content: Observed
-            visible: (expected)
-
-          - name: count[obs]
-            title: Count
-            type: integer
-
-          - name: prop[obs]
-            title: Proportion
-            type: number
-
-          - name: name[exp]
-            title: ''
-            type: text
-            content: Expected
-            visible: (expected)
-
-          - name: count[exp]
-            title: Count
-            type: number
-            visible: (expected)
-
-          - name: prop[exp]
-            title: Proportion
-            type: number
-            visible: (expected)
+        - rows
+        - cols
+        - counts
 
     - name:  text
       title: Log likelihood ratio analysis
       type:  Preformatted
 
-    - name: tests
-      title: Support
+    - name:  ctt
+      title: Risk Ratio analyses
       type: Table
-      description: a table of the test results
       rows:  3
+      refs:
+        - Glover_Tut
+        - Edwards_OR
       clearWith:
-          - var
-          - ratio
-          - counts
-          - data
-          - correction
+        - rows
+        - cols
+        - counts
+        - data
+        - nul
+        - alt
+        - correction
       columns:
         - name: var
-          title: Hypotheses
+          title: ''
           type: text
-        - name: Values
-          title: Expected values
-          type: text
+        - name: Value
+          title: RR Value
+          type: number
+        - name: ordiff
+          title: Difference
+          type: number
         - name: S
           title: S
           type: number
@@ -86,33 +53,68 @@ items:
           type: number
         - name: df
           title: df
-          type: integer
+          type: number
+        - name: p
+          title: p
+          type: number
+          format: zto,pvalue
+
+    - name:  cttma
+      title: Marginal main effects and interaction analyses
+      type: Table
+      rows:  4
+      clearWith:
+        - rows
+        - cols
+        - counts
+        - data
+        - correction
+      columns:
+        - name: var
+          title: Component
+          type: text
+        - name: Value
+          title: Expected value
+          type: number
+        - name: S
+          title: S
+          type: number
+        - name: Param
+          type: number
+        - name: G
+          title: G
+          type: number
+        - name: df
+          title: df
+          type: number
         - name: p
           title: p
           type: number
           format: zto,pvalue
           refs:
-              - Edwards_OR
+            - Glover_Tut
+            - Edwards_OR
+            - EdwardsCT
 
     - name:  ctt2
-      title: Intervals for Proportion
+      title: Intervals for RR
       type: Table
-      clearWith:
-          - var
-          - ratio
-          - counts
-          - lint
-          - ciWidth
-          - data
-      visible: (bi)
       rows:  2
+      clearWith:
+        - rows
+        - cols
+        - counts
+        - data
+        - lint
+        - ciWidth
       columns:
         - name: Interval
           title: Type of interval
           type: text
         - name: Level
           type: text
-        - name: P
+        - name: RR
+          title: RR
           type: number
         - name: Lower
           type: number
@@ -126,10 +128,12 @@ items:
       type: Html
       visible: (text)
       clearWith:
-        - var
-        - ratio
+        - rows
+        - cols
         - counts
+        - data
         - correction
+        - lint
 
     - name:  SupportTab
       title: Interpreting Support S (log LR)
@@ -157,17 +161,18 @@ items:
           - Book
 
     - name:  ctt3
-      title: Variance analyses
+      title: Variance analysis
       type: Table
       visible: (varA)
-      rows:  2
-      clearWith:
-          - var
-          - ratio
-          - counts
+      rows:  1
+        - rows
+        - cols
+        - counts
+        - data
+        - cc
       columns:
         - name: var
-          title: Hypotheses
+          title: ''
           type: text
         - name: Sv
           title: S
@@ -177,7 +182,7 @@ items:
           type: number
         - name: dfv
           title: df
-          type: integer
+          type: number
         - name: pv
           title: p
           type: number
@@ -190,20 +195,41 @@ items:
               - EdwardsVA
 
     - name: plotc
-      title: '`Likelihood curve for Proportion with S-{lint} support interval`'
+      title: '`Likelihood curve for RR with S-{lint} support interval`'
       type: Image
       width:  500
       height: 400
       renderFun: .plotc
-      visible: (pll)
       clearWith:
-        - var
-        - ratio
+        - rows
+        - cols
         - counts
+        - data
         - lint
-        - logplot
-        - lplot
+        - nul
+        - alt
         - plotype
         - supplot
+      visible: (pll)
 
+    - name: barplot
+      title: Plots
+      type: Image
+      width: 450
+      height: 400
+      renderFun: .barPlot
+      visible: (barplot)
+      requiresData: true
+      clearWith:
+        - rows
+        - cols
+        - counts
+        - barplot
+        - yaxis
+        - yaxisPc
+        - xaxis
+        - bartype
+        - pcTot
+        - pcCol
+        - pcRow
 ...

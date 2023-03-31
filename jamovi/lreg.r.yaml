@@ -16,31 +16,32 @@ items:
           - dep
           - pred
           - data
+          - correction
       columns:
         - name: var
           title: Model Comparisons
           type: text
         - name: S
-          title: <i>S</i>
-          type: number
-        - name: Sc
-          title: <i>S</i>c
+          title: S
           type: number
         - name: Param
           type: number
         - name: r2
-          title: <i>R</i>²
+          title: R²
           type: number
         - name: aic
-          title: <i>AIC</i>
+          title: AIC
           type: number
         - name: df
-          title: <i>df</i>
+          title: df
           type: integer
         - name: p
-          title: <i>p</i>
+          title: p
           type: number
           format: zto,pvalue
+      refs:
+        - Edwards_OR
+        - Glover_Tut
 
     - name: coef
       title: '`Model Coefficients - ${ dep }`'
@@ -61,14 +62,14 @@ items:
         - name: SE
           type: number
         - name: S
-          title: <i>S</i>
+          title: S
           type: number
         - name: Lower
           type: number
         - name: Upper
           type: number
         - name: p
-          title: <i>p</i>
+          title: p
           type: number
           format: zto,pvalue
 
@@ -81,6 +82,7 @@ items:
         - lint
         - pred
         - data
+        - correction
 
     - name:  SupportTab
       title: Interpreting Support S (log LR)
@@ -89,11 +91,11 @@ items:
       visible: (text)
       columns:
         - name: SS
-          title: <i>S</i>
+          title: S
           type: number
 
         - name: LR
-          title: <i>LR</i>
+          title: LR
           type: number
 
         - name: Interp

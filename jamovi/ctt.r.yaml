@@ -14,10 +14,17 @@ items:
         - cols
         - counts
 
+    - name:  text
+      title: Log likelihood ratio analysis
+      type:  Preformatted
+
     - name:  ctt
       title: Odds Ratio analyses
       type: Table
       rows:  3
+      refs:
+        - Glover_Tut
+        - Edwards_OR
       clearWith:
         - rows
         - cols
@@ -25,27 +32,30 @@ items:
         - data
         - nul
         - alt
+        - correction
       columns:
         - name: var
           title: ''
           type: text
         - name: Value
-          title: <i>OR</i> Value
+          title: OR Value
           type: number
         - name: ordiff
           title: Difference
           type: number
         - name: S
-          title: <i>S</i>
+          title: S
+          type: number
+        - name: Param
           type: number
         - name: G
-          title: <i>G</i>
+          title: G
           type: number
         - name: df
-          title: <i>df</i>
+          title: df
           type: number
         - name: p
-          title: <i>p</i>
+          title: p
           type: number
           format: zto,pvalue
 
@@ -58,6 +68,7 @@ items:
         - cols
         - counts
         - data
+        - correction
       columns:
         - name: var
           title: Component
@@ -66,20 +77,24 @@ items:
           title: Expected value
           type: number
         - name: S
-          title: <i>S</i>
+          title: S
+          type: number
+        - name: Param
           type: number
         - name: G
-          title: <i>G</i>
+          title: G
           type: number
         - name: df
-          title: <i>df</i>
+          title: df
           type: number
         - name: p
-          title: <i>p</i>
+          title: p
           type: number
           format: zto,pvalue
           refs:
-              - EdwardsCT
+            - Glover_Tut
+            - Edwards_OR
+            - EdwardsCT
 
     - name:  ctt2
       title: Intervals for OR
@@ -99,7 +114,7 @@ items:
         - name: Level
           type: text
         - name: OR
-          title: <i>OR</i>
+          title: OR
           type: number
         - name: Lower
           type: number
@@ -117,6 +132,7 @@ items:
         - cols
         - counts
         - data
+        - correction
         - lint
 
     - name:  SupportTab
@@ -126,11 +142,11 @@ items:
       visible: (text)
       columns:
         - name: SS
-          title: <i>S</i>
+          title: S
           type: number
 
         - name: LR
-          title: <i>LR</i>
+          title: LR
           type: number
 
         - name: Interp
@@ -159,27 +175,27 @@ items:
           title: ''
           type: text
         - name: Sv
-          title: <i>S</i>
+          title: S
           type: number
         - name: X2
           title: χ²
           type: number
         - name: dfv
-          title: <i>df</i>
+          title: df
           type: number
         - name: pv
-          title: <i>p</i>
+          title: p
           type: number
           format: zto,pvalue
         - name: pv1
-          title: 1 - <i>p</i>
+          title: 1 - p
           type: number
           format: zto,pvalue
           refs:
               - EdwardsVA
 
     - name: plotc
-      title: '`Likelihood function for OR with S-{lint} support interval`'
+      title: '`Likelihood curve for OR with S-{lint} support interval`'
       type: Image
       width:  500
       height: 400
@@ -192,4 +208,28 @@ items:
         - lint
         - nul
         - alt
+        - plotype
+        - supplot
       visible: (pll)
+
+    - name: barplot
+      title: Plots
+      type: Image
+      width: 450
+      height: 400
+      renderFun: .barPlot
+      visible: (barplot)
+      requiresData: true
+      clearWith:
+        - rows
+        - cols
+        - counts
+        - barplot
+        - yaxis
+        - yaxisPc
+        - xaxis
+        - bartype
+        - pcTot
+        - pcCol
+        - pcRow
+...

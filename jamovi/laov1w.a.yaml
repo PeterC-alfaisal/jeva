@@ -24,23 +24,23 @@ description:
         dontrun: false
         usage: |
             data('ToothGrowth')
-            jeva::laov1w(formula = len ~ dose, data = ToothGrowth)
+            jeva::laov1w(formula = len ~ dose, data = ToothGrowth, text = FALSE)
 
             #
             # ONE-WAY ANOVA
-
+            #
             # Support: One-Way ANOVA (Fisher's assuming equal variances)                                                               
-            # ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
-            #   Model Comparisons                           S              Sc             Param    F             df       p            
-            # ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
-            #   H₀  vs observed means                       -36.4069796    -34.1486064    2, 4      67.415738    2, 57    < .0000001   
-            #   Contrast 1 (Linear) vs observed means        -0.7362044      0.4131462    3, 4     133.415383    1, 57    < .0000001   
-            #   Contrast 2 (Quadratic) vs observed means    -36.1846993    -35.0353486    3, 4       1.416093    1, 57     0.2389805   
-            #   Contrast 1 vs Contrast 2                     35.4484948     35.4484948    3, 3                   1, 1                  
-            #   Linear vs Non-linear                         35.4484948     35.4484948    3, 3                   1, 1                  
-            # ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
-            #   Note. Sc uses Akaike correction for parameters (Param).  Unless specified, Contrast 1 is linear and Contrast 2 is
-            #   quadratic
+            # ───────────────────────────────────────────────────────────────────────────────────────────────────────── 
+            #   Model Comparisons                           S              Param    F             df       p            
+            # ───────────────────────────────────────────────────────────────────────────────────────────────────────── 
+            #   H₀  vs observed means                       -35.4069796     2, 4     67.415738    2, 57    < .0000001   
+            #   Contrast 1 (Linear) vs observed means        -0.2362044     3, 4    133.415383    1, 57    < .0000001   
+            #   Contrast 2 (Quadratic) vs observed means    -35.6846993     3, 4      1.416093    1, 57     0.2389805   
+            #   Contrast 1 vs Contrast 2                     35.4484948     3, 3                   1, 1                 
+            #   Linear vs Non-linear                         35.4484948     3, 3                   1, 1                 
+            # ───────────────────────────────────────────────────────────────────────────────────────────────────────── 
+            #   Note. S uses Occam's Bonus correction for parameters (Param).  Unless specified, Contrast 1 is
+            #   linear and Contrast 2 is quadratic
             #
 
 formula:
@@ -82,6 +82,16 @@ options:
           R: >
             the grouping or independent variable in `data`
 
+    - name: lint
+      type: Number
+      title: Likelihood interval support level
+      min: 1
+      max: 100
+      default: 2
+      description:
+          R: >
+            likelihood interval given as support values, e.g. 2 or 3, default = 2
+
     - name: ct1
       title: Contrast 1
       type: Bool
@@ -114,15 +124,22 @@ options:
           R: >
             a comma-separated list specifying the contrast
 
-    - name: lint
-      type: Number
-      title: Likelihood interval support level
-      min: 1
-      max: 100
-      default: 2
+    - name: correction
+      title: Correction for parameters
+      type: List
+      options:
+        - name: nc
+          title: "None"
+        - name: ob
+          title: "Occam's Bonus"
+        - name: aic
+          title: 'AIC'
+        - name: aicsm
+          title: 'AICs'
+      default: ob
       description:
           R: >
-            likelihood interval given as support values, e.g. 2 or 3, default = 2
+            correction for parameters, none, Occam's bonus (default) or AIC
 
     - name: desc
       title: Descriptives table

@@ -1,12 +1,12 @@
 ---
 title: Evidential Analyses for Common Statistical Tests
 name: jeva
-version: 0.0.5
+version: 0.0.6
 jms: '1.0'
 authors:
   - Peter Cahusac
 maintainer: Peter Cahusac <peteqsac@gmail.com>
-date: '2023-01-21'
+date: '2023-03-29'
 type: R
 description: >-
   Analyses that calculate the log likelihood ratio (support) for a  range of
@@ -22,12 +22,10 @@ analyses:
     menuTitle: Independent Samples T-Test
     menuSubgroup: T-Tests
     description: >
-      Independent samples analysis where null and alternative hypotheses can
-
-      be specified. Likelihood interval support level can be specified and
-      plotted with the means.
-
-      A likelihood function for the difference in means can be plotted. 
+      Independent samples analysis where null and alternative hypotheses canbe
+      specified. Likelihood interval support level can be specified and plotted
+      with the means. A likelihood function for the difference in means can be
+      plotted. 
   - title: Paired Samples T-Test
     name: lrttest
     ns: jeva
@@ -36,12 +34,9 @@ analyses:
     menuSubgroup: T-Tests
     description: >
       Related samples analysis where null and alternative hypotheses can be
-      specified.
-
-      Likelihood interval support level can be specified and plotted with the
-      mean difference.
-
-      A likelihood function for the mean difference can be plotted. 
+      specified. Likelihood interval support level can be specified and plotted
+      with the mean difference. A likelihood function for the mean difference
+      can be plotted. 
   - title: One Sample T-Test
     name: lttest
     ns: jeva
@@ -50,12 +45,8 @@ analyses:
     menuSubgroup: T-Tests
     description: >
       One sample analysis where null and alternative hypotheses can be
-      specified.
-
-      Likelihood interval support level can be specified and plotted with the
-      mean.
-
-      A likelihood function for the mean can be plotted.
+      specified. Likelihood interval support level can be specified and plotted
+      with the mean. A likelihood function for the mean can be plotted.
   - title: One-Way ANOVA
     name: laov1w
     ns: jeva
@@ -112,9 +103,9 @@ analyses:
     menuGroup: jeva
     menuTitle: Independent Samples
     menuSubgroup: Categorical Data
-    description: |
-      Two-way analysis of a contingency table where main effects and
-      interaction can be assessed.
+    description: >
+      Two-way analysis of a contingency table where main effects and interaction
+      can be assessed.
     menuSubtitle: Two-way association
   - title: Odds Ratio
     name: ctt
@@ -125,6 +116,15 @@ analyses:
     description: >
       Analysis of a 2 x 2 contingency table using the odds ratio, choose null
       and alternative values
+  - title: Relative Risk
+    name: llr
+    ns: jeva
+    menuGroup: jeva
+    menuTitle: Relative Risk
+    menuSubgroup: Categorical Data
+    description: >
+      Analysis of a 2 x 2 contingency table using relative risk, choose null and
+      alternative values
   - title: Paired Samples
     name: mcnem
     ns: jeva
@@ -133,9 +133,7 @@ analyses:
     menuSubgroup: Categorical Data
     description: >
       Paired samples analysis (McNemar test) where null and alternative odds can
-      be
-
-      specified.
+      be specified.
     menuSubtitle: McNemar test
 usesNative: true
 minApp: 1.0.8

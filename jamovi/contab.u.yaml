@@ -23,7 +23,7 @@ children:
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label: Counts (required)
+        label: Counts (optional)
         children:
           - type: VariablesListBox
             name: counts
@@ -39,32 +39,89 @@ children:
         stretchFactor: 1
         children:
           - type: Label
-            label: Percentages
+            label: Correction for Parameters
+            fitToGrid: true
             children:
-              - type: CheckBox
-                name: pcRow
-              - type: CheckBox
-                name: pcCol
-          - type: Label
-            label: Additional Analysis
-            children:
-              - type: CheckBox
-                name: varA
-                verticalAlignment: center
+              - type: RadioButton
+                name: nc
+                optionName: correction
+                optionPart: nc
+              - type: RadioButton
+                name: ob
+                optionName: correction
+                optionPart: ob
+              - type: RadioButton
+                name: aic
+                optionName: correction
+                optionPart: aic
+
   - type: LayoutBox
     margin: large
     cell:
       column: 1
       row: 1
     stretchFactor: 1
-    horizontalAlignment: center
+    horizontalAlignment: right
     children:
+      - type: Label
+        label: Additional Analysis
+        children:
+          - type: CheckBox
+            name: varA
+            verticalAlignment: center
       - type: Label
         label: Additional Options
         children:
           - type: CheckBox
             name: text
         verticalAlignment: bottom
+  - type: CollapseBox
+    label: Cells
+    stretchFactor: 1
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        stretchFactor: 1
+        children:
+          - type: LayoutBox
+            cell:
+              column: 0
+              row: 0
+            stretchFactor: 1
+            children:
+              - type: Label
+                label: Counts
+                fitToGrid: true
+                children:
+                  - type: CheckBox
+                    name: obs
+                  - type: CheckBox
+                    name: exp
+                  - type: CheckBox
+                    name: sr
+                  - type: CheckBox
+                    name: ss
+          - type: LayoutBox
+            cell:
+              column: 1
+              row: 0
+            stretchFactor: 1
+            children:
+              - type: Label
+                label: Percentages
+                fitToGrid: true
+                cell:
+                  column: 1
+                  row: 0
+                children:
+                  - type: CheckBox
+                    name: pcRow
+                  - type: CheckBox
+                    name: pcCol
+                  - type: CheckBox
+                    name: pcTot
+
 
   - type: CollapseBox
     label: Plots

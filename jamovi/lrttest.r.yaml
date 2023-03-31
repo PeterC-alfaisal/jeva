@@ -10,6 +10,13 @@ items:
       
     - name:  lrttest
       title: Support
+      clearWith:
+          - depb
+          - depa
+          - nul
+          - alt
+          - data
+          - correction
       type: Table
       rows:  3
       columns:
@@ -25,22 +32,35 @@ items:
           title: SE difference
           type: number
         - name: S
-          title: <i>S</i>
+          title: S
+          type: number
+        - name: Param
+          title: Param
           type: number
         - name: t
-          title: <i>t</i>
+          title: t
           type: number
         - name: df
-          title: <i>df</i>
+          title: df
           type: number
         - name: p
-          title: <i>p</i>
+          title: p
           type: number
           format: zto,pvalue
+          refs:
+            - Edwards_OR
+            - Glover_Tut
 
     - name:  lrttest2
       title: Support Interval for mean difference
       type: Table
+      clearWith:
+          - depb
+          - depa
+          - nul
+          - alt
+          - data
+          - lint
       rows:  1
       columns:
         - name: diff
@@ -55,6 +75,10 @@ items:
       title: Group Descriptives
       type: Table
       visible: (dtab)
+      clearWith:
+          - depb
+          - depa
+          - data
       rows:  2
       columns:
         - name: gp
@@ -74,6 +98,14 @@ items:
     - name: tabText
       title: 'Summarizing an evidential analysis'
       type: Html
+      clearWith:
+          - depb
+          - depa
+          - nul
+          - alt
+          - data
+          - lint
+          - correction
       visible: (text)
 
     - name:  SupportTab
@@ -83,11 +115,11 @@ items:
       visible: (text)
       columns:
         - name: SS
-          title: <i>S</i>
+          title: S
           type: number
 
         - name: LR
-          title: <i>LR</i>
+          title: LR
           type: number
 
         - name: Interp
@@ -107,14 +139,30 @@ items:
       width:  400
       height: 300
       renderFun: .plot
+      clearWith:
+          - depb
+          - depa
+          - data
+          - lint
       visible: (plt)
 
     - name: plotc
-      title: '`Likelihood function with S-{lint} support interval`'
+      title: '`Likelihood curve with S-{lint} support interval`'
       type: Image
       width:  500
       height: 400
       renderFun: .plotc
+      clearWith:
+          - depb
+          - depa
+          - nul
+          - alt
+          - data
+          - lint
+          - logplot
+          - lplot
+          - plotype
+          - supplot
       visible: (pll)
 
 ...

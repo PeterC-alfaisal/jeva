@@ -44,26 +44,22 @@ children:
                 name: ciWidth
                 suffix: '%'
                 format: number
-
           - type: Label
-            label: Plots
+            label: Correction for Parameters
+            fitToGrid: true
             children:
-              - type: CheckBox
-                name: pll
-              - type: CheckBox
-                name: plt
-                children:
-                  - type: LayoutBox
-                    children:
-                      - type: ComboBox
-                        name: line
-                        enable: (plt)
-                      - type: LayoutBox
-                        children:
-                          - type: CheckBox
-                            name: se
-                            enable: (plt)
-
+              - type: RadioButton
+                name: nc
+                optionName: correction
+                optionPart: nc
+              - type: RadioButton
+                name: ob
+                optionName: correction
+                optionPart: ob
+              - type: RadioButton
+                name: aic
+                optionName: correction
+                optionPart: aic
   - type: LayoutBox
     margin: large
     cell:
@@ -72,6 +68,41 @@ children:
     stretchFactor: 1
     horizontalAlignment: center
     children:
+      - type: Label
+        label: Likelihood Curve
+        children:
+          - type: CheckBox
+            name: pll
+            children:
+              - type: RadioButton
+                name: lplot
+                optionName: plotype
+                optionPart: lplot
+                enable: (pll)
+              - type: RadioButton
+                name: logplot
+                optionName: plotype
+                optionPart: logplot
+                enable: (pll)
+              - type: TextBox
+                name: supplot
+                format: number
+                enable: (pll)
+      - type: Label
+        label: Scatterplot
+      - type: CheckBox
+        name: plt
+        children:
+          - type: LayoutBox
+            children:
+              - type: ComboBox
+                name: line
+                enable: (plt)
+              - type: LayoutBox
+                children:
+                  - type: CheckBox
+                    name: se
+                    enable: (plt)
       - type: Label
         label: Additional Options
         children:

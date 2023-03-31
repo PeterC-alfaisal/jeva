@@ -13,9 +13,11 @@ items:
       type: Table
       rows:  3
       clearWith:
+          - dep
           - nul
           - alt
           - data
+          - correction
       columns:
         - name: var
           title: ''
@@ -28,18 +30,24 @@ items:
         - name: SE
           type: number
         - name: S
-          title: <i>S</i>
+          title: S
+          type: number
+        - name: Param
+          title: Param
           type: number
         - name: t
-          title: <i>t</i>
+          title: t
           type: number
         - name: df
-          title: <i>df</i>
+          title: df
           type: integer
         - name: p
-          title: <i>p</i>
+          title: p
           type: number
           format: zto,pvalue
+          refs:
+            - Edwards_OR
+            - Glover_Tut
 
     - name:  lttest2
       title: Support Interval for mean
@@ -48,6 +56,7 @@ items:
       clearWith:
         - lint
         - data
+        - dep
       columns:
         - name: Mean
           type: number
@@ -63,6 +72,7 @@ items:
       rows:  1
       clearWith:
         - data
+        - dep
       columns:
         - name: gp
           title: ''
@@ -81,6 +91,12 @@ items:
     - name: tabText
       title: 'Summarizing an evidential analysis'
       type: Html
+      clearWith:
+          - dep
+          - nul
+          - alt
+          - data
+          - lint
       visible: (text)
 
     - name:  SupportTab
@@ -90,11 +106,11 @@ items:
       visible: (text)
       columns:
         - name: SS
-          title: <i>S</i>
+          title: S
           type: number
 
         - name: LR
-          title: <i>LR</i>
+          title: LR
           type: number
 
         - name: Interp
@@ -116,20 +132,26 @@ items:
       renderFun: .plot
       clearWith:
         - data
+        - dep
         - lint
       visible: (plt)
 
     - name: plotc
-      title: '`Likelihood function with S-{lint} support interval`'
+      title: '`Likelihood curve with S-{lint} support interval`'
       type: Image
       width:  500
       height: 400
       renderFun: .plotc
       clearWith:
         - data
+        - dep
         - lint
         - nul
         - alt
+        - logplot
+        - lplot
+        - plotype
+        - supplot
       visible: (pll)
 
 ...

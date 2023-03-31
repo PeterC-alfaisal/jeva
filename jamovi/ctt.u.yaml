@@ -52,53 +52,22 @@ children:
                 name: ciWidth
                 suffix: '%'
                 format: number
-              - type: LayoutBox
-                margin: large
-                children:
-                  - type: CheckBox
-                    name: pll
-      - type: CollapseBox
-        label: Cells
-        stretchFactor: 1
-        collapsed: true
-        children:
-          - type: LayoutBox
-            margin: large
-            stretchFactor: 1
+          - type: Label
+            label: Correction for Parameters
+            fitToGrid: true
             children:
-              - type: LayoutBox
-                cell:
-                  column: 0
-                  row: 0
-                stretchFactor: 1
-                children:
-                  - type: Label
-                    label: Counts
-                    fitToGrid: true
-                    children:
-                      - type: CheckBox
-                        name: obs
-                      - type: CheckBox
-                        name: exp
-              - type: LayoutBox
-                cell:
-                  column: 1
-                  row: 0
-                stretchFactor: 1
-                children:
-                  - type: Label
-                    label: Percentages
-                    fitToGrid: true
-                    cell:
-                      column: 1
-                      row: 0
-                    children:
-                      - type: CheckBox
-                        name: pcRow
-                      - type: CheckBox
-                        name: pcCol
-                      - type: CheckBox
-                        name: pcTot
+              - type: RadioButton
+                name: nc
+                optionName: correction
+                optionPart: nc
+              - type: RadioButton
+                name: ob
+                optionName: correction
+                optionPart: ob
+              - type: RadioButton
+                name: aic
+                optionName: correction
+                optionPart: aic
   - type: LayoutBox
     margin: large
     cell:
@@ -107,6 +76,26 @@ children:
     stretchFactor: 1
     horizontalAlignment: center
     children:
+      - type: Label
+        label: Likelihood Curve
+        children:
+          - type: CheckBox
+            name: pll
+            children:
+              - type: RadioButton
+                name: lplot
+                optionName: plotype
+                optionPart: lplot
+                enable: (pll)
+              - type: RadioButton
+                name: logplot
+                optionName: plotype
+                optionPart: logplot
+                enable: (pll)
+              - type: TextBox
+                name: supplot
+                format: number
+                enable: (pll)
       - type: Label
         label: Additional Analysis
         children:
@@ -123,3 +112,116 @@ children:
           - type: CheckBox
             name: text
         verticalAlignment: bottom
+
+  - type: CollapseBox
+    label: Cells
+    stretchFactor: 1
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        stretchFactor: 1
+        children:
+          - type: LayoutBox
+            cell:
+              column: 0
+              row: 0
+            stretchFactor: 1
+            children:
+              - type: Label
+                label: Counts
+                fitToGrid: true
+                children:
+                  - type: CheckBox
+                    name: obs
+                  - type: CheckBox
+                    name: exp
+          - type: LayoutBox
+            cell:
+              column: 1
+              row: 0
+            stretchFactor: 1
+            children:
+              - type: Label
+                label: Percentages
+                fitToGrid: true
+                cell:
+                  column: 1
+                  row: 0
+                children:
+                  - type: CheckBox
+                    name: pcRow
+                  - type: CheckBox
+                    name: pcCol
+                  - type: CheckBox
+                    name: pcTot
+
+  - type: CollapseBox
+    label: Plots
+    stretchFactor: 1
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        stretchFactor: 1
+        children:
+          - type: LayoutBox
+            cell:
+              column: 0
+              row: 0
+            stretchFactor: 1
+            children:
+              - type: Label
+                label: Plots
+                fitToGrid: true
+                children:
+                  - type: CheckBox
+                    name: barplot
+              - type: Label
+                label: Bar Type
+                fitToGrid: true
+                children:
+                  - type: RadioButton
+                    name: dodge
+                    optionName: bartype
+                    optionPart: dodge
+                  - type: RadioButton
+                    name: stack
+                    optionName: bartype
+                    optionPart: stack
+          - type: LayoutBox
+            cell:
+              column: 1
+              row: 0
+            stretchFactor: 1
+            children:
+              - type: Label
+                label: Y-Axis
+                fitToGrid: true
+                children:
+                  - name: ycounts
+                    type: RadioButton
+                    optionName: yaxis
+                    optionPart: ycounts
+                  - type: RadioButton
+                    name: ypc
+                    optionName: yaxis
+                    optionPart: ypc
+                    style: inline
+                    verticalAlignment: center
+                    children:
+                      - type: ComboBox
+                        name: yaxisPc
+                        enable: (ypc)
+              - type: Label
+                label: X-Axis
+                fitToGrid: true
+                children:
+                  - type: RadioButton
+                    name: xrows
+                    optionName: xaxis
+                    optionPart: xrows
+                  - type: RadioButton
+                    name: xcols
+                    optionName: xaxis
+                    optionPart: xcols
