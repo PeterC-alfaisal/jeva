@@ -7,15 +7,12 @@ laov1wClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       .init = function() {
         
         private$.initSupportTab()
-
+        
         private$.initAnovaTable()
         private$.initDescTable()
         private$.initDescPlot()
         
-#        levels <- levels(self$data[[self$options$group]])
-#        k <- length(levels)
-        
-            # contrasts
+        # contrasts
         if ( self$options$ct1 ){
           contrast1 <- private$.getCt1Values()
           con1txt <- paste(contrast1,collapse=',')
@@ -26,17 +23,17 @@ laov1wClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           con2txt <- paste(contrast2,collapse=',')
         }
         
-#        conta <- contr.poly(k, scores = 1:k)
+        #        conta <- contr.poly(k, scores = 1:k)
         if (isFALSE(self$options$ct1)) {
           con1txt <- 'Linear'
         } 
         
-          if (isFALSE(self$options$ct2)) {
-            con2txt <- 'Quadratic'
-          }
-
+        if (isFALSE(self$options$ct2)) {
+          con2txt <- 'Quadratic'
+        }
+        
         table <- self$results$anova
-        table$setRow(rowNo=1, values=list(var='<i>H</i>\u2080  vs observed means'))
+        table$setRow(rowNo=1, values=list(var='H\u2080  vs observed means'))
         table$setRow(rowNo=2, values=list(var=paste0('Contrast 1 (',con1txt,') vs observed means')))
         table$setRow(rowNo=3, values=list(var=paste0('Contrast 2 (',con2txt,') vs observed means')))
         table$setRow(rowNo=4, values=list(var="Contrast 1 vs Contrast 2"))
@@ -48,10 +45,10 @@ laov1wClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         
       },
       .run = function() {
-
+        
         if (is.null(self$options$group) || length(self$options$deps) == 0)
           return()
-
+        
         ready <- TRUE
         
         if (ready) {
@@ -73,7 +70,7 @@ laov1wClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       .compute = function(data) {
         
         group <- self$options$group
-
+        
         r <- list()
         for (dep in self$options$deps) {
           
@@ -83,20 +80,22 @@ laov1wClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           
           fisher <-  stats::anova(lm(dep ~ group, data=dataA))
           residuals <- rstandard(lm(dep ~ group, data=dataA))
+          model0 <- stats::glm(dep ~ 1, data=dataA)
+          model1 <- stats::glm(dep ~ group, data=dataA)
           
           desc <- tapply(dataA$dep, dataA$group, function (x) {
             n <- length(x)
             mean <- mean(x)
             sd <- sd(x)
             se <- sd / sqrt(n)
-#            ci <- se * qt(95 / 200 + .5, n - 1)
+            #            ci <- se * qt(95 / 200 + .5, n - 1)
             si <- se*sqrt((exp(self$options$lint*2/n)-1)*(n-1))     # for S-2 support interval
             return(c(n=n, mean=mean, sd=sd, se=se, si=si))
           })
           
           levene <- car::leveneTest(dep ~ group, dataA, center="mean")
           
-          r[[dep]] <- list(fisher=fisher, desc=desc, levene=levene, 
+          r[[dep]] <- list(fisher=fisher, model0=model0, model1=model1, desc=desc, levene=levene, 
                            residuals=residuals)
         }
         
@@ -106,11 +105,19 @@ laov1wClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       #### Init tables/plots functions ----
       .initAnovaTable = function() {
         
+        if(self$options$correction=="ob") { notext <- "S uses Occam's Bonus correction for parameters (Param). "
+        } else if(self$options$correction=="aic") { notext <- "S uses AIC correction for parameters (Param). "
+        } else if(self$options$correction=="aicsm") { notext <- "S uses AIC small sample correction for parameters (Param). "
+        } else {
+          notext <- "S uses no correction for parameters (Param). "
+        }
+        
+        
         table <- self$results$anova
-        table$setNote('Note', "<i>S</i>c uses Akaike correction for parameters (Param). 
-                      Unless specified, Contrast 1 is linear and Contrast 2 is quadratic")
+        table$setNote('Note', paste0(notext,"  
+                      Unless specified, Contrast 1 is linear and Contrast 2 is quadratic"))
         table$setTitle(.("Support: One-Way ANOVA (Fisher's assuming equal variances)"))
-
+        
       },
       .initDescTable = function() {
         
@@ -167,12 +174,20 @@ laov1wClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           N <- (sum(r$fisher$Df)+1)
           k <- r$fisher$Df[1]+1
           S_12 <- -(-0.5 * N * (log(r$fisher$`Sum Sq`[2]) - log(tss)))
-          np <- 2                   # parameter each for variance and grand mean
-          mp <- r$fisher$Df[1] + np
           
-          # Akaike's correction
-          Ac <- function(k1,k2,N) { k2 * N/(N - k2 - 1) - k1 * (N/(N - k1 - 1)) }
-          S_12c <- S_12 + Ac(np,mp,N)
+          np <- attr(logLik(r$model0),"df")  # parameter each for variance and grand mean
+          mp <- attr(logLik(r$model1),"df")
+          
+          # Corrections
+          Ac <- function(c,k1,k2,N) { 
+            if(c=="nc") { 0
+            } else if(c=="ob") { 0.5*(k2-k1) 
+            } else if(c=="aic") { 1*(k2-k1)
+            } else {
+              k2 * N/(N - k2 - 1) - k1 * (N/(N - k1 - 1)) 
+            }
+          }
+          S_12c <- S_12 + Ac(self$options$correction,np,mp,N)
           
           if (k < 3){
             jmvcore::reject(.("At least 3 groups are needed"))
@@ -198,12 +213,12 @@ laov1wClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           if (isFALSE(self$options$ct1)) {
             contrast1 <- conta[,1]
           } 
-
+          
           if (length(gp_means) < 3) {
             contrast2 <- NULL
           } else {
             if (isFALSE(self$options$ct2)) {
-             contrast2 <- conta[,2]
+              contrast2 <- conta[,2]
             }}
           
           orth <- NULL
@@ -212,7 +227,7 @@ laov1wClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           footnote <- NULL
           if (abs(sum(contrast1)) >= 0.03 || abs(sum(contrast2)) >= 0.03)
             footnote <- 1
-
+          
           contrastL <- conta[,1]  # linear contrast
           
           n <- N/(r$fisher$Df[1]+1)
@@ -235,41 +250,41 @@ laov1wClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           # vs means model
           
           cp <- np + 1       # parameters for contrast and means model
-          S_cont1_meansc <- S_cont1_means + Ac(cp,mp,N)
-          S_cont2_meansc <- S_cont2_means + Ac(cp,mp,N)
-
+          S_cont1_meansc <- S_cont1_means + Ac(self$options$correction,cp,mp,N)
+          S_cont2_meansc <- S_cont2_means + Ac(self$options$correction,cp,mp,N)
+          
           dfL <- 1; dfnL <- r$fisher$Df[1]-dfL         # df for linear and non-linear components
           nlp <- np + dfnL               # then parameters
-          S_cont_LnLc <- S_cont_LnL + Ac(cp,nlp,N)
-            
+          S_cont_LnLc <- S_cont_LnL + Ac(self$options$correction,cp,nlp,N)
+          
           Fval_c1 <- SS_1/r$fisher$`Mean Sq`[2]
           Fval_c2 <- SS_2/r$fisher$`Mean Sq`[2]
           Pval_c1 <- pf(Fval_c1, 1, r$fisher$Df[2], lower.tail = FALSE)
           Pval_c2 <- pf(Fval_c2, 1, r$fisher$Df[2], lower.tail = FALSE)
-
+          
           
           table <- self$results$anova
           if ( ! is.null(orth))
             #            table$addFootnote(rowNo=3, 'var', "The contrasts are not orthogonal")
-          table$setNote('Note', "The contrasts are not orthogonal. 
-                        <i>S</i>c uses Akaike correction for parameters (Param). 
+            table$setNote('Note', "The contrasts are not orthogonal. 
+                        Sc uses Akaike correction for parameters (Param). 
                         Unless specified, Contrast 1 is linear and Contrast 2 is quadratic")
           if ( ! is.null(footnote))
             table$setNote('Note', "Contrast weights do not sum to zero. 
-                        <i>S</i>c uses Akaike correction for parameters (Param). 
+                        Sc uses Akaike correction for parameters (Param). 
                         Unless specified, Contrast 1 is linear and Contrast 2 is quadratic")
-          table$setRow(rowNo=1, values=list(S=S_12, Sc=S_12c, Param=paste0(c(np,mp), collapse = ', '),
+          table$setRow(rowNo=1, values=list(S=S_12c, Param=paste0(c(np,mp), collapse = ', '),
                                             F=as.numeric(r$fisher$`F value`[1]), 
                                             df=paste(as.numeric(r$fisher$Df),collapse=", "), 
                                             p=as.numeric(r$fisher$`Pr(>F)`[1])))
-          table$setRow(rowNo=2, values=list(S=S_cont1_means, Sc=S_cont1_meansc, Param=paste0(c(cp,mp), collapse = ', '),
+          table$setRow(rowNo=2, values=list(S=S_cont1_meansc, Param=paste0(c(cp,mp), collapse = ', '),
                                             F=Fval_c1, df=paste0('1, ', r$fisher$Df[2]), p=Pval_c1))
-          table$setRow(rowNo=3, values=list(S=S_cont2_means, Sc=S_cont2_meansc, Param=paste0(c(cp,mp), collapse = ', '), 
+          table$setRow(rowNo=3, values=list(S=S_cont2_meansc, Param=paste0(c(cp,mp), collapse = ', '), 
                                             F=Fval_c2, df=paste0('1, ', r$fisher$Df[2]), p=Pval_c2))
-          table$setRow(rowNo=4, values=list(S=S_cont_12, Sc=S_cont_12,
+          table$setRow(rowNo=4, values=list(S=S_cont_12,
                                             Param=paste0(c(cp,cp), collapse = ', '),
                                             F="", df='1, 1', p=""))
-          table$setRow(rowNo=5, values=list(S=S_cont_LnL, Sc=S_cont_LnLc, 
+          table$setRow(rowNo=5, values=list(S=S_cont_LnLc, 
                                             Param=paste0(c(cp,nlp), collapse = ', '),
                                             F="", df=paste0('1, ', dfnL), p=""))
           
@@ -336,7 +351,7 @@ laov1wClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           )
           
           table$setRow(rowKey=dep, row)
-          table$setNote('Note', "Unlike <i>F</i>, a large <i>S</i> value indicates that group variances are either 
+          table$setNote('Note', "Unlike F, a large S value indicates that group variances are either 
                         more or less homogenous than expected")
           
         }
@@ -388,7 +403,7 @@ laov1wClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             table$addFootnote(rowKey=dep, 'w', footnote)
         }
       },
-
+      
       #### Plot functions ----
       .prepareDescPlot = function(results) {
         
@@ -466,7 +481,7 @@ laov1wClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       .cleanData = function() {
         
         data <- self$data
-
+        
         data
       },
       .descPlotSize = function() {
@@ -500,66 +515,69 @@ laov1wClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         jmvcore:::composeFormula(self$options$deps, self$options$group)
       },
       .getCt1Values = function() {
-
+        
         Ct1Values<-self$options$Ct1Values
         if ( is.character(Ct1Values) )
           Ct1Values <- as.numeric(unlist(strsplit(Ct1Values,",")))
         Ct1Values <- Ct1Values[!is.na(Ct1Values)]
-
+        
         return(Ct1Values)
       },
-        .getCt2Values = function() {
-          
-          Ct2Values<-self$options$Ct2Values
-          if ( is.character(Ct2Values) )
-            Ct2Values <- as.numeric(unlist(strsplit(Ct2Values,",")))
-          Ct2Values <- Ct2Values[!is.na(Ct2Values)]
-          
-          return(Ct2Values)
-        },
-
-        .initSupportTab = function() {
-          
-          table <- self$results$SupportTab
-          
-          Interp <- c('No evidence either way', 'Weak evidence', 'Moderate evidence', 
-                      'Strong evidence', 'Extremely strong evidence', 
-                      'More than a thousand to one', 'More than a million to one')
-          SS=integer(); LR=numeric(); row=list()
-          for (i in 0:4) {
-            SS[i+1] <- i; LR[i+1] <- exp(i)
-            row <- list('SS' = SS[i+1], 'LR' = LR[i+1], 'Interp' = Interp[i+1])
-            table$setRow(rowNo=i+1, values=row)
-          }
-          SS[6] <- as.integer(7); LR[6] <- exp(7)
-          row <- list('SS' = SS[6], 'LR' = LR[6], 'Interp' = Interp[6])
-          table$setRow(rowNo=6, values=row)
-          SS[7] <- as.integer(14); LR[7] <- exp(14)
-          row <- list('SS' = SS[7], 'LR' = LR[7], 'Interp' = Interp[7])
-          table$setRow(rowNo=7, values=row)
-          
-        },
+      .getCt2Values = function() {
         
-        .populateSupportText = function(st) {
-          
-          html <- self$results$tabText
-          
-          Sxl = list(s=st$S1, "<i>H</i>\u2080", "observed means")                       
-          stg1 <- private$.strength(Sxl)
-          Sxl = list(s=st$S2, "Contrast 1", "observed means")                       
-          stg2 <- private$.strength(Sxl)
-          Sxl = list(s=st$S3, "Contrast 2", "observed means")                       
-          stg3 <- private$.strength(Sxl)
-          Sxl = list(s=st$S4, "Contrast 1", "Contrast 2")                       
-          stg4 <- private$.strength(Sxl)
-          Sxl = list(s=st$S5, "Linear", "Non-linear")                       
-          stg5 <- private$.strength(Sxl)
-          
-          
-          str = paste0("<br> <h2>Summarizing the evidential analysis</h2>
-                                 <br>  <i>Using the Akaike corrected values, the analysis shows that:</i> <br> 
-                                 ", stg1, "<br>", stg2," <br>", stg3,"<br>", stg4,"<br>", stg5,
-                             "<p> <i>The Homogeneity test:</i> <br>
+        Ct2Values<-self$options$Ct2Values
+        if ( is.character(Ct2Values) )
+          Ct2Values <- as.numeric(unlist(strsplit(Ct2Values,",")))
+        Ct2Values <- Ct2Values[!is.na(Ct2Values)]
+        
+        return(Ct2Values)
+      },
+      
+      .initSupportTab = function() {
+        
+        table <- self$results$SupportTab
+        
+        Interp <- c('No evidence either way', 'Weak evidence', 'Moderate evidence', 
+                    'Strong evidence', 'Extremely strong evidence', 
+                    'More than a thousand to one', 'More than a million to one')
+        SS=integer(); LR=numeric(); row=list()
+        for (i in 0:4) {
+          SS[i+1] <- i; LR[i+1] <- exp(i)
+          row <- list('SS' = SS[i+1], 'LR' = LR[i+1], 'Interp' = Interp[i+1])
+          table$setRow(rowNo=i+1, values=row)
+        }
+        SS[6] <- as.integer(7); LR[6] <- exp(7)
+        row <- list('SS' = SS[6], 'LR' = LR[6], 'Interp' = Interp[6])
+        table$setRow(rowNo=6, values=row)
+        SS[7] <- as.integer(14); LR[7] <- exp(14)
+        row <- list('SS' = SS[7], 'LR' = LR[7], 'Interp' = Interp[7])
+        table$setRow(rowNo=7, values=row)
+        
+      },
+      
+      .populateSupportText = function(st) {
+        
+        html <- self$results$tabText
+        
+        Sxl = list(s=st$S1, "<i>H</i>\u2080", "observed means")                       
+        stg1 <- private$.strength(Sxl)
+        Sxl = list(s=st$S2, "Contrast 1", "observed means")                       
+        stg2 <- private$.strength(Sxl)
+        Sxl = list(s=st$S3, "Contrast 2", "observed means")                       
+        stg3 <- private$.strength(Sxl)
+        Sxl = list(s=st$S4, "Contrast 1", "Contrast 2")                       
+        stg4 <- private$.strength(Sxl)
+        Sxl = list(s=st$S5, "Linear", "Non-linear")                       
+        stg5 <- private$.strength(Sxl)
+        if(self$options$correction=="ob") { stg0 <- "<i>Using Occam's Bonus correction, the analysis shows that:</i>"
+        } else if(self$options$correction=="aicsm") { stg0 <- "<i>Using AIC small sample correction, the analysis shows that:</i>"
+        } else if(self$options$correction=="aic") { stg0 <- "<i>Using AIC correction, the analysis shows that:</i>"
+        } else {
+          stg0 <- "<i>Using no correction, the analysis shows that:</i>"
+        }
+        str = paste0("<br> <h2>Summarizing the evidential analysis</h2>", "<br>",
+                     stg0, "<br>", stg1, "<br>", stg2," <br>", stg3,"<br>", stg4,"<br>", stg5,
+                     "<p> <i>The Homogeneity test:</i> <br>
                              The <i>S</i> produced by the homogeneity of variance test can be given, 
                              where a large value indicates that the group variances are either less  
                              or <i>more</i> homogenous than expected.
@@ -577,66 +595,63 @@ laov1wClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                              moderate evidence and 8.6 as strong evidence! 
                              <i>S</i> values represent the weight of evidence, and are additive 
                              across independent data.")
-          
-          html$setContent(str)
-        },
         
-        .strength = function(Sxl) {
-          
-          stgx <- ifelse(Sxl$s < -3.9, paste0("There was extremely strong evidence, <i>S</i> = ", 
-                                              round(Sxl$s,1), ", against ", Sxl[2], " versus ", Sxl[3]),
-                         ifelse(Sxl$s < -2.9, paste0("There was strong evidence, <i>S</i> = ",
-                                                     round(Sxl$s,1), ", against ", Sxl[2], " versus ", Sxl[3]),
-                                ifelse(Sxl$s < -1.9, paste0("There was moderate evidence, <i>S</i> = ",
-                                                            round(Sxl$s,1), ", against ", Sxl[2], " versus ", Sxl[3]),
-                                       ifelse(Sxl$s < -0.9, paste0("There was weak evidence, <i>S</i> = ",
-                                                                   round(Sxl$s,1), ", against ", Sxl[2], " versus ", Sxl[3]),
-        ifelse(Sxl$s < -0.1, paste0("There was less than weak evidence, <i>S</i> = ",
-                                    round(Sxl$s,1), ", against ", Sxl[2], " versus ", Sxl[3]),
-               ifelse(Sxl$s > 3.9, paste0("There was extremely strong evidence, <i>S</i> = ",
-                                          round(Sxl$s,1), ", for ", Sxl[2], " against ", Sxl[3]),
-                      ifelse(Sxl$s > 2.9, paste0("There was strong evidence, <i>S</i> = ",
-                                                 round(Sxl$s,1), ", for ", Sxl[2], " against ", Sxl[3]),
-                             ifelse(Sxl$s > 1.9, paste0("There was moderate evidence, <i>S</i> = ",
-                                                        round(Sxl$s,1), ", for ", Sxl[2], " against ", Sxl[3]),
-                                    ifelse(Sxl$s > 0.9, paste0("There was weak evidence, <i>S</i> = ",
-                                                               round(Sxl$s,1), ", for ", Sxl[2], " against ", Sxl[3]),
-                                           ifelse(Sxl$s > 0.1, paste0("There was less than weak evidence, <i>S</i> = ",
-                                                      round(Sxl$s,1), ", for ", Sxl[2], " against ", Sxl[3]),
-                                  paste0("There was no evidence either way, <i>S</i> = ", 
-                                         round(Sxl$s,3), ", for ", Sxl[2], " against ", Sxl[3]))))))))))) 
-          return(stgx)
-          
-        },
+        html$setContent(str)
+      },
+      
+      .strength = function(Sxl) {
         
+        stgx <- ifelse(Sxl$s < -3.9, paste0("There was extremely strong evidence, <i>S</i> = ", 
+                                            round(Sxl$s,1), ", against ", Sxl[2], " versus ", Sxl[3]),
+                       ifelse(Sxl$s < -2.9, paste0("There was strong evidence, <i>S</i> = ",
+                                                   round(Sxl$s,1), ", against ", Sxl[2], " versus ", Sxl[3]),
+                              ifelse(Sxl$s < -1.9, paste0("There was moderate evidence, <i>S</i> = ",
+                                                          round(Sxl$s,1), ", against ", Sxl[2], " versus ", Sxl[3]),
+                                     ifelse(Sxl$s < -0.9, paste0("There was weak evidence, <i>S</i> = ",
+                                                                 round(Sxl$s,1), ", against ", Sxl[2], " versus ", Sxl[3]),
+                                            ifelse(Sxl$s < -0.1, paste0("There was less than weak evidence, <i>S</i> = ",
+                                                                        round(Sxl$s,1), ", against ", Sxl[2], " versus ", Sxl[3]),
+                                                   ifelse(Sxl$s > 3.9, paste0("There was extremely strong evidence, <i>S</i> = ",
+                                                                              round(Sxl$s,1), ", for ", Sxl[2], " against ", Sxl[3]),
+                                                          ifelse(Sxl$s > 2.9, paste0("There was strong evidence, <i>S</i> = ",
+                                                                                     round(Sxl$s,1), ", for ", Sxl[2], " against ", Sxl[3]),
+                                                                 ifelse(Sxl$s > 1.9, paste0("There was moderate evidence, <i>S</i> = ",
+                                                                                            round(Sxl$s,1), ", for ", Sxl[2], " against ", Sxl[3]),
+                                                                        ifelse(Sxl$s > 0.9, paste0("There was weak evidence, <i>S</i> = ",
+                                                                                                   round(Sxl$s,1), ", for ", Sxl[2], " against ", Sxl[3]),
+                                                                               ifelse(Sxl$s > 0.1, paste0("There was less than weak evidence, <i>S</i> = ",
+                                                                                                          round(Sxl$s,1), ", for ", Sxl[2], " against ", Sxl[3]),
+                                                                                      paste0("There was no evidence either way, <i>S</i> = ", 
+                                                                                             round(Sxl$s,3), ", for ", Sxl[2], " against ", Sxl[3]))))))))))) 
+        return(stgx)
         
+      },
+      
+      
+      
+      .populateMoreSupportText = function(st) {
         
-        .populateMoreSupportText = function(st) {
-          
-          html <- self$results$MoretabText
-          
-          str1 <- "<i>Support Intervals</i> 
-          <br> The log likelihood ratio interval identifies a supported range of values which are consistent with the observed statistic. 
-          In jeva it is denoted as <i>S</i>-<i>X</i>, where <i>X</i> can be any number between 1 and 100. The <i>S</i>-2 interval is 
-          commonly used since it is numerically close to the 95% confidence interval. For the <i>S</i>-2 interval, it means that the values 
-          within the interval have likelihood ratios in the range 0.135 to 7.38, corresponding to e\u207B\u00B2 to e\u00B2. 
-          Simply put, within an <i>S</i>-2 interval, no likelihoods are more than 7.38 times different from each other. Similarly, for the 
-          <i>S</i>-3 interval, likelihood ratios will range from 0.050 to 20.09, corresponding to e\u207B\u00B3 to e\u00B3, and no 
-          likelihoods will be more than 20.09 times different from each other.
+        html <- self$results$MoretabText
+        
+        str1 <- "<i>Support Intervals</i> 
+          <br> The log likelihood ratio interval identifies a supported range of values which are consistent with the observed 
+          statistic. In jeva it is denoted as <i>S</i>-<i>X</i>, where <i>X</i> can be any number between 1 and 100. 
+          The <i>S</i>-2 interval is commonly used since it is numerically close to the 95% confidence interval. For the <i>S</i>-2 
+          interval, it means that the values within the interval have likelihood ratios in the range 0.135 to 7.38, corresponding 
+          to e\u207B\u00B2 to e\u00B2. Simply put, within an <i>S</i>-2 interval, no likelihoods are more than 7.38 times different 
+          from each other. Similarly, for the <i>S</i>-3 interval, likelihood ratios will range from 0.050 to 20.09, corresponding 
+          to e\u207B\u00B3 to e\u00B3, and no likelihoods will be more than 20.09 times different from each other.
           <br> <i>Advantages of the Evidential Approach</i> 
-          <br> One advantage of the evidential approach is that <i>S</i> quantifies the strength of evidence 
-          for or against the null hypothesis. "
-          str2 <- "Another advantage is that we can select hypothesis values that reflect our research interests. "
-          str3 <- "For example, we could choose a meaningful contrast to compare with another contrast. The results 
-                  for such comparisons are shown by the last 2 lines of the main Support table (where the <i>p</i> 
-                  values cannot be calculated). "
-          
-          str = paste0(str1, str2, str3, "As data accumulates the strength of evidence for one hypothesis over another will tend 
-                       to increase.")
-          
-          html$setContent(str)
-          
-        }
-
-)
+          <br> One advantage of the evidential approach is that <i>S</i> quantifies the strength of evidence for or against the 
+          null hypothesis. "
+        str2 <- "Another advantage is that we can select hypothesis values that reflect our research interests. "
+        str3 <- "For example, we could choose a meaningful effect size <i>H</i>\u2090 to compare with any <i>H</i>\u2080. 
+        This is shown by the last line of the main Support table, where the <i>p</i> value cannot be calculated. "
+        str = paste0(str1, str2, str3, "As data accumulates the strength of evidence for one hypothesis over another will tend to increase.")
+        
+        html$setContent(str)
+        
+      }
+      
+    )
 )

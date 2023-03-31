@@ -13,6 +13,9 @@ propOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             ciWidth = 95,
             lint = 2,
             pll = FALSE,
+            plotype = "lplot",
+            supplot = -10,
+            correction = "ob",
             ratio = NULL,
             varA = FALSE,
             text = TRUE, ...) {
@@ -63,6 +66,27 @@ propOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "pll",
                 pll,
                 default=FALSE)
+            private$..plotype <- jmvcore::OptionList$new(
+                "plotype",
+                plotype,
+                options=list(
+                    "lplot",
+                    "logplot"),
+                default="lplot")
+            private$..supplot <- jmvcore::OptionNumber$new(
+                "supplot",
+                supplot,
+                min=-100,
+                max=-1,
+                default=-10)
+            private$..correction <- jmvcore::OptionList$new(
+                "correction",
+                correction,
+                options=list(
+                    "nc",
+                    "ob",
+                    "aic"),
+                default="ob")
             private$..ratio <- jmvcore::OptionArray$new(
                 "ratio",
                 ratio,
@@ -88,6 +112,9 @@ propOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..ciWidth)
             self$.addOption(private$..lint)
             self$.addOption(private$..pll)
+            self$.addOption(private$..plotype)
+            self$.addOption(private$..supplot)
+            self$.addOption(private$..correction)
             self$.addOption(private$..ratio)
             self$.addOption(private$..varA)
             self$.addOption(private$..text)
@@ -100,6 +127,9 @@ propOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ciWidth = function() private$..ciWidth$value,
         lint = function() private$..lint$value,
         pll = function() private$..pll$value,
+        plotype = function() private$..plotype$value,
+        supplot = function() private$..supplot$value,
+        correction = function() private$..correction$value,
         ratio = function() private$..ratio$value,
         varA = function() private$..varA$value,
         text = function() private$..text$value),
@@ -111,6 +141,9 @@ propOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..ciWidth = NA,
         ..lint = NA,
         ..pll = NA,
+        ..plotype = NA,
+        ..supplot = NA,
+        ..correction = NA,
         ..ratio = NA,
         ..varA = NA,
         ..text = NA)
@@ -146,6 +179,10 @@ propResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "ratio",
                     "counts",
                     "data"),
+                refs=list(
+                    "Book",
+                    "Glover_Tut",
+                    "Edwards_OR"),
                 columns=list(
                     list(
                         `name`="level", 
@@ -195,7 +232,8 @@ propResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "var",
                     "ratio",
                     "counts",
-                    "data"),
+                    "data",
+                    "correction"),
                 columns=list(
                     list(
                         `name`="var", 
@@ -207,23 +245,22 @@ propResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="text"),
                     list(
                         `name`="S", 
-                        `title`="<i>S</i>", 
+                        `title`="S", 
                         `type`="number"),
                     list(
-                        `name`="Sc", 
-                        `title`="<i>S</i>c", 
+                        `name`="Param", 
                         `type`="number"),
                     list(
                         `name`="G", 
-                        `title`="<i>G</i>", 
+                        `title`="G", 
                         `type`="number"),
                     list(
                         `name`="df", 
-                        `title`="<i>df</i>", 
+                        `title`="df", 
                         `type`="integer"),
                     list(
                         `name`="p", 
-                        `title`="<i>p</i>", 
+                        `title`="p", 
                         `type`="number", 
                         `format`="zto,pvalue", 
                         `refs`=list(
@@ -268,7 +305,8 @@ propResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "var",
                     "ratio",
-                    "counts")))
+                    "counts",
+                    "correction")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="SupportTab",
@@ -278,11 +316,11 @@ propResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 columns=list(
                     list(
                         `name`="SS", 
-                        `title`="<i>S</i>", 
+                        `title`="S", 
                         `type`="number"),
                     list(
                         `name`="LR", 
-                        `title`="<i>LR</i>", 
+                        `title`="LR", 
                         `type`="number"),
                     list(
                         `name`="Interp", 
@@ -312,7 +350,7 @@ propResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="text"),
                     list(
                         `name`="Sv", 
-                        `title`="<i>S</i>", 
+                        `title`="S", 
                         `type`="number"),
                     list(
                         `name`="X2", 
@@ -320,16 +358,16 @@ propResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="number"),
                     list(
                         `name`="dfv", 
-                        `title`="<i>df</i>", 
-                        `type`="number"),
+                        `title`="df", 
+                        `type`="integer"),
                     list(
                         `name`="pv", 
-                        `title`="<i>p</i>", 
+                        `title`="p", 
                         `type`="number", 
                         `format`="zto,pvalue"),
                     list(
                         `name`="pv1", 
-                        `title`="1 - <i>p</i>", 
+                        `title`="1 - p", 
                         `type`="number", 
                         `format`="zto,pvalue", 
                         `refs`=list(
@@ -337,7 +375,7 @@ propResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plotc",
-                title="`Likelihood function for Proportion with S-{lint} support interval`",
+                title="`Likelihood curve for Proportion with S-{lint} support interval`",
                 width=500,
                 height=400,
                 renderFun=".plotc",
@@ -346,7 +384,11 @@ propResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "var",
                     "ratio",
                     "counts",
-                    "lint")))}))
+                    "lint",
+                    "logplot",
+                    "lplot",
+                    "plotype",
+                    "supplot")))}))
 
 propBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "propBase",
@@ -375,12 +417,10 @@ propBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
-#' dat <- data.frame(
-#'   Sex = c('Female', 'Male'),
-#'   Students = c(60, 40),
-#'   check.names=FALSE)
+#' dat <- data.frame(Sex = c('Female', 'Male'), Students = c(60, 40))
 #'
-#' jeva::prop(formula = Students ~ Sex, data = dat, ratio = c(1, 1))
+#'
+#' jeva::prop(formula = Students ~ Sex, data = dat, ratio = c(1, 1), text = FALSE)
 #'
 #' # N OUTCOMES
 #' #
@@ -395,13 +435,13 @@ propBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' #
 #' # Support
 #' # ----------------------------------------------------------------------------------------------------------
-#' #   Hypotheses                    Expected values    S            Sc           G           df    p
-#' # ----------------------------------------------------------------------------------------------------------
-#' #   H₀ vs observed proportions    50 | 50            -2.013551    -2.013551    4.027103     1    0.0447748
-#' #   Ha vs observed proportion     50 | 50            -2.013551    -2.013551    4.027103     1    0.0447748
-#' #   Ha vs H₀                                          0.000000     0.000000    0.000000     1    1.0000000
-#' # ----------------------------------------------------------------------------------------------------------
-#' #   Note. Sc is S corrected for degrees of freedom using Edwards's Occam's bonus, see reference
+#' #   Hypotheses                    Expected values    S             Param    G           df    p
+#' # -------------------------------------------------------------------------------------------------------
+#' #   H₀ vs observed proportions    50 | 50            -1.5135514     1, 2    4.027103     1    0.0447748
+#' #   Ha vs observed proportion     50 | 50            -2.0135514     2, 2    4.027103     1    0.0447748
+#' #   Ha vs H₀                                         -0.5000000     2, 1    0.000000     1    1.0000000
+#' # -------------------------------------------------------------------------------------------------------
+#' #   Note. S uses Occam's Bonus correction for parameters (Param).
 #' #
 #'
 #' @param data the data as a data frame
@@ -417,6 +457,12 @@ propBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   likelihood support interval width
 #' @param pll for binomial only: plot the likelihood function displaying
 #'   observed proportion,  alternative hypothesis and support interval
+#' @param plotype choose type of plot, likelihood function (default), support
+#'   function
+#' @param supplot To set the minimum likelihood display value in plot, in log
+#'   units (default = -10)  affects the x-axis range
+#' @param correction correction for parameters, none, Occam's bonus (default)
+#'   or AIC
 #' @param ratio a vector of numbers: the expected proportions
 #' @param varA \code{TRUE} or \code{FALSE} (default), perform variance
 #'   analysis for null and alternative hypotheses
@@ -452,6 +498,9 @@ prop <- function(
     ciWidth = 95,
     lint = 2,
     pll = FALSE,
+    plotype = "lplot",
+    supplot = -10,
+    correction = "ob",
     ratio = NULL,
     varA = FALSE,
     text = TRUE,
@@ -493,6 +542,9 @@ prop <- function(
         ciWidth = ciWidth,
         lint = lint,
         pll = pll,
+        plotype = plotype,
+        supplot = supplot,
+        correction = correction,
         ratio = ratio,
         varA = varA,
         text = text)

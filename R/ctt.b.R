@@ -1,7 +1,3 @@
-
-#' @importFrom jmvcore .
-
-
 cttClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     "cttClass",
     inherit = cttBase,
@@ -185,20 +181,28 @@ cttClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         
         int_text <- paste(rowVarName," \u2A2F ", colVarName)
         
-        table <- self$results$cttma
-        table$setTitle(.("Support: Marginal main effects and interaction analyses, against the Null model"))
-        table$setNote('Note', "The interaction and <i>OR</i> (against 1) will have the same <i>S</i> value. Adding  
-        the <i>S</i> values for the 3 components will precisely sum to the total <i>S</i>") 
-        table$setRow(rowNo=1, values=list(var= rowVarName))
-        table$setRow(rowNo=2, values=list(var= colVarName))
-        table$setRow(rowNo=3, values=list(var= int_text))
-        table$setRow(rowNo=4, values=list(var="Total"))
+        if(self$options$correction=="ob") { notext <- "S uses Occam's Bonus correction for parameters (Param). "
+        } else if(self$options$correction=="aic") { notext <- "S uses AIC correction for parameters (Param). "
+        } else if(self$options$correction=="aicsm") { notext <- "S uses AIC small sample correction for parameters (Param). "
+        } else {
+          notext <- "S uses no correction for parameters (Param). "
+        }
         
         table <- self$results$ctt
+        table$setNote('Note', notext)
         table$setTitle(.("Support: Odds Ratio analyses"))
         table$setRow(rowNo=1, values=list(var= "H\u2080 vs odds ratio"))
         table$setRow(rowNo=2, values=list(var="H\u2090 vs odds ratio"))
         table$setRow(rowNo=3, values=list(var="H\u2090 vs H\u2080"))
+        
+        table <- self$results$cttma
+        table$setTitle(.("Support: Marginal main effects and interaction analyses, against the Null model"))
+        table$setNote('Note', paste(notext, "The interaction and OR (against 1) will have the same S value. Adding  
+        the S values for the 3 components will precisely sum to the total S when no parameter correction is applied.")) 
+        table$setRow(rowNo=1, values=list(var= rowVarName))
+        table$setRow(rowNo=2, values=list(var= colVarName))
+        table$setRow(rowNo=3, values=list(var= int_text))
+        table$setRow(rowNo=4, values=list(var="Total"))
         
         table <- self$results$ctt2
         table$setRow(rowNo=1, values=list(Interval="Support"))
@@ -366,6 +370,14 @@ cttClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             if (lt$observed[i] < 1) tabt1[i]=1   # turn 0s into 1s for one table used for log
           }
           
+          # Correction
+          Ac <- function(c,k1,k2) { 
+            if(c=="nc") { 0
+            } else if(c=="ob") { 0.5*(k2-k1) 
+            } else { 1*(k2-k1)
+            } 
+          }
+          
           # main marginal totals
           row_sum <- rowSums(tab)
           col_sum <- colSums(tab)
@@ -414,11 +426,12 @@ cttClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           
           lintlev <- toString(self$options$lint); conflev <- paste0(self$options$ciWidth,"%")
           
-          # to determine x axis space for plot
-          dif <- orv-begL
-          lolim <- orv - 3*dif; hilim <- orv + 4*dif
-          if (orv < 1 ) { hilim <- orv + 6*dif}
-          if (lolim < 0) {lolim <- 0}
+          # x axis limits
+          goalx <- self$options$supplot   # with e^-10 we get x values for when curve is down to 0.00004539
+          suppressWarnings(xmin1x <- optimize(f, c(0, a), tol = toler, a, b, c, d, c1tot, r1tot, r2tot, goalx))
+          suppressWarnings(xmin2x <- optimize(f, c(a, dve), tol = toler, a, b, c, d, c1tot, r1tot, r2tot, goalx))
+          xmin <- xmin1x$minimum*(r2tot-c1tot+xmin1x$minimum)/((c1tot-xmin1x$minimum)*(r1tot-xmin1x$minimum))
+          xmax <- xmin2x$minimum*(r2tot-c1tot+xmin2x$minimum)/((c1tot-xmin2x$minimum)*(r1tot-xmin2x$minimum))
           
           # to determine height of self$options$alt and nul on likelihood function
           goal <- self$options$alt
@@ -450,7 +463,7 @@ cttClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           Scol <- sum(col_sum*log(col_sum))-grandtot*log(grandtot) + grandtot*log(length(col_sum))
           if(c1tot == c2tot) Scol <- 0
           # interaction
-          Sint <- sum(lt$observed * log(tabt1/lt$expected))
+          Sint <- sum(lt$observed * log(tabt1/lt$expected)) 
           # Grand total
           Sgt <- sum(lt$observed*log(tabt1))-sum(lt$observed)*log(sum(lt$observed)/4)
           
@@ -476,18 +489,25 @@ cttClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           gi_p <- 1-pchisq(2*Sint,1)
           
           table <- self$results$ctt
-          table$setRow(rowNo=1, values=list(Value=self$options$nul, 
-                                            ordiff= self$options$nul-orv, S=S2way, G=gn, df=df, p=gn_p))
-          table$setRow(rowNo=2, values=list(Value=self$options$alt, 
-                                            ordiff= self$options$alt-orv, S=Salt, G=ga, df=df, p=ga_p))
+          table$setRow(rowNo=1, values=list(Value=self$options$nul, ordiff= self$options$nul-orv, 
+                                            S=S2way + Ac(self$options$correction,1,2), Param=paste0(c(1,2), collapse = ', '), 
+                                            G=gn, df=df, p=gn_p))
+          table$setRow(rowNo=2, values=list(Value=self$options$alt, ordiff= self$options$alt-orv, 
+                                            S=Salt + Ac(self$options$correction,2,2), Param=paste0(c(2,2), collapse = ', '), 
+                                            G=ga, df=df, p=ga_p))
           table$setRow(rowNo=3, values=list(Value="", ordiff= self$options$alt-self$options$nul, 
-                                            S=SexOR_null, G=gan, df=df, p=gan_p))
+                                            S=SexOR_null + Ac(self$options$correction,2,1), Param=paste0(c(2,1), collapse = ', '), 
+                                            G=gan, df=df, p=gan_p))
           
           table <- self$results$cttma
-          table$setRow(rowNo=1, values=list(Value=exp_row, S=Srow, G=2*Srow, df=as.integer(df), p=gr_p))
-          table$setRow(rowNo=2, values=list(Value=exp_col, S=Scol, G=2*Scol, df=as.integer(df), p=gc_p))
-          table$setRow(rowNo=3, values=list(Value="", S=Sint, G=2*Sint, df=as.integer(df), p=gi_p))
-          table$setRow(rowNo=4, values=list(Value=exp_int, S=Sgt, G=2*Sgt, df=as.integer(3), p=gt_p))
+          table$setRow(rowNo=1, values=list(Value=exp_row, S=Srow + Ac(self$options$correction,2,1), 
+                                            G=2*Srow, Param=paste0(c(2,1), collapse = ', '),df=as.integer(df), p=gr_p))
+          table$setRow(rowNo=2, values=list(Value=exp_col, S=Scol + Ac(self$options$correction,2,1),
+                                            G=2*Scol, Param=paste0(c(2,1), collapse = ', '), df=as.integer(df), p=gc_p))
+          table$setRow(rowNo=3, values=list(Value="", S=Sint + Ac(self$options$correction,2,1), 
+                                            G=2*Sint, Param=paste0(c(2,1), collapse = ', '), df=as.integer(df), p=gi_p))
+          table$setRow(rowNo=4, values=list(Value=exp_int, S=Sgt + Ac(self$options$correction,4,1), 
+                                            G=2*Sgt, Param=paste0(c(4,1), collapse = ', '), df=as.integer(3), p=gt_p))
           table <- self$results$ctt2
           table$setRow(rowNo=1, values=list(Level=lintlev, OR = orv, Lower=begL, Upper=endL))
           table$setRow(rowNo=2, values=list(Level=conflev, OR = orv, Lower=beg, Upper=end))
@@ -495,21 +515,21 @@ cttClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             table$addFootnote(rowNo=1, col="OR", "Haldane-Anscombe correction applied")      
           
           table <- self$results$ctt3
-          table$setNote('Note', "Unlike the \u03C7\u00B2 statistic, a large <i>S</i> value indicates 
+          table$setNote('Note', "Unlike the \u03C7\u00B2 statistic, a large S value indicates 
           that the proportions are either more different or too similar compared with those expected") 
           if (isTRUE(self$options$cc))
-            table$setNote('Note', "Continuity correction applied. Unlike the \u03C7\u00B2 statistic, a large <i>S</i> value indicates 
+            table$setNote('Note', "Continuity correction applied. Unlike the \u03C7\u00B2 statistic, a large S value indicates 
           that the proportions are either more different or too similar compared with those expected")
-          table$setRow(rowNo=1, values=list(var= "For <i>OR</i> = 1", Sv=toogood, X2=chi.s, dfv=df, 
+          table$setRow(rowNo=1, values=list(var= "For OR = 1", Sv=toogood, X2=chi.s, dfv=df, 
                                             pv=lt$p.value, pv1=1-lt$p.value))
           
           # stats for summary        
-          stats <- list(S1 = S2way,
-                        S2 = Salt,
-                        S3 = SexOR_null,
-                        S4 = Srow,
-                        S5 = Scol,
-                        S7 = Sgt,
+          stats <- list(S1 = S2way+ Ac(self$options$correction,1,2),
+                        S2 = Salt + Ac(self$options$correction,2,2),
+                        S3 = SexOR_null + Ac(self$options$correction,2,1),
+                        S4 = Srow + Ac(self$options$correction,2,1),
+                        S5 = Scol + Ac(self$options$correction,2,1),
+                        S7 = Sgt + Ac(self$options$correction,4,1),
                         tg = toogood,
                         chi = chi.s)
           
@@ -527,7 +547,7 @@ cttClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           
           g <- data.frame(orv=orv, a=a, b=b, c=c, d=d, dvs=dvs,
                           r1tot=r1tot, r2tot=r2tot, c1tot=c1tot, c2tot=c2tot, 
-                          nullh=nullh, xah=xah, goalL=goalL, begL=begL,endL=endL)
+                          nullh=nullh, xah=xah, goalL=goalL, begL=begL,endL=endL, xmin=xmin, xmax=xmax)
           imagec <- self$results$plotc
           imagec$setState(g)
           
@@ -545,6 +565,89 @@ cttClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       },
       
       #### Plot functions ----
+      .initBarPlot = function() {
+        image <- self$results$get('barplot')
+        
+        width <- 450
+        height <- 400
+        
+        image$setSize(width * 2, height)
+      },
+      .barPlot = function(image, ggtheme, theme, ...) {
+        
+        if (! self$options$barplot)
+          return()
+        
+        rowVarName <- self$options$rows
+        colVarName <- self$options$cols
+        countsName <- self$options$counts
+        
+        if (is.null(rowVarName) || is.null(colVarName))
+          return()
+        
+        data <- private$.cleanData()
+        data <- na.omit(data)
+        
+        if (! is.null(countsName)){
+          untable <- function (df, counts) df[rep(1:nrow(df), counts), ]
+          data <- untable(data[, c(rowVarName, colVarName)], counts=data[, countsName])
+        }
+        
+        formula <- jmvcore::composeFormula(NULL, c(rowVarName, colVarName))
+        counts <- xtabs(formula, data)
+        d <- dim(counts)
+        
+        expand <- list()
+        for (i in c(rowVarName, colVarName))
+          expand[[i]] <- base::levels(data[[i]])
+        tab <- expand.grid(expand)
+        tab$Counts <- as.numeric(counts)
+        
+        if (self$options$yaxis == "ypc") { # percentages
+          props <- counts
+          
+          if (self$options$yaxisPc == "column_pc") {
+            pctVarName <- colVarName
+          } else if (self$options$yaxisPc == "row_pc") {
+            pctVarName <- rowVarName
+          } else { # total
+            pctVarName <- NULL
+          }
+          
+          props <- proportions(counts, pctVarName)
+          
+          tab$Percentages <- as.numeric(props) * 100
+        }
+        
+        if (self$options$xaxis == "xcols") {
+          xVarName <- ensym(colVarName)
+          zVarName <- ensym(rowVarName)
+        } else {
+          xVarName <- ensym(rowVarName)
+          zVarName <- ensym(colVarName)
+        }
+        
+        position <- self$options$bartype
+        
+        if (self$options$yaxis == "ycounts") {
+          p <- ggplot(data=tab, aes(y=Counts, x=!!xVarName, fill=!!zVarName)) +
+            geom_col(position=position, width = 0.7) +
+            labs(y = .("Counts"))
+        } else {
+          p <- ggplot(data=tab, aes(y=Percentages, x=!!xVarName, fill=!!zVarName)) +
+            geom_col(position=position, width = 0.7)
+          
+          if (self$options$yaxisPc == "total_pc") {
+            p <- p + labs(y = .("Percentages of total"))
+          } else {
+            p <- p + labs(y = jmvcore::format(.("Percentages within {var}"), var=pctVarName))
+          }
+        }
+        
+        p <- p + ggtheme
+        
+        return(p)
+      },      
       
       .plotc=function(imagec, ...) {
         
@@ -566,14 +669,26 @@ cttClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         lolim <- exp(log(g$orv)-3*seor); hilim <- exp(log(g$orv)+3*seor)
         if (lolim < 0) {lolim <- 0}
         
-        # do the plot with lines
-        plot <- plot(xs, ys, xlim=c(lolim,hilim),type="l", lwd = 1, xlab = "Odds Ratio", ylab = "Likelihood")
-        lines(c(g$orv,g$orv),c(0,1),lty=2) # add MLE as dashed line
-        segments(g$begL, exp(g$goalL), g$endL, exp(g$goalL), lwd = 1, col = "red")
-        lines(c(self$options$nul,self$options$nul),c(0,g$nullh), lty=1, col = "black") # add H prob as black line
-        lines(c(self$options$alt,self$options$alt), c(0,g$xah), lty=1, col = "blue") # add H prob as blue line
+        #-sum(a*log(a/x), b*log(b/(c1tot-x)), c*log(c/(r1tot-x)),
+        # d*log(d/(r2tot-c1tot+x)))
         
-        print(plot)
+        # do the plot with lines
+        if(self$options$plotype=="lplot") {
+          plot <- plot(xs, ys, xlim=c(lolim,hilim),type="l", lwd = 1, xlab = "Odds Ratio", ylab = "Likelihood")        
+          lines(c(g$orv,g$orv),c(0,1),lty=2) # add MLE as dashed line
+          segments(g$begL, exp(g$goalL), g$endL, exp(g$goalL), lwd = 1, col = "red")
+          lines(c(self$options$nul,self$options$nul),c(0,g$nullh), lty=1, col = "black") # add H prob as black line
+          lines(c(self$options$alt,self$options$alt), c(0,g$xah), lty=1, col = "blue") # add H prob as blue line
+        } else {
+          plot <- plot(xs, log(ys), xlim=c(g$xmin,g$xmax),type="l", lwd = 1, xlab = "Odds Ratio", 
+                       ylim=c(self$options$supplot,0), ylab = "Log Likelihood")
+          lines(c(g$orv,g$orv),c(self$options$supplot,0),lty=2) # add MLE as dashed line
+          segments(g$begL, g$goalL, g$endL, g$goalL, lwd = 1, col = "red")
+          lines(c(self$options$nul,self$options$nul),c(self$options$supplot,log(g$nullh)), lty=1, col = "black") # add H prob as black line
+          lines(c(self$options$alt,self$options$alt), c(self$options$supplot,log(g$xah)), lty=1, col = "blue") # add H prob as blue line
+        }
+        
+        #        print(plot)
         TRUE
       },
       #### Helper functions ----
@@ -752,10 +867,18 @@ cttClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         if (2*st$tg > st$chi) {
           stg8 <- paste0("For the observed <i>OR</i>", sv, ", that it was closer to the H\u2080 = 1 than expected")
         }
-        
-        str = paste0("<br> <h2>Summarizing the evidential analysis</h2>
-                               <br>  <i>The main <i>OR</i> analysis shows that:</i> <br>", 
-                     stg1, "<br>", stg2, "<br>", stg3, 
+        if(self$options$correction=="ob") { stg0 <- "<i>Using Occam's Bonus correction, the analysis shows that:</i>"
+        } else if(self$options$correction=="aic") { stg0 <- "<i>Using AIC correction, the analysis shows that:</i>"
+        } else {
+          stg0 <- "<i>Using no correction, the analysis shows that:</i>"
+        }
+        if(self$options$correction=="ob") { stg0 <- "<i>Using Occam's Bonus correction, the analysis shows that:</i>"
+        } else if(self$options$correction=="aic") { stg0 <- "<i>Using AIC correction, the analysis shows that:</i>"
+        } else {
+          stg0 <- "<i>Using no correction, the analysis shows that:</i>"
+        }
+        str = paste0("<br> <h2>Summarizing the evidential analysis</h2>", "<br>",
+                     stg0, "<br>", stg1, "<br>", stg2, "<br>", stg3, 
                      "<p>
                        <i>The additional analysis of marginal main effects (not necessarily required) shows that:
                        </i> <br>", stg4, "<br>", stg5,"<br>", stg7, 

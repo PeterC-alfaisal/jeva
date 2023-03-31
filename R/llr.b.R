@@ -1,18 +1,25 @@
-contabClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
-    "contabClass",
-    inherit = contabBase,
-    private = list(
-      .init = function() {
+llrClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
+    "llrClass",
+    inherit = llrBase,
+    private=list(
+      .init=function() {
         
         private$.initSupportTab()
         
         rowVarName <- self$options$rows
         colVarName <- self$options$cols
+        layerNames <- NULL
         countsName <- self$options$counts
         
         freqs <- self$results$freqs
         
         data <- private$.cleanData()
+        
+        reversed <- rev(layerNames)
+        for (i in seq_along(reversed)) {
+          layer <- reversed[[i]]
+          freqs$addColumn(name=layer, type='text', combineBelow=TRUE)
+        }
         
         # add the row column, containing the row variable
         # fill in dots, if no row variable specified
@@ -39,21 +46,18 @@ contabClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           levels <- c('.', '.')
         }
         
-        hasSubRows <- sum(self$options$pcRow,
-                          self$options$pcCol) > 0
-        
-        subNames  <- c('[count]', '[expected]', '[sred]', '[ssv]', '[pcRow]', '[pcCol]', '[pcTot]')
-        subTitles <- c(.('Observed'), .('Expected'), .('St resid'), .('S value'), .('% within row'), .('% within column'), .('% of total'))
-        visible   <- c('(obs)', '(exp)', '(sr)', '(ss)', '(pcRow)', '(pcCol)', '(pcTot)')
-        types     <- c('integer', 'number', 'number', 'number', 'number', 'number', 'number')
-        formats   <- c('', '', '', '', 'pc', 'pc', 'pc')
+        subNames  <- c('[count]', '[expected]', '[pcRow]', '[pcCol]', '[pcTot]')
+        subTitles <- c(.('Observed'), .('Expected'), .('% within row'), .('% within column'), .('% of total'))
+        visible   <- c('(obs)', '(exp)', '(pcRow)', '(pcCol)', '(pcTot)')
+        types     <- c('integer', 'number', 'number', 'number', 'number')
+        formats   <- c('', '', 'pc', 'pc', 'pc')
         
         # iterate over the sub rows
         
         for (j in seq_along(subNames)) {
           subName <- subNames[[j]]
           if (subName == '[count]')
-            v <- '(obs && (exp || sr || ss || pcRow || pcCol || pcTot))'
+            v <- '(obs && (exp || pcRow || pcCol || pcTot))'
           else
             v <- visible[j]
           
@@ -91,18 +95,6 @@ contabClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         if (self$options$exp) {
           freqs$addColumn(
             name='.total[exp]',
-            title=.('Total'),
-            type='number')
-        }
-        if (self$options$sr) {
-          freqs$addColumn(
-            name='.total[sr]',
-            title=.('Total'),
-            type='number')
-        }
-        if (self$options$ss) {
-          freqs$addColumn(
-            name='.total[ss]',
             title=.('Total'),
             type='number')
         }
@@ -187,6 +179,7 @@ contabClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         }
         
         int_text <- paste(rowVarName," \u2A2F ", colVarName)
+        
         if(self$options$correction=="ob") { notext <- "S uses Occam's Bonus correction for parameters (Param). "
         } else if(self$options$correction=="aic") { notext <- "S uses AIC correction for parameters (Param). "
         } else if(self$options$correction=="aicsm") { notext <- "S uses AIC small sample correction for parameters (Param). "
@@ -194,17 +187,30 @@ contabClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           notext <- "S uses no correction for parameters (Param). "
         }
         
+        table <- self$results$ctt
+        table$setNote('Note', notext)
+        table$setTitle(.("Support: Risk Ratio analyses"))
+        table$setRow(rowNo=1, values=list(var= "H\u2080 vs risk ratio"))
+        table$setRow(rowNo=2, values=list(var="H\u2090 vs risk ratio"))
+        table$setRow(rowNo=3, values=list(var="H\u2090 vs H\u2080"))
+        
         table <- self$results$cttma
         table$setTitle(.("Support: Marginal main effects and interaction analyses, against the Null model"))
-        table$setNote('Note', notext)
+        table$setNote('Note', paste(notext, "The interaction and RR (against 1) will have the same S value. Adding  
+        the S values for the 3 components will precisely sum to the total S when no parameter correction is applied.")) 
         table$setRow(rowNo=1, values=list(var= rowVarName))
-        table$setRow(rowNo=2, values=list(var=colVarName))
-        table$setRow(rowNo=3, values=list(var=int_text))
+        table$setRow(rowNo=2, values=list(var= colVarName))
+        table$setRow(rowNo=3, values=list(var= int_text))
         table$setRow(rowNo=4, values=list(var="Total"))
         
+        table <- self$results$ctt2
+        table$setRow(rowNo=1, values=list(Interval="Support"))
+        table$setRow(rowNo=2, values=list(Interval="Likelihood-based"))
+        table$addFootnote(rowNo=2, col="Interval", "See reference Pritikin et al (2017) such intervals 
+                          are more accurate and are parameterization-invariant compared to conventional 
+                          confidence intervals")
       },
-      
-      .run = function() {
+      .run=function() {
         
         rowVarName <- self$options$rows
         colVarName <- self$options$cols
@@ -219,6 +225,10 @@ contabClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           jmvcore::reject(.("Row variable '{var}' contains fewer than 2 levels"), code='', var=rowVarName)
         if (nlevels(data[[colVarName]]) < 2)
           jmvcore::reject(.("Column variable '{var}' contains fewer than 2 levels"), code='', var=colVarName)
+        if (nlevels(data[[rowVarName]]) > 2)
+          jmvcore::reject(.("Row variable '{var}' contains more than 2 levels"), code='', var=rowVarName)
+        if (nlevels(data[[colVarName]]) > 2)
+          jmvcore::reject(.("Column variable '{var}' contains more than 2 levels"), code='', var=colVarName)
         
         if ( ! is.null(countsName)) {
           countCol <- data[[countsName]]
@@ -239,6 +249,8 @@ contabClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         nRows  <- base::nlevels(data[[rowVarName]])
         nCols  <- base::nlevels(data[[colVarName]])
         nCells <- nRows * nCols
+        
+        ciWidth <- self$options$ciWidth / 100
         
         for (mat in mats) {
           
@@ -265,8 +277,6 @@ contabClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             rowTotal <- sum(values)
             
             pcRow <- values / rowTotal
-            srValues <- (values-exp[rowNo,])/sqrt(exp[rowNo,])
-            ssValues <- sign(srValues) * 0.5 * srValues^2
             
             values <- as.list(values)
             names(values) <- paste0(1:nCols, '[count]')
@@ -276,13 +286,6 @@ contabClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             expValues <- as.list(expValues)
             names(expValues) <- paste0(1:nCols, '[expected]')
             expValues[['.total[exp]']] <- sum(exp[rowNo,])
-            
-            srValues <- as.list(srValues)
-            names(srValues) <- paste0(1:nCols, '[sred]')
-            #            srValues[['.total[sr]']] <- sum(exp[rowNo,])
-            
-            ssValues <- as.list(ssValues)
-            names(ssValues) <- paste0(1:nCols, '[ssv]')
             
             pcRow <- as.list(pcRow)
             names(pcRow) <- paste0(1:nCols, '[pcRow]')
@@ -296,7 +299,7 @@ contabClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             names(pcTot) <- paste0(1:nCols, '[pcTot]')
             pcTot[['.total[pcTot]']] <- sum(mat[rowNo,] / total)
             
-            values <- c(values, expValues, srValues, ssValues, pcRow, pcCol, pcTot)
+            values <- c(values, expValues, pcRow, pcCol, pcTot)
             
             freqs$setRow(rowNo=freqRowNo, values=values)
             freqRowNo <- freqRowNo + 1
@@ -311,13 +314,6 @@ contabClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           expValues <- apply(mat, 2, sum)
           expValues <- as.list(expValues)
           names(expValues) <- paste0(1:nCols, '[expected]')
-          
-          srValues <- apply(mat, 2, sum)
-          srValues <- as.list(srValues)
-          #          names(srValues) <- paste0(1:nCols, '[sred]')
-          
-          ssValues <- apply(mat, 2, sum)
-          ssValues <- as.list(ssValues)
           
           pcRow <- apply(mat, 2, sum) / rowTotal
           pcRow <- as.list(pcRow)
@@ -336,19 +332,39 @@ contabClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           pcCol[['.total[pcCol]']] <- 1
           pcTot[['.total[pcTot]']] <- 1
           
-          values <- c(values, expValues, srValues, ssValues, pcRow, pcCol, pcTot)
+          values <- c(values, expValues, pcRow, pcCol, pcTot)
           
           freqs$setRow(rowNo=freqRowNo, values=values)
           freqRowNo <- freqRowNo + 1
           
-          tabt <- mat
+          ##########################################################
+          tab <- mat
           
-          # calculating the interaction support
-          S2way <- 0
-          suppressWarnings(lt <- try(chisq.test(tabt, correct=FALSE))) # ignore warning message
+          HAc <- FALSE
+          a <- tab[1]
+          b <- tab[2]
+          c <- tab[3]
+          d <- tab[4]
+          if (a == 0 | b == 0 | c == 0 | d == 0) {
+            a=a+0.5;b=b+0.5;c=c+0.5;d=d+0.5;HAc=TRUE       # Haldane-Anscombe correction
+          }                   
+          r1tot <- sum(a,c) #sum of 1st row
+          r2tot <- sum(b,d) #sum of 2nd row
+          c1tot <- sum(a,b)
+          c2tot <- sum(c,d)
+          grandtot <- c1tot+c2tot
+          minmarg <- min(r1tot,r2tot,c1tot,c2tot)
+          maxmarg <- max(r1tot,r2tot,c1tot,c2tot)
           
+          toler=0.0001
+          
+          # chi-square
+          suppressWarnings(lt <- chisq.test(tab,correct=self$options$cc)) # ignore warning message
+          chi.s <- unname(lt$statistic)
+          df <- unname(lt$parameter)
+          # correct if 0 cells
           tabt1=lt$observed
-          for (i in 1:length(tabt)) {
+          for (i in 1:length(tab)) {
             tabt1[i] <- lt$observed[i]
             if (lt$observed[i] < 1) tabt1[i]=1   # turn 0s into 1s for one table used for log
           }
@@ -361,13 +377,9 @@ contabClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             } 
           }
           
-          S2way <- sum(lt$observed * log(tabt1/lt$expected))
-          dfi <- lt$parameter
-          S2way_c <- S2way - Ac(self$options$correction,1,dfi+1)  # corrected for df
-          
           # main marginal totals
-          row_sum <- rowSums(tabt)
-          col_sum <- colSums(tabt)
+          row_sum <- rowSums(tab)
+          col_sum <- colSums(tab)
           
           # do not allow 0 marginal totals
           for (i in 1:length(row_sum)) {
@@ -377,92 +389,154 @@ contabClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             if (col_sum[i] < 1) jmvcore::reject(.("Margin '{var}' has 0 total"), code='', var=colVarName)
           }
           
-          # Correction
-          Ac <- function(c,k1,k2) { 
-            if(c=="nc") { 0
-            } else if(c=="ob") { 0.5*(k2-k1) 
-            } else { 1*(k2-k1)
-            } 
+          rr <- (a*(b+d))/(b*(a+c)) # RR from the contingency table
+          
+          f <- function(x,a,b,c,d,c1tot,r1tot,r2tot,goal) {
+            (-sum(a*log(a/x), b*log(b/(c1tot-x)), c*log(c/(r1tot-x)),
+                  d*log(d/(r2tot-c1tot+x)))-goal)^2
           }
           
-          grandtot <- sum(tabt)
-          dfr <- length(row_sum)-1; dfc <- length(col_sum)-1; dft <- nRows*nCols-1
-          RowMain <- sum(row_sum*log(row_sum))-grandtot*log(grandtot) + grandtot*log(length(row_sum))
-          RowMain_c <- RowMain - Ac(self$options$correction,1,dfr+1) # corrected for row df
+          # likelihood-based % confidence interval
           
-          ColMain <- sum(col_sum*log(col_sum))-grandtot*log(grandtot) + grandtot*log(length(col_sum))
-          ColMain_c <- ColMain - Ac(self$options$correction,1,dfc+1) # corrected for column df
+          arry <- numeric(maxmarg)   # finding endpoints for S and OR values
+          for(x in 1:maxmarg) {
+            arry[x] <- x*(r2tot-c1tot+x)/((c1tot-x)*(r1tot-x))
+          }
+          arry[!is.finite(arry)] <- 0
+          ind <- which(arry > 0)
+          aa <- split(ind, cumsum(c(0, diff(ind) > 1)))
+          dvs <- min(aa$'0')-1
+          dve <- max(aa$'0')+1
           
-          exp_row <- grandtot/nRows # expected values
-          exp_col <- grandtot/nCols
-          exp_cell <- grandtot/(nRows*nCols)
+          goal = -qchisq(self$options$ciWidth/100,1)/2
+          suppressWarnings(xmin1 <- optimize(f, c(0, a), tol = toler, a, b, c, d, c1tot, r1tot,
+                                             r2tot, goal))
+          suppressWarnings(xmin2 <- optimize(f, c(a, dve), tol = toler, a, b, c, d, c1tot, r1tot,
+                                             r2tot, goal))
+          beg <- xmin1$minimum*r2tot/((c1tot-xmin1$minimum)*r1tot)
+          end <- xmin2$minimum*r2tot/((c1tot-xmin2$minimum)*r1tot)
           
-          # Total S
-          Tot_S <- sum(lt$observed*log(tabt1))-sum(lt$observed)*log(sum(lt$observed)/(nRows*nCols))
+          # likelihood interval
+          goalL <- -self$options$lint
+          suppressWarnings(xmin1L <- optimize(f, c(0, a), tol = toler, a, b, c, d, c1tot, r1tot, r2tot, goalL))
+          suppressWarnings(xmin2L <- optimize(f, c(a, dve), tol = toler, a, b, c, d, c1tot, r1tot, r2tot, goalL))
+          begL <- xmin1L$minimum*r2tot/((c1tot-xmin1L$minimum)*r1tot)
+          endL <- xmin2L$minimum*r2tot/((c1tot-xmin2L$minimum)*r1tot)
           
-          # same as components added together (without correction for df)
-          Tot_S_c <- Tot_S - Ac(self$options$correction,1,dft+1) # corrected for column df
+          lintlev <- toString(self$options$lint); conflev <- paste0(self$options$ciWidth,"%")
           
-          toogood <- dfi/2*(log(dfi/lt$statistic)) - (dfi - lt$statistic)/2
-          suppressWarnings(ltr <- chisq.test(row_sum, correct=FALSE)) # ignore warning message
-          toogoodr <- dfr/2*(log(dfr/ltr$statistic)) - (dfr - ltr$statistic)/2
-          suppressWarnings(ltc <- chisq.test(col_sum, correct=FALSE)) # ignore warning message
-          toogoodc <- dfc/2*(log(dfc/ltc$statistic)) - (dfc - ltc$statistic)/2
+          # x axis limits
+          goalx <- self$options$supplot   # with e^-10 we get x values for when curve is down to 0.00004539
+          suppressWarnings(xmin1x <- optimize(f, c(0, a), tol = toler, a, b, c, d, c1tot, r1tot, r2tot, goalx))
+          suppressWarnings(xmin2x <- optimize(f, c(a, dve), tol = toler, a, b, c, d, c1tot, r1tot, r2tot, goalx))
+          xmin <- xmin1x$minimum*r2tot/((c1tot-xmin1x$minimum)*r1tot)
+          xmax <- xmin2x$minimum*r2tot/((c1tot-xmin2x$minimum)*r1tot)
           
-          # evidence for trend
-          #        trX <- NULL
-          #        tr <- NULL
-          #        trX$p.value <- NULL
-          #        if (length(col_sum)>=3) {
-          #          table.pos <- tabt[1:length(col_sum)]
-          #          trX <- prop.trend.test(tabt[1,], col_sum)
-          #          tr <- unname(trX$statistic)/2      # S for trend
-          #        }
+          # to determine height of self$options$alt and nul on likelihood function
+          goal <- self$options$alt
           
-          gt_p <- 1-pchisq(2*Tot_S,dft)
-          gr_p <- 1-pchisq(2*RowMain,dfr)
-          gc_p <- 1-pchisq(2*ColMain,dfc)
-          gi_p <- 1-pchisq(2*S2way,dfi)
+          h <- function(x,c1tot,r1tot,r2tot,goal) {
+            (x*(r2tot)/((c1tot-x)*(r1tot))-goal)^2
+          }
+          suppressWarnings(exa2 <- optimize(h, c(dvs, dve), tol = toler, c1tot, r1tot, r2tot, goal))
+          xa <- unname(unlist(exa2[1]))
+          xah <- exp(-sum(a*log(a/xa), b*log(b/(c1tot-xa)), c*log(c/(r1tot-xa)), d*log(d/(r2tot-c1tot+xa))))
           
-          int_text <- paste(rowVarName," \u2A2F ", colVarName)
+          goal <- self$options$nul
+          suppressWarnings(exa2 <- optimize(h, c(dvs, dve), tol = toler, c1tot, r1tot, r2tot, goal))
+          xa <- unname(unlist(exa2[1]))
+          nullh <- exp(-sum(a*log(a/xa), b*log(b/(c1tot-xa)), c*log(c/(r1tot-xa)), d*log(d/(r2tot-c1tot+xa))))
+          
+          S2way <- log(nullh) # check that this should be negative but same abs value as S for observed OR
+          if(rr == 1) S2way <- 0
+          
+          # variance analysis
+          toogood <- df/2*(log(df/chi.s)) - (df - chi.s)/2
+          
+          # marginal main effects analysis
+          # main marginal totals
+          row_sum <- rowSums(tab)
+          col_sum <- colSums(tab)
+          grandtot <- sum(tab)
+          Srow <- sum(row_sum*log(row_sum))-grandtot*log(grandtot) + grandtot*log(length(row_sum))
+          if(r1tot == r2tot) Srow <- 0
+          Scol <- sum(col_sum*log(col_sum))-grandtot*log(grandtot) + grandtot*log(length(col_sum))
+          if(c1tot == c2tot) Scol <- 0
+          # interaction
+          Sint <- sum(lt$observed * log(tabt1/lt$expected)) 
+          # Grand total
+          Sgt <- sum(lt$observed*log(tabt1))-sum(lt$observed)*log(sum(lt$observed)/4)
+          
+          # Sums
+          exp_row <- (r1tot+r2tot)/2
+          exp_col <- (c1tot+c2tot)/2
+          exp_int <- grandtot/4
+          
+          # support for alt. H
+          Salt <- log(xah)
+          SexOR_null <- Salt - S2way
+          SexOR_obs <- SexOR_null - S2way
+          
+          gn <- 2*abs(S2way) # likelihood ratio statistic
+          gn_p <- 1-pchisq(gn,1)
+          ga <- 2*abs(Salt)
+          ga_p <- 1-pchisq(ga,1)
+          gan <- 2*abs(SexOR_null)
+          gan_p <- 1-pchisq(gan,1)
+          gt_p <- 1-pchisq(2*Sgt,3)
+          gr_p <- 1-pchisq(2*Srow,1)
+          gc_p <- 1-pchisq(2*Scol,1)
+          gi_p <- 1-pchisq(2*Sint,1)
+          
+          table <- self$results$ctt
+          table$setRow(rowNo=1, values=list(Value=self$options$nul, ordiff= self$options$nul-rr, 
+                                            S=S2way + Ac(self$options$correction,1,2), Param=paste0(c(1,2), collapse = ', '), 
+                                            G=gn, df=df, p=gn_p))
+          table$setRow(rowNo=2, values=list(Value=self$options$alt, ordiff= self$options$alt-rr, 
+                                            S=Salt + Ac(self$options$correction,2,2), Param=paste0(c(2,2), collapse = ', '), 
+                                            G=ga, df=df, p=ga_p))
+          table$setRow(rowNo=3, values=list(Value="", ordiff= self$options$alt-self$options$nul, 
+                                            S=SexOR_null + Ac(self$options$correction,2,1), Param=paste0(c(2,1), collapse = ', '), 
+                                            G=gan, df=df, p=gan_p))
           
           table <- self$results$cttma
-          table$setRow(rowNo=1, values=list(Value=exp_row, S=RowMain_c, 
-                                            Param=paste0(c(1,dfr+1), collapse = ', '), G=2*RowMain, df=dfr, p=gr_p))
-          table$setRow(rowNo=2, values=list(Value=exp_col, S=ColMain_c, 
-                                            Param=paste0(c(1,dfc+1), collapse = ', '), G=2*ColMain, df=dfc, p=gc_p))
-          table$setRow(rowNo=3, values=list(Value="", S=S2way_c, 
-                                            Param=paste0(c(1,dfi+1), collapse = ', '), G=2*S2way, df=dfi, p=gi_p))
-          table$setRow(rowNo=4, values=list(Value=exp_cell, S=Tot_S_c, 
-                                            Param=paste0(c(1,dft+1), collapse = ', '), G=2*Tot_S, df=dft, p=gt_p))
+          table$setRow(rowNo=1, values=list(Value=exp_row, S=Srow + Ac(self$options$correction,2,1), 
+                                            G=2*Srow, Param=paste0(c(2,1), collapse = ', '),df=as.integer(df), p=gr_p))
+          table$setRow(rowNo=2, values=list(Value=exp_col, S=Scol + Ac(self$options$correction,2,1),
+                                            G=2*Scol, Param=paste0(c(2,1), collapse = ', '), df=as.integer(df), p=gc_p))
+          table$setRow(rowNo=3, values=list(Value="", S=Sint + Ac(self$options$correction,2,1), 
+                                            G=2*Sint, Param=paste0(c(2,1), collapse = ', '), df=as.integer(df), p=gi_p))
+          table$setRow(rowNo=4, values=list(Value=exp_int, S=Sgt + Ac(self$options$correction,4,1), 
+                                            G=2*Sgt, Param=paste0(c(4,1), collapse = ', '), df=as.integer(3), p=gt_p))
+          table <- self$results$ctt2
+          table$setRow(rowNo=1, values=list(Level=lintlev, RR = rr, Lower=begL, Upper=endL))
+          table$setRow(rowNo=2, values=list(Level=conflev, RR = rr, Lower=beg, Upper=end))
+          if (HAc)
+            table$addFootnote(rowNo=1, col="RR", "Haldane-Anscombe correction applied")      
           
           table <- self$results$ctt3
           table$setNote('Note', "Unlike the \u03C7\u00B2 statistic, a large S value indicates 
           that the proportions are either more different or too similar compared with those expected") 
-          table$setRow(rowNo=1, values=list(var= rowVarName, Sv=toogoodr, X2=ltr$statistic, dfv=dfr, 
-                                            pv=ltr$p.value, pv1=1-ltr$p.value))
-          table$setRow(rowNo=2, values=list(var= colVarName, Sv=toogoodc, X2=ltc$statistic, dfv=dfc, 
-                                            pv=ltc$p.value, pv1=1-ltc$p.value))
-          table$setRow(rowNo=3, values=list(var= int_text, Sv=toogood, X2=lt$statistic, dfv=dfi, 
+          if (isTRUE(self$options$cc))
+            table$setNote('Note', "Continuity correction applied. Unlike the \u03C7\u00B2 statistic, a large S value indicates 
+          that the proportions are either more different or too similar compared with those expected")
+          table$setRow(rowNo=1, values=list(var= "For RR = 1", Sv=toogood, X2=chi.s, dfv=df, 
                                             pv=lt$p.value, pv1=1-lt$p.value))
           
           # stats for summary        
-          stats <- list(S1 = RowMain_c,
-                        S2 = ColMain_c,
-                        S3 = S2way_c,
-                        S4 = Tot_S_c,
-                        tgr = toogoodr,
-                        tgc = toogoodc,
+          stats <- list(S1 = S2way+ Ac(self$options$correction,1,2),
+                        S2 = Salt + Ac(self$options$correction,2,2),
+                        S3 = SexOR_null + Ac(self$options$correction,2,1),
+                        S4 = Srow + Ac(self$options$correction,2,1),
+                        S5 = Scol + Ac(self$options$correction,2,1),
+                        S7 = Sgt + Ac(self$options$correction,4,1),
                         tg = toogood,
-                        chi_r = ltr$statistic,
-                        chi_c = ltc$statistic,
-                        chi = lt$statistic)
+                        chi = chi.s)
           
           # Populate Explanation & table
           private$.populateSupportText(stats)
           private$.populateMoreSupportText()
           #
-          
           
           if(isTRUE(self$options$varA)) { 
             
@@ -470,6 +544,22 @@ contabClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             table$setVisible(TRUE)
             
           }
+          
+          g <- data.frame(rr=rr, a=a, b=b, c=c, d=d, dvs=dvs,
+                          r1tot=r1tot, r2tot=r2tot, c1tot=c1tot, c2tot=c2tot, 
+                          nullh=nullh, xah=xah, goalL=goalL, begL=begL,endL=endL, xmin=xmin, xmax=xmax)
+          imagec <- self$results$plotc
+          imagec$setState(g)
+          
+          if(isTRUE(self$options$pll)) {
+            
+            plotc <- self$results$plotc
+            plotc$setVisible(TRUE)
+            
+          }
+          
+          ########################################################
+          
         }
       },
       
@@ -558,7 +648,47 @@ contabClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         return(p)
       },      
       
+      .plotc=function(imagec, ...) {
+        
+        g <- imagec$state
+        
+        res <- 100    # resolution, increase for greater resolution
+        minmarg <- min(g$r1tot,g$r2tot,g$c1tot,g$c2tot)
+        arrlen <- res*minmarg-1
+        xs <- 0; ys <- 0
+        for (i in 1:arrlen) {     # arrays to plot likelihood vs OR
+          dv <- i/res+g$dvs
+          ys[i] <- exp(-sum(g$a*log(g$a/dv), g$b*log(g$b/(g$c1tot-dv)),
+                            g$c*log(g$c/(g$r1tot-dv)), g$d*log(g$d/(g$r2tot-g$c1tot+dv))))
+          xs[i] <- dv*g$r2tot/((g$c1tot-dv)*(g$r1tot))
+          
+        }
+        
+        # to determine x axis space for plot
+        seor <- sqrt(1/g$a+1/g$b+1/g$c+1/g$d)
+        lolim <- exp(log(g$rr)-3*seor); hilim <- exp(log(g$rr)+3*seor)
+        if (lolim < 0) {lolim <- 0}
+        
+        # do the plot with lines
+        if(self$options$plotype=="lplot") {
+          plot <- plot(xs, ys, xlim=c(lolim,hilim),type="l", lwd = 1, xlab = "Risk Ratio", ylab = "Likelihood")        
+          lines(c(g$rr,g$rr),c(0,1),lty=2) # add MLE as dashed line
+          segments(g$begL, exp(g$goalL), g$endL, exp(g$goalL), lwd = 1, col = "red")
+          lines(c(self$options$nul,self$options$nul),c(0,g$nullh), lty=1, col = "black") # add H prob as black line
+          lines(c(self$options$alt,self$options$alt), c(0,g$xah), lty=1, col = "blue") # add H prob as blue line
+        } else {
+          plot <- plot(xs, log(ys), xlim=c(g$xmin,g$xmax),type="l", lwd = 1, xlab = "Risk Ratio", 
+                       ylim=c(self$options$supplot,0), ylab = "Log Likelihood")
+          lines(c(g$rr,g$rr),c(self$options$supplot,0),lty=2) # add MLE as dashed line
+          segments(g$begL, g$goalL, g$endL, g$goalL, lwd = 1, col = "red")
+          lines(c(self$options$nul,self$options$nul),c(self$options$supplot,log(g$nullh)), lty=1, col = "black") # add H prob as black line
+          lines(c(self$options$alt,self$options$alt), c(self$options$supplot,log(g$xah)), lty=1, col = "blue") # add H prob as blue line
+        }
+        TRUE
+      },
+      #### Helper functions ----
       .cleanData = function() {
+        
         data <- self$data
         
         rowVarName <- self$options$rows
@@ -577,7 +707,6 @@ contabClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         
         data
       },
-      
       .matrices=function(data) {
         
         matrices <- list()
@@ -643,7 +772,7 @@ contabClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         }
         
         matrices
-      },      
+      },
       .grid=function(data, incRows=FALSE) {
         
         rowVarName <- self$options$rows
@@ -712,67 +841,59 @@ contabClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         colVarName <- self$options$cols
         int_text <- paste(rowVarName," \u2A2F ", colVarName)
         
-        Sxl = list(s=st$S1, rowVarName, "the Null model")                       
+        Sxl = list(s=st$S1, "H\u2080", "the observed <i>RR</i>")                       
         stg1 <- private$.strength(Sxl)
-        Sxl = list(s=st$S2, colVarName, "the Null model")                       
+        Sxl = list(s=st$S2, "H\u2090", "the observed <i>RR</i>")                       
         stg2 <- private$.strength(Sxl)
-        Sxl = list(s=st$S3, int_text, "the Null model")  
+        Sxl = list(s=st$S3, "H\u2090", "H\u2080")  
         stg3 <- private$.strength(Sxl)
-        Sxl = list(s=st$S4, "Total components", "the Null model")  
+        Sxl = list(s=st$S4, rowVarName, "the Null model")  
         stg4 <- private$.strength(Sxl)
+        Sxl = list(s=st$S5, colVarName, "the Null model")  
+        stg5 <- private$.strength(Sxl)
+        Sxl = list(s=st$S7, "Total components", "the Null model")  
+        stg7 <- private$.strength(Sxl)
         
-        Sxl = list(s=st$tgr)                       
-        svr <- private$.strength2(Sxl)
-        Sxl = list(s=st$tgc)                       
-        svc <- private$.strength2(Sxl)
-        Sxl = list(s=st$tg)                   
+        Sxl = list(s=st$tg)                       
         sv <- private$.strength2(Sxl)
         
-        stg5 <- paste0("For ", rowVarName, svr, ", that the 
-                    observed frequencies were more different than the <i>H</i>\u2080 frequencies")
-        if (2*st$tgr > st$chi_r) {
-          stg5 <- paste0("For ", rowVarName, svr, ", that the 
-                    observed frequencies were too close to the <i>H</i>\u2080 frequencies")
-        }
-        
-        stg6 <- paste0("For ", colVarName, svc, ", that the 
-                    observed frequencies were more different than the <i>H</i>\u2080 frequencies")
-        if (2*st$tgc > st$chi_c) {
-          stg6 <- paste0("For ", colVarName, svc, ", that the 
-                    observed frequencies were too close to the <i>H</i>\u2080 frequencies")
-        }
-        stg7 <- paste0("For ", int_text, sv, ", that the 
-                    observed frequencies were more different than the <i>H</i>\u2080 frequencies")
+        stg8 <- paste0("For the observed <i>RR</i>", sv, ", that it was more different from the H\u2080 = 1 
+                         than expected")
         if (2*st$tg > st$chi) {
-          stg7 <- paste0("For ", int_text, sv, ", that the 
-                    observed frequencies were too close to the <i>H</i>\u2080 frequencies")
+          stg8 <- paste0("For the observed <i>RR</i>", sv, ", that it was closer to the H\u2080 = 1 than expected")
         }
-        
+        if(self$options$correction=="ob") { stg0 <- "<i>Using Occam's Bonus correction, the analysis shows that:</i>"
+        } else if(self$options$correction=="aic") { stg0 <- "<i>Using AIC correction, the analysis shows that:</i>"
+        } else {
+          stg0 <- "<i>Using no correction, the analysis shows that:</i>"
+        }
         if(self$options$correction=="ob") { stg0 <- "<i>Using Occam's Bonus correction, the analysis shows that:</i>"
         } else if(self$options$correction=="aic") { stg0 <- "<i>Using AIC correction, the analysis shows that:</i>"
         } else {
           stg0 <- "<i>Using no correction, the analysis shows that:</i>"
         }
         str = paste0("<br> <h2>Summarizing the evidential analysis</h2>", "<br>",
-                     stg0, "<br>", stg1, "<br>", stg2, "<br>", stg3, "<br>", stg4, "<br>Usually only the 
-                    interaction term will be of interest. <p>
-                    <i>The Variance analysis (not necessarily required) shows that:</i><br>", 
-                     stg5,"<br>", stg6, "<br>", stg7,
-                     "<p>Give the observed frequencies, and the available <i>p</i> values 
-                   for the <i>G</i> test (likelihood ratio test) may also be supplied to allow 
-                   comparison with a conventional analysis. The signed S values for individual cells can be given, which 
-                   are half of the squared standardized residuals.
-                   
-                   </p> <br>
-                   <br>There are no thresholds for <i>S</i> values, just guidelines on 
-                   the strength of evidence for one hypothesis versus the other. They range from 
-                   \u2212\u221E to +\u221E, with zero representing no evidence either way. 
-                   Positive values are evidence for, while negative values are evidence against. 
-                   The table below shows the interpretation of <i>S</i> values generally accepted 
-                   in science. In contrast, UK law courts regard an <i>S</i> of 4 as 
-                   moderate evidence and 8.6 as strong evidence! 
-                   <i>S</i> values represent the weight of evidence, and are additive 
-                   across independent data.")
+                     stg0, "<br>", stg1, "<br>", stg2, "<br>", stg3, 
+                     "<p>
+                       <i>The additional analysis of marginal main effects (not necessarily required) shows that:
+                       </i> <br>", stg4, "<br>", stg5,"<br>", stg7, 
+                     "<p>
+                       <i>The variance analysis shows that:</i><br>", 
+                     stg8,
+                     "<p>Give the <i>RR</i> and the observed frequencies. The support interval for the <i>RR</i> 
+                       can be given, along with the likelihood-based % confidence interval (see Pritikin et al, 2017).
+                       <br>The available <i>p</i> values for the <i>G</i> test (likelihood ratio test) may also be supplied 
+                       to allow comparison with a conventional analysis.
+                       </p><br>
+                       <br>There are no thresholds for <i>S</i> values, just guidelines on 
+                       the strength of evidence for one hypothesis versus the other. They range from 
+                       \u2212\u221E to +\u221E, with zero representing no evidence either way. 
+                       Positive values are evidence for, while negative values are evidence against. 
+                       The table below shows the interpretation of <i>S</i> values generally accepted 
+                       in science. In contrast, UK law courts regard an <i>S</i> of 4 as 
+                       moderate evidence and 8.6 as strong evidence! 
+                       <i>S</i> values represent the weight of evidence, and are additive 
+                       across independent data.")
         
         html$setContent(str)
       },
@@ -837,13 +958,17 @@ contabClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           <br> <i>Advantages of the Evidential Approach</i> 
           <br> One advantage of the evidential approach is that <i>S</i> quantifies the strength of evidence 
           for or against the null hypothesis. "
-        str = paste0(str1, "As data accumulates the strength of evidence for one hypothesis over another will tend 
+        str2 <- "Another advantage is that we can select hypothesis values that reflect our research interests. "
+        str3 <- "For example, we could choose a meaningful <i>H</i>\u2090 <i>RR</i> to compare with a specified <i>H</i>\u2080 <i>RR</i> 
+          (default = 1). This is shown by the last line of the main Support table for <i>RR</i> analyses. "
+        
+        str = paste0(str1, str2, str3, "As data accumulates the strength of evidence for one hypothesis over another will tend 
                        to increase.")
+        
         
         html$setContent(str)
         
       }
-      
       
     )
 )

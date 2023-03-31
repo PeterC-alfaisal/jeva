@@ -8,11 +8,12 @@ laov1wOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         initialize = function(
             deps = NULL,
             group = NULL,
+            lint = 2,
             ct1 = FALSE,
             Ct1Values = "1,-1,...",
             ct2 = FALSE,
             Ct2Values = "1,-1,...",
-            lint = 2,
+            correction = "ob",
             desc = FALSE,
             descPlot = FALSE,
             text = TRUE,
@@ -44,6 +45,12 @@ laov1wOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "ordinal"),
                 permitted=list(
                     "factor"))
+            private$..lint <- jmvcore::OptionNumber$new(
+                "lint",
+                lint,
+                min=1,
+                max=100,
+                default=2)
             private$..ct1 <- jmvcore::OptionBool$new(
                 "ct1",
                 ct1,
@@ -60,12 +67,15 @@ laov1wOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "Ct2Values",
                 Ct2Values,
                 default="1,-1,...")
-            private$..lint <- jmvcore::OptionNumber$new(
-                "lint",
-                lint,
-                min=1,
-                max=100,
-                default=2)
+            private$..correction <- jmvcore::OptionList$new(
+                "correction",
+                correction,
+                options=list(
+                    "nc",
+                    "ob",
+                    "aic",
+                    "aicsm"),
+                default="ob")
             private$..desc <- jmvcore::OptionBool$new(
                 "desc",
                 desc,
@@ -93,11 +103,12 @@ laov1wOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
             self$.addOption(private$..deps)
             self$.addOption(private$..group)
+            self$.addOption(private$..lint)
             self$.addOption(private$..ct1)
             self$.addOption(private$..Ct1Values)
             self$.addOption(private$..ct2)
             self$.addOption(private$..Ct2Values)
-            self$.addOption(private$..lint)
+            self$.addOption(private$..correction)
             self$.addOption(private$..desc)
             self$.addOption(private$..descPlot)
             self$.addOption(private$..text)
@@ -108,11 +119,12 @@ laov1wOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     active = list(
         deps = function() private$..deps$value,
         group = function() private$..group$value,
+        lint = function() private$..lint$value,
         ct1 = function() private$..ct1$value,
         Ct1Values = function() private$..Ct1Values$value,
         ct2 = function() private$..ct2$value,
         Ct2Values = function() private$..Ct2Values$value,
-        lint = function() private$..lint$value,
+        correction = function() private$..correction$value,
         desc = function() private$..desc$value,
         descPlot = function() private$..descPlot$value,
         text = function() private$..text$value,
@@ -122,11 +134,12 @@ laov1wOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     private = list(
         ..deps = NA,
         ..group = NA,
+        ..lint = NA,
         ..ct1 = NA,
         ..Ct1Values = NA,
         ..ct2 = NA,
         ..Ct2Values = NA,
-        ..lint = NA,
+        ..correction = NA,
         ..desc = NA,
         ..descPlot = NA,
         ..text = NA,
@@ -170,7 +183,8 @@ laov1wResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "Ct1Values",
                     "Ct2Values",
                     "ct1",
-                    "ct2"),
+                    "ct2",
+                    "correction"),
                 columns=list(
                     list(
                         `name`="var", 
@@ -178,29 +192,27 @@ laov1wResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="text"),
                     list(
                         `name`="S", 
-                        `title`="<i>S</i>", 
-                        `type`="number"),
-                    list(
-                        `name`="Sc", 
-                        `title`="<i>S</i>c", 
+                        `title`="S", 
                         `type`="number"),
                     list(
                         `name`="Param", 
-                        `type`="text"),
+                        `title`="Param", 
+                        `type`="number"),
                     list(
                         `name`="F", 
-                        `title`="<i>F</i>", 
+                        `title`="F", 
                         `type`="number"),
                     list(
                         `name`="df", 
-                        `title`="<i>df</i>", 
-                        `type`="text"),
+                        `title`="df", 
+                        `type`="number"),
                     list(
                         `name`="p", 
-                        `title`="<i>p</i>", 
+                        `title`="p", 
                         `type`="number", 
                         `format`="zto,pvalue", 
                         `refs`=list(
+                            "Edwards_OR",
                             "GloverDixon")))))
             self$add(jmvcore::Table$new(
                 options=options,
@@ -248,7 +260,8 @@ laov1wResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "data",
                     "deps",
                     "Ct1Values",
-                    "Ct2Values")))
+                    "Ct2Values",
+                    "correction")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="SupportTab",
@@ -258,11 +271,11 @@ laov1wResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 columns=list(
                     list(
                         `name`="SS", 
-                        `title`="<i>S</i>", 
+                        `title`="S", 
                         `type`="number"),
                     list(
                         `name`="LR", 
-                        `title`="<i>LR</i>", 
+                        `title`="LR", 
                         `type`="number"),
                     list(
                         `name`="Interp", 
@@ -308,19 +321,19 @@ laov1wResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                                     `type`="text"),
                                 list(
                                     `name`="S", 
-                                    `title`="<i>S</i>", 
+                                    `title`="S", 
                                     `type`="number"),
                                 list(
                                     `name`="F", 
-                                    `title`="<i>F</i>", 
+                                    `title`="F", 
                                     `type`="number"),
                                 list(
                                     `name`="df", 
-                                    `title`="<i>df</i>", 
+                                    `title`="df", 
                                     `type`="text"),
                                 list(
                                     `name`="p", 
-                                    `title`="<i>p</i>", 
+                                    `title`="p", 
                                     `type`="number", 
                                     `format`="zto,pvalue"))))
                         self$add(jmvcore::Table$new(
@@ -427,34 +440,36 @@ laov1wBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'
 #' @examples
 #' data('ToothGrowth')
-#' jeva::laov1w(formula = len ~ dose, data = ToothGrowth)
+#' jeva::laov1w(formula = len ~ dose, data = ToothGrowth, text = FALSE)
 #'
 #' #
 #' # ONE-WAY ANOVA
-#'
+#' #
 #' # Support: One-Way ANOVA (Fisher's assuming equal variances)
-#' # ------------------------------------------------------------------------------------------------------------------------
-#' #   Model Comparisons                           S              Sc             Param    F             df       p
-#' # ------------------------------------------------------------------------------------------------------------------------
-#' #   H₀  vs observed means                       -36.4069796    -34.1486064    2, 4      67.415738    2, 57    < .0000001
-#' #   Contrast 1 (Linear) vs observed means        -0.7362044      0.4131462    3, 4     133.415383    1, 57    < .0000001
-#' #   Contrast 2 (Quadratic) vs observed means    -36.1846993    -35.0353486    3, 4       1.416093    1, 57     0.2389805
-#' #   Contrast 1 vs Contrast 2                     35.4484948     35.4484948    3, 3                   1, 1
-#' #   Linear vs Non-linear                         35.4484948     35.4484948    3, 3                   1, 1
-#' # ------------------------------------------------------------------------------------------------------------------------
-#' #   Note. Sc uses Akaike correction for parameters (Param).  Unless specified, Contrast 1 is linear and Contrast 2 is
-#' #   quadratic
+#' # ---------------------------------------------------------------------------------------------------------
+#' #   Model Comparisons                           S              Param    F             df       p
+#' # ---------------------------------------------------------------------------------------------------------
+#' #   H₀  vs observed means                       -35.4069796     2, 4     67.415738    2, 57    < .0000001
+#' #   Contrast 1 (Linear) vs observed means        -0.2362044     3, 4    133.415383    1, 57    < .0000001
+#' #   Contrast 2 (Quadratic) vs observed means    -35.6846993     3, 4      1.416093    1, 57     0.2389805
+#' #   Contrast 1 vs Contrast 2                     35.4484948     3, 3                   1, 1
+#' #   Linear vs Non-linear                         35.4484948     3, 3                   1, 1
+#' # ---------------------------------------------------------------------------------------------------------
+#' #   Note. S uses Occam's Bonus correction for parameters (Param).  Unless specified, Contrast 1 is
+#' #   linear and Contrast 2 is quadratic
 #' #
 #'
 #' @param data the data as a data frame
 #' @param deps a string naming the dependent variables in \code{data}
 #' @param group the grouping or independent variable in \code{data}
+#' @param lint likelihood interval given as support values, e.g. 2 or 3,
+#'   default = 2
 #' @param ct1 \code{TRUE} or \code{FALSE} (default), for contrast 1
 #' @param Ct1Values a comma-separated list specifying the contrast
 #' @param ct2 \code{TRUE} or \code{FALSE} (default), for contrast 2
 #' @param Ct2Values a comma-separated list specifying the contrast
-#' @param lint likelihood interval given as support values, e.g. 2 or 3,
-#'   default = 2
+#' @param correction correction for parameters, none, Occam's bonus (default)
+#'   or AIC
 #' @param desc \code{TRUE} or \code{FALSE} (default), provide descriptive
 #'   statistics
 #' @param descPlot \code{TRUE} or \code{FALSE} (default), provide descriptive
@@ -492,11 +507,12 @@ laov1w <- function(
     data,
     deps,
     group,
+    lint = 2,
     ct1 = FALSE,
     Ct1Values = "1,-1,...",
     ct2 = FALSE,
     Ct2Values = "1,-1,...",
-    lint = 2,
+    correction = "ob",
     desc = FALSE,
     descPlot = FALSE,
     text = TRUE,
@@ -535,11 +551,12 @@ laov1w <- function(
     options <- laov1wOptions$new(
         deps = deps,
         group = group,
+        lint = lint,
         ct1 = ct1,
         Ct1Values = Ct1Values,
         ct2 = ct2,
         Ct2Values = Ct2Values,
-        lint = lint,
+        correction = correction,
         desc = desc,
         descPlot = descPlot,
         text = text,

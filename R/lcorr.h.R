@@ -11,7 +11,10 @@ lcorrOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             alt = 0,
             lint = 2,
             ciWidth = 95,
+            correction = "ob",
             pll = FALSE,
+            plotype = "lplot",
+            supplot = -10,
             plt = FALSE,
             line = "none",
             se = FALSE,
@@ -59,10 +62,31 @@ lcorrOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 min=50,
                 max=99.99,
                 default=95)
+            private$..correction <- jmvcore::OptionList$new(
+                "correction",
+                correction,
+                options=list(
+                    "nc",
+                    "ob",
+                    "aic"),
+                default="ob")
             private$..pll <- jmvcore::OptionBool$new(
                 "pll",
                 pll,
                 default=FALSE)
+            private$..plotype <- jmvcore::OptionList$new(
+                "plotype",
+                plotype,
+                options=list(
+                    "lplot",
+                    "logplot"),
+                default="lplot")
+            private$..supplot <- jmvcore::OptionNumber$new(
+                "supplot",
+                supplot,
+                min=-100,
+                max=-1,
+                default=-10)
             private$..plt <- jmvcore::OptionBool$new(
                 "plt",
                 plt,
@@ -89,7 +113,10 @@ lcorrOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..alt)
             self$.addOption(private$..lint)
             self$.addOption(private$..ciWidth)
+            self$.addOption(private$..correction)
             self$.addOption(private$..pll)
+            self$.addOption(private$..plotype)
+            self$.addOption(private$..supplot)
             self$.addOption(private$..plt)
             self$.addOption(private$..line)
             self$.addOption(private$..se)
@@ -101,7 +128,10 @@ lcorrOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         alt = function() private$..alt$value,
         lint = function() private$..lint$value,
         ciWidth = function() private$..ciWidth$value,
+        correction = function() private$..correction$value,
         pll = function() private$..pll$value,
+        plotype = function() private$..plotype$value,
+        supplot = function() private$..supplot$value,
         plt = function() private$..plt$value,
         line = function() private$..line$value,
         se = function() private$..se$value,
@@ -112,7 +142,10 @@ lcorrOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..alt = NA,
         ..lint = NA,
         ..ciWidth = NA,
+        ..correction = NA,
         ..pll = NA,
+        ..plotype = NA,
+        ..supplot = NA,
         ..plt = NA,
         ..line = NA,
         ..se = NA,
@@ -151,9 +184,12 @@ lcorrResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "depa",
                     "depb",
                     "alt",
-                    "data"),
+                    "data",
+                    "correction"),
                 refs=list(
-                    "Book"),
+                    "Book",
+                    "Glover_Tut",
+                    "Edwards_OR"),
                 columns=list(
                     list(
                         `name`="var", 
@@ -168,28 +204,31 @@ lcorrResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="number"),
                     list(
                         `name`="S", 
-                        `title`="<i>S</i>", 
+                        `title`="S", 
+                        `type`="number"),
+                    list(
+                        `name`="Param", 
                         `type`="number"),
                     list(
                         `name`="t", 
-                        `title`="<i>t</i>", 
+                        `title`="t", 
                         `type`="number"),
                     list(
                         `name`="df", 
-                        `title`="<i>df</i>", 
+                        `title`="df", 
                         `type`="number"),
                     list(
                         `name`="p", 
-                        `title`="<i>p</i>", 
+                        `title`="p", 
                         `type`="number", 
                         `format`="zto,pvalue"),
                     list(
                         `name`="z", 
-                        `title`="<i>z</i>", 
+                        `title`="z", 
                         `type`="number"),
                     list(
                         `name`="pz", 
-                        `title`="p(<i>z</i>)", 
+                        `title`="p(z)", 
                         `type`="number", 
                         `format`="zto,pvalue"))))
             self$add(jmvcore::Table$new(
@@ -216,7 +255,7 @@ lcorrResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="text"),
                     list(
                         `name`="r", 
-                        `title`="<i>r</i>", 
+                        `title`="r", 
                         `type`="number"),
                     list(
                         `name`="Lower", 
@@ -234,7 +273,8 @@ lcorrResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "depb",
                     "lint",
                     "alt",
-                    "data")))
+                    "data",
+                    "correction")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="SupportTab",
@@ -244,11 +284,11 @@ lcorrResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 columns=list(
                     list(
                         `name`="SS", 
-                        `title`="<i>S</i>", 
+                        `title`="S", 
                         `type`="number"),
                     list(
                         `name`="LR", 
-                        `title`="<i>LR</i>", 
+                        `title`="LR", 
                         `type`="number"),
                     list(
                         `name`="Interp", 
@@ -264,7 +304,7 @@ lcorrResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plotc",
-                title="`Likelihood function with S-{lint} support interval`",
+                title="`Likelihood curve with S-{lint} support interval`",
                 width=500,
                 height=400,
                 clearWith=list(
@@ -272,7 +312,11 @@ lcorrResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "depb",
                     "alt",
                     "data",
-                    "lint"),
+                    "lint",
+                    "logplot",
+                    "lplot",
+                    "plotype",
+                    "supplot"),
                 renderFun=".plotc",
                 visible="(pll)"))
             self$add(jmvcore::Image$new(
@@ -320,21 +364,19 @@ lcorrBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'
 #' @examples
 #' data('mtcars')
-#' jeva::lcorr(data = mtcars, depa = mpg, depb = cyl)
+#' jeva::lcorr(data = mtcars, depa = mpg, depb = cyl, text = FALSE)
 #'
 #' #
 #' # CORRELATION
 #' #
 #' # Support
-#' # --------------------------------------------------------------------------------------------------------------------------------------
-#' #                                     Value       Difference    S             t            df    p             z            p(z)
-#' # --------------------------------------------------------------------------------------------------------------------------------------
-#' #   H₀ vs observed correlation        0.000000     0.8521620    -23.166436    -8.919699    30    < .0000001    -6.806825    < .0000001
-#' #   Ha versus observed correlation    0.000000     0.8521620    -23.166436                                     -6.806825    < .0000001
-#' #   Ha vs H₀                                       0.0000000      0.000000
-#' # --------------------------------------------------------------------------------------------------------------------------------------
-#' #   Note. The last column p(z) gives the p value for the preceding z value
-#' #
+#' #                                     Value       Difference    S              Param    t            df    p             z            p(z)
+#' # ------------------------------------------------------------------------------------------------------------------------------------------------
+#' #   H₀ vs observed correlation        0.000000     0.8521620    -22.6664364     2, 3    -8.919699    30    < .0000001    -6.806825    < .0000001
+#' #   Ha versus observed correlation    0.000000     0.8521620    -23.1664364     3, 3                                     -6.806825    < .0000001
+#' #   Ha vs H₀                                       0.0000000     -0.5000000     3, 2
+#' # ------------------------------------------------------------------------------------------------------------------------------------------------
+#' #   Note. S uses Occam's Bonus correction for parameters (Param). The last column p(z) gives the p value for the preceding z value
 #' #
 #' # Intervals
 #' # -------------------------------------------------------------------------
@@ -357,8 +399,14 @@ lcorrBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   default = 2
 #' @param ciWidth a number between 50 and 99.9 (default: 95), width of the
 #'   confidence intervals to provide
+#' @param correction correction for parameters, none, Occam's bonus (default)
+#'   or AIC
 #' @param pll plot the likelihood function displaying observed correlation,
 #'   alternative hypothesis and support interval
+#' @param plotype choose type of plot, likelihood function (default), support
+#'   function
+#' @param supplot To set the minimum likelihood display value in plot, in log
+#'   units (default = -10)  affects the x-axis range
 #' @param plt \code{TRUE} or \code{FALSE} (default), do a scatter plot of the
 #'   data
 #' @param line \code{none} (default), \code{linear}, or \code{smooth}, provide
@@ -394,7 +442,10 @@ lcorr <- function(
     alt = 0,
     lint = 2,
     ciWidth = 95,
+    correction = "ob",
     pll = FALSE,
+    plotype = "lplot",
+    supplot = -10,
     plt = FALSE,
     line = "none",
     se = FALSE,
@@ -418,7 +469,10 @@ lcorr <- function(
         alt = alt,
         lint = lint,
         ciWidth = ciWidth,
+        correction = correction,
         pll = pll,
+        plotype = plotype,
+        supplot = supplot,
         plt = plt,
         line = line,
         se = se,

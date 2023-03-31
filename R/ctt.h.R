@@ -10,10 +10,13 @@ cttOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             cols = NULL,
             counts = NULL,
             nul = 1,
-            alt = 0,
+            alt = 1,
             lint = 2,
             ciWidth = 95,
+            correction = "ob",
             pll = FALSE,
+            plotype = "lplot",
+            supplot = -10,
             varA = FALSE,
             cc = FALSE,
             text = TRUE,
@@ -21,7 +24,12 @@ cttOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             exp = FALSE,
             pcRow = FALSE,
             pcCol = FALSE,
-            pcTot = FALSE, ...) {
+            pcTot = FALSE,
+            barplot = FALSE,
+            yaxis = "ycounts",
+            yaxisPc = "total_pc",
+            xaxis = "xrows",
+            bartype = "dodge", ...) {
 
             super$initialize(
                 package="jeva",
@@ -64,7 +72,7 @@ cttOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 alt,
                 min=-100000000000,
                 max=100000000000,
-                default=0)
+                default=1)
             private$..lint <- jmvcore::OptionNumber$new(
                 "lint",
                 lint,
@@ -77,10 +85,31 @@ cttOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 min=50,
                 max=99.9,
                 default=95)
+            private$..correction <- jmvcore::OptionList$new(
+                "correction",
+                correction,
+                options=list(
+                    "nc",
+                    "ob",
+                    "aic"),
+                default="ob")
             private$..pll <- jmvcore::OptionBool$new(
                 "pll",
                 pll,
                 default=FALSE)
+            private$..plotype <- jmvcore::OptionList$new(
+                "plotype",
+                plotype,
+                options=list(
+                    "lplot",
+                    "logplot"),
+                default="lplot")
+            private$..supplot <- jmvcore::OptionNumber$new(
+                "supplot",
+                supplot,
+                min=-100,
+                max=-1,
+                default=-10)
             private$..varA <- jmvcore::OptionBool$new(
                 "varA",
                 varA,
@@ -113,6 +142,39 @@ cttOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "pcTot",
                 pcTot,
                 default=FALSE)
+            private$..barplot <- jmvcore::OptionBool$new(
+                "barplot",
+                barplot,
+                default=FALSE)
+            private$..yaxis <- jmvcore::OptionList$new(
+                "yaxis",
+                yaxis,
+                options=list(
+                    "ycounts",
+                    "ypc"),
+                default="ycounts")
+            private$..yaxisPc <- jmvcore::OptionList$new(
+                "yaxisPc",
+                yaxisPc,
+                options=list(
+                    "total_pc",
+                    "column_pc",
+                    "row_pc"),
+                default="total_pc")
+            private$..xaxis <- jmvcore::OptionList$new(
+                "xaxis",
+                xaxis,
+                options=list(
+                    "xrows",
+                    "xcols"),
+                default="xrows")
+            private$..bartype <- jmvcore::OptionList$new(
+                "bartype",
+                bartype,
+                options=list(
+                    "dodge",
+                    "stack"),
+                default="dodge")
 
             self$.addOption(private$..rows)
             self$.addOption(private$..cols)
@@ -121,7 +183,10 @@ cttOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..alt)
             self$.addOption(private$..lint)
             self$.addOption(private$..ciWidth)
+            self$.addOption(private$..correction)
             self$.addOption(private$..pll)
+            self$.addOption(private$..plotype)
+            self$.addOption(private$..supplot)
             self$.addOption(private$..varA)
             self$.addOption(private$..cc)
             self$.addOption(private$..text)
@@ -130,6 +195,11 @@ cttOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..pcRow)
             self$.addOption(private$..pcCol)
             self$.addOption(private$..pcTot)
+            self$.addOption(private$..barplot)
+            self$.addOption(private$..yaxis)
+            self$.addOption(private$..yaxisPc)
+            self$.addOption(private$..xaxis)
+            self$.addOption(private$..bartype)
         }),
     active = list(
         rows = function() private$..rows$value,
@@ -139,7 +209,10 @@ cttOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         alt = function() private$..alt$value,
         lint = function() private$..lint$value,
         ciWidth = function() private$..ciWidth$value,
+        correction = function() private$..correction$value,
         pll = function() private$..pll$value,
+        plotype = function() private$..plotype$value,
+        supplot = function() private$..supplot$value,
         varA = function() private$..varA$value,
         cc = function() private$..cc$value,
         text = function() private$..text$value,
@@ -147,7 +220,12 @@ cttOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         exp = function() private$..exp$value,
         pcRow = function() private$..pcRow$value,
         pcCol = function() private$..pcCol$value,
-        pcTot = function() private$..pcTot$value),
+        pcTot = function() private$..pcTot$value,
+        barplot = function() private$..barplot$value,
+        yaxis = function() private$..yaxis$value,
+        yaxisPc = function() private$..yaxisPc$value,
+        xaxis = function() private$..xaxis$value,
+        bartype = function() private$..bartype$value),
     private = list(
         ..rows = NA,
         ..cols = NA,
@@ -156,7 +234,10 @@ cttOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..alt = NA,
         ..lint = NA,
         ..ciWidth = NA,
+        ..correction = NA,
         ..pll = NA,
+        ..plotype = NA,
+        ..supplot = NA,
         ..varA = NA,
         ..cc = NA,
         ..text = NA,
@@ -164,7 +245,12 @@ cttOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..exp = NA,
         ..pcRow = NA,
         ..pcCol = NA,
-        ..pcTot = NA)
+        ..pcTot = NA,
+        ..barplot = NA,
+        ..yaxis = NA,
+        ..yaxisPc = NA,
+        ..xaxis = NA,
+        ..bartype = NA)
 )
 
 cttResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -172,6 +258,7 @@ cttResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         freqs = function() private$.items[["freqs"]],
+        text = function() private$.items[["text"]],
         ctt = function() private$.items[["ctt"]],
         cttma = function() private$.items[["cttma"]],
         ctt2 = function() private$.items[["ctt2"]],
@@ -179,7 +266,8 @@ cttResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         SupportTab = function() private$.items[["SupportTab"]],
         MoretabText = function() private$.items[["MoretabText"]],
         ctt3 = function() private$.items[["ctt3"]],
-        plotc = function() private$.items[["plotc"]]),
+        plotc = function() private$.items[["plotc"]],
+        barplot = function() private$.items[["barplot"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -196,18 +284,26 @@ cttResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "rows",
                     "cols",
                     "counts")))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="text",
+                title="Log likelihood ratio analysis"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="ctt",
                 title="Odds Ratio analyses",
                 rows=3,
+                refs=list(
+                    "Glover_Tut",
+                    "Edwards_OR"),
                 clearWith=list(
                     "rows",
                     "cols",
                     "counts",
                     "data",
                     "nul",
-                    "alt"),
+                    "alt",
+                    "correction"),
                 columns=list(
                     list(
                         `name`="var", 
@@ -215,7 +311,7 @@ cttResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="text"),
                     list(
                         `name`="Value", 
-                        `title`="<i>OR</i> Value", 
+                        `title`="OR Value", 
                         `type`="number"),
                     list(
                         `name`="ordiff", 
@@ -223,19 +319,22 @@ cttResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="number"),
                     list(
                         `name`="S", 
-                        `title`="<i>S</i>", 
+                        `title`="S", 
+                        `type`="number"),
+                    list(
+                        `name`="Param", 
                         `type`="number"),
                     list(
                         `name`="G", 
-                        `title`="<i>G</i>", 
+                        `title`="G", 
                         `type`="number"),
                     list(
                         `name`="df", 
-                        `title`="<i>df</i>", 
+                        `title`="df", 
                         `type`="number"),
                     list(
                         `name`="p", 
-                        `title`="<i>p</i>", 
+                        `title`="p", 
                         `type`="number", 
                         `format`="zto,pvalue"))))
             self$add(jmvcore::Table$new(
@@ -247,7 +346,8 @@ cttResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "rows",
                     "cols",
                     "counts",
-                    "data"),
+                    "data",
+                    "correction"),
                 columns=list(
                     list(
                         `name`="var", 
@@ -259,22 +359,27 @@ cttResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="number"),
                     list(
                         `name`="S", 
-                        `title`="<i>S</i>", 
+                        `title`="S", 
+                        `type`="number"),
+                    list(
+                        `name`="Param", 
                         `type`="number"),
                     list(
                         `name`="G", 
-                        `title`="<i>G</i>", 
+                        `title`="G", 
                         `type`="number"),
                     list(
                         `name`="df", 
-                        `title`="<i>df</i>", 
+                        `title`="df", 
                         `type`="number"),
                     list(
                         `name`="p", 
-                        `title`="<i>p</i>", 
+                        `title`="p", 
                         `type`="number", 
                         `format`="zto,pvalue", 
                         `refs`=list(
+                            "Glover_Tut",
+                            "Edwards_OR",
                             "EdwardsCT")))))
             self$add(jmvcore::Table$new(
                 options=options,
@@ -298,7 +403,7 @@ cttResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="text"),
                     list(
                         `name`="OR", 
-                        `title`="<i>OR</i>", 
+                        `title`="OR", 
                         `type`="number"),
                     list(
                         `name`="Lower", 
@@ -318,6 +423,7 @@ cttResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "cols",
                     "counts",
                     "data",
+                    "correction",
                     "lint")))
             self$add(jmvcore::Table$new(
                 options=options,
@@ -328,11 +434,11 @@ cttResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 columns=list(
                     list(
                         `name`="SS", 
-                        `title`="<i>S</i>", 
+                        `title`="S", 
                         `type`="number"),
                     list(
                         `name`="LR", 
-                        `title`="<i>LR</i>", 
+                        `title`="LR", 
                         `type`="number"),
                     list(
                         `name`="Interp", 
@@ -358,7 +464,7 @@ cttResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="text"),
                     list(
                         `name`="Sv", 
-                        `title`="<i>S</i>", 
+                        `title`="S", 
                         `type`="number"),
                     list(
                         `name`="X2", 
@@ -366,16 +472,16 @@ cttResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="number"),
                     list(
                         `name`="dfv", 
-                        `title`="<i>df</i>", 
+                        `title`="df", 
                         `type`="number"),
                     list(
                         `name`="pv", 
-                        `title`="<i>p</i>", 
+                        `title`="p", 
                         `type`="number", 
                         `format`="zto,pvalue"),
                     list(
                         `name`="pv1", 
-                        `title`="1 - <i>p</i>", 
+                        `title`="1 - p", 
                         `type`="number", 
                         `format`="zto,pvalue", 
                         `refs`=list(
@@ -383,7 +489,7 @@ cttResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plotc",
-                title="`Likelihood function for OR with S-{lint} support interval`",
+                title="`Likelihood curve for OR with S-{lint} support interval`",
                 width=500,
                 height=400,
                 renderFun=".plotc",
@@ -394,8 +500,31 @@ cttResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "data",
                     "lint",
                     "nul",
-                    "alt"),
-                visible="(pll)"))}))
+                    "alt",
+                    "plotype",
+                    "supplot"),
+                visible="(pll)"))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="barplot",
+                title="Plots",
+                width=450,
+                height=400,
+                renderFun=".barPlot",
+                visible="(barplot)",
+                requiresData=TRUE,
+                clearWith=list(
+                    "rows",
+                    "cols",
+                    "counts",
+                    "barplot",
+                    "yaxis",
+                    "yaxisPc",
+                    "xaxis",
+                    "bartype",
+                    "pcTot",
+                    "pcCol",
+                    "pcRow")))}))
 
 cttBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "cttBase",
@@ -432,50 +561,6 @@ cttBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'
 #'  jeva::ctt(formula = count ~ Treatment:Defect, data = dat, text=FALSE)
 #'
-#' # ODDS RATIO
-#' #
-#' # Contingency Table
-#' # --------------------------------------
-#' #   Treatment     No      Yes    Total
-#' # --------------------------------------
-#' #   Folic acid     587      6      593
-#' #   Placebo        581     21      602
-#' #   Total         1168     27     1195
-#' # --------------------------------------
-#' #
-#' #
-#' # Support: Odds Ratio analyses
-#' # ----------------------------------------------------------------------------------------------
-#' #                       OR Value    Difference    S             G             df    p
-#' # ----------------------------------------------------------------------------------------------
-#' #   H₀ vs odds ratio    1.000000     0.7172061     -4.394435      8.788869     1     0.0030307
-#' #   Ha vs odds ratio    0.000000    -0.2827939    -63.749258    127.498516     1    < .0000001
-#' #   Ha vs H₀                        -1.0000000    -59.354823    118.709646     1    < .0000001
-#' # ----------------------------------------------------------------------------------------------
-#' #
-#' #
-#' # Support: Marginal main effects and interaction analyses, against the Null model
-#' # -----------------------------------------------------------------------------------------------------
-#' #   Component               Expected value    S               G                df          p
-#' # -----------------------------------------------------------------------------------------------------
-#' #   Treatment                     597.5000    699.28648107    1398.57296214    1.000000    < .0000001
-#' #   Defect                        597.5000      0.03389153       0.06778307    1.000000     0.7945924
-#' #   Treatment  ⨯  Defect                        4.39442599       8.78885199    1.000000     0.0030308
-#' #   Total                         298.7500    703.71479860    1407.42959720    1.000000    < .0000001
-#' # -----------------------------------------------------------------------------------------------------
-#' #   Note. The interaction and OR (against 1) will have the same 𝑆 value. Adding the 𝑆 values for
-#' #   the 3 components will precisely sum to the total 𝑆
-#' #
-#' #
-#' # Intervals for OR
-#' # ----------------------------------------------------------------------
-#' #   Type of interval      Level    OR           Lower        Upper
-#' # ----------------------------------------------------------------------
-#' #   Support               2        0.2827939    0.1008474    0.6760284
-#' #   Likelihood-based a    95\%      0.2827939    0.1031917    0.6649475
-#' # ----------------------------------------------------------------------
-#' #
-#'
 #' @param data the data as a data frame
 #' @param rows the variable to use as the rows in the contingency table (not
 #'   necessary when providing a formula, see the examples)
@@ -484,15 +569,21 @@ cttBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param counts the variable to use as the counts in the contingency table
 #'   (not necessary when providing a formula, see the examples)
 #' @param nul value for the null hypothesis, default = 1
-#' @param alt value for the alternative hypothesis, default = 0
+#' @param alt value for the alternative hypothesis, default = 1
 #' @param lint likelihood interval given as support value, e.g. 2 or 3,
 #'   default = 2
 #' @param ciWidth a number between 50 and 99.9 (default: 95), width of the
 #'   confidence intervals to provide
+#' @param correction correction for parameters, none, Occam's bonus (default)
+#'   or AIC
 #' @param pll \code{TRUE} or \code{FALSE} (default), give the likelihood
 #'   function showing null hypothesis (black line),  alternative hypothesis
 #'   (blue line), mean (dashed line), and specified support interval
 #'   (horizontal red line)
+#' @param plotype choose type of plot, likelihood function (default), support
+#'   function
+#' @param supplot To set the minimum likelihood display value in plot, in log
+#'   units (default = -10)  affects the x-axis range
 #' @param varA \code{TRUE} or \code{FALSE} (default), perform variance
 #'   analysis for null and alternative hypothesis
 #' @param cc \code{TRUE} or \code{FALSE} (default), use continuity correction
@@ -507,10 +598,19 @@ cttBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   percentages
 #' @param pcTot \code{TRUE} or \code{FALSE} (default), provide total
 #'   percentages
+#' @param barplot \code{TRUE} or \code{FALSE} (default), show barplots
+#' @param yaxis ycounts (default) or ypc. Use respectively \code{counts} or
+#'   \code{percentages} for the bar plot y-axis
+#' @param yaxisPc total_pc (default), column_pc, or row_pc. Use respectively
+#'   percentages \code{of total}, \code{within columns}, or \code{within rows}
+#'   for the bar plot y-axis.
+#' @param xaxis rows (default), or columns in bar plot X axis
+#' @param bartype stack or side by side (default), barplot type
 #' @param formula (optional) the formula to use, see the examples
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$freqs} \tab \tab \tab \tab \tab a table of proportions \cr
+#'   \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$ctt} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$cttma} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$ctt2} \tab \tab \tab \tab \tab a table \cr
@@ -519,6 +619,7 @@ cttBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$MoretabText} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$ctt3} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$plotc} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$barplot} \tab \tab \tab \tab \tab an image \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -534,10 +635,13 @@ ctt <- function(
     cols,
     counts = NULL,
     nul = 1,
-    alt = 0,
+    alt = 1,
     lint = 2,
     ciWidth = 95,
+    correction = "ob",
     pll = FALSE,
+    plotype = "lplot",
+    supplot = -10,
     varA = FALSE,
     cc = FALSE,
     text = TRUE,
@@ -546,6 +650,11 @@ ctt <- function(
     pcRow = FALSE,
     pcCol = FALSE,
     pcTot = FALSE,
+    barplot = FALSE,
+    yaxis = "ycounts",
+    yaxisPc = "total_pc",
+    xaxis = "xrows",
+    bartype = "dodge",
     formula) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
@@ -603,7 +712,10 @@ ctt <- function(
         alt = alt,
         lint = lint,
         ciWidth = ciWidth,
+        correction = correction,
         pll = pll,
+        plotype = plotype,
+        supplot = supplot,
         varA = varA,
         cc = cc,
         text = text,
@@ -611,7 +723,12 @@ ctt <- function(
         exp = exp,
         pcRow = pcRow,
         pcCol = pcCol,
-        pcTot = pcTot)
+        pcTot = pcTot,
+        barplot = barplot,
+        yaxis = yaxis,
+        yaxisPc = yaxisPc,
+        xaxis = xaxis,
+        bartype = bartype)
 
     analysis <- cttClass$new(
         options = options,

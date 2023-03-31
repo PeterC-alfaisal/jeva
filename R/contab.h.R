@@ -9,8 +9,14 @@ contabOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             rows = NULL,
             cols = NULL,
             counts = NULL,
+            correction = "ob",
+            obs = TRUE,
+            exp = FALSE,
+            sr = FALSE,
+            ss = FALSE,
             pcRow = FALSE,
             pcCol = FALSE,
+            pcTot = FALSE,
             varA = FALSE,
             text = TRUE,
             barplot = FALSE,
@@ -49,6 +55,30 @@ contabOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 permitted=list(
                     "numeric"),
                 default=NULL)
+            private$..correction <- jmvcore::OptionList$new(
+                "correction",
+                correction,
+                options=list(
+                    "nc",
+                    "ob",
+                    "aic"),
+                default="ob")
+            private$..obs <- jmvcore::OptionBool$new(
+                "obs",
+                obs,
+                default=TRUE)
+            private$..exp <- jmvcore::OptionBool$new(
+                "exp",
+                exp,
+                default=FALSE)
+            private$..sr <- jmvcore::OptionBool$new(
+                "sr",
+                sr,
+                default=FALSE)
+            private$..ss <- jmvcore::OptionBool$new(
+                "ss",
+                ss,
+                default=FALSE)
             private$..pcRow <- jmvcore::OptionBool$new(
                 "pcRow",
                 pcRow,
@@ -56,6 +86,10 @@ contabOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..pcCol <- jmvcore::OptionBool$new(
                 "pcCol",
                 pcCol,
+                default=FALSE)
+            private$..pcTot <- jmvcore::OptionBool$new(
+                "pcTot",
+                pcTot,
                 default=FALSE)
             private$..varA <- jmvcore::OptionBool$new(
                 "varA",
@@ -102,8 +136,14 @@ contabOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..rows)
             self$.addOption(private$..cols)
             self$.addOption(private$..counts)
+            self$.addOption(private$..correction)
+            self$.addOption(private$..obs)
+            self$.addOption(private$..exp)
+            self$.addOption(private$..sr)
+            self$.addOption(private$..ss)
             self$.addOption(private$..pcRow)
             self$.addOption(private$..pcCol)
+            self$.addOption(private$..pcTot)
             self$.addOption(private$..varA)
             self$.addOption(private$..text)
             self$.addOption(private$..barplot)
@@ -116,8 +156,14 @@ contabOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         rows = function() private$..rows$value,
         cols = function() private$..cols$value,
         counts = function() private$..counts$value,
+        correction = function() private$..correction$value,
+        obs = function() private$..obs$value,
+        exp = function() private$..exp$value,
+        sr = function() private$..sr$value,
+        ss = function() private$..ss$value,
         pcRow = function() private$..pcRow$value,
         pcCol = function() private$..pcCol$value,
+        pcTot = function() private$..pcTot$value,
         varA = function() private$..varA$value,
         text = function() private$..text$value,
         barplot = function() private$..barplot$value,
@@ -129,8 +175,14 @@ contabOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..rows = NA,
         ..cols = NA,
         ..counts = NA,
+        ..correction = NA,
+        ..obs = NA,
+        ..exp = NA,
+        ..sr = NA,
+        ..ss = NA,
         ..pcRow = NA,
         ..pcCol = NA,
+        ..pcTot = NA,
         ..varA = NA,
         ..text = NA,
         ..barplot = NA,
@@ -165,9 +217,17 @@ contabResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 title="Contingency Table",
                 columns=list(),
                 clearWith=list(
+                    "data",
                     "rows",
                     "cols",
-                    "counts")))
+                    "counts",
+                    "exp",
+                    "obs",
+                    "sr",
+                    "ss",
+                    "pcRow",
+                    "pcCol",
+                    "pcTot")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text",
@@ -180,7 +240,8 @@ contabResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "rows",
                     "cols",
-                    "counts"),
+                    "counts",
+                    "correction"),
                 columns=list(
                     list(
                         `name`="var", 
@@ -192,28 +253,28 @@ contabResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="number"),
                     list(
                         `name`="S", 
-                        `title`="<i>S</i>", 
+                        `title`="S", 
                         `type`="number"),
                     list(
-                        `name`="Sc", 
-                        `title`="<i>S</i>c", 
+                        `name`="Param", 
                         `type`="number"),
                     list(
                         `name`="G", 
-                        `title`="<i>G</i>", 
+                        `title`="G", 
                         `type`="number"),
                     list(
                         `name`="df", 
-                        `title`="<i>df</i>", 
+                        `title`="df", 
                         `type`="integer"),
                     list(
                         `name`="p", 
-                        `title`="<i>p</i>", 
+                        `title`="p", 
                         `type`="number", 
                         `format`="zto,pvalue", 
                         `refs`=list(
                             "EdwardsCT",
-                            "Edwards_OR")))))
+                            "Edwards_OR",
+                            "Glover_Tut")))))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="tabText",
@@ -223,7 +284,8 @@ contabResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "data",
                     "counts",
                     "rows",
-                    "cols"),
+                    "cols",
+                    "correction"),
                 visible="(text)"))
             self$add(jmvcore::Table$new(
                 options=options,
@@ -234,11 +296,11 @@ contabResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 columns=list(
                     list(
                         `name`="SS", 
-                        `title`="<i>S</i>", 
+                        `title`="S", 
                         `type`="number"),
                     list(
                         `name`="LR", 
-                        `title`="<i>LR</i>", 
+                        `title`="LR", 
                         `type`="number"),
                     list(
                         `name`="Interp", 
@@ -268,7 +330,7 @@ contabResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="text"),
                     list(
                         `name`="Sv", 
-                        `title`="<i>S</i>", 
+                        `title`="S", 
                         `type`="number"),
                     list(
                         `name`="X2", 
@@ -276,16 +338,16 @@ contabResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="number"),
                     list(
                         `name`="dfv", 
-                        `title`="<i>df</i>", 
+                        `title`="df", 
                         `type`="integer"),
                     list(
                         `name`="pv", 
-                        `title`="<i>p</i>", 
+                        `title`="p", 
                         `type`="number", 
                         `format`="zto,pvalue"),
                     list(
                         `name`="pv1", 
-                        `title`="1 - <i>p</i>", 
+                        `title`="1 - p", 
                         `type`="number", 
                         `format`="zto,pvalue", 
                         `refs`=list(
@@ -303,10 +365,14 @@ contabResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "rows",
                     "cols",
                     "counts",
+                    "barplot",
                     "yaxis",
                     "yaxisPc",
                     "xaxis",
-                    "bartype")))}))
+                    "bartype",
+                    "pcTot",
+                    "pcCol",
+                    "pcRow")))}))
 
 contabBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "contabBase",
@@ -330,8 +396,8 @@ contabBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
 #' Independent Samples
 #'
-#' Two-way analysis of a contingency table where main effects and
-#' interaction can be assessed.
+#' Two-way analysis of a contingency table where main effects and interaction 
+#' can be assessed.
 #' 
 #'
 #' @examples
@@ -341,38 +407,26 @@ contabBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   Eggs = c(14, 16, 14, 7, 6, 87, 33, 66, 34, 11),
 #'   check.names=FALSE)
 #'
-#' jeva::contab(formula = Eggs ~ Infested:Age, data = dat)
-#'
-#' # INDEPENDENT SAMPLES
-#' #
-#' # Contingency Table
-#' # ----------------------------------------------------
-#' #   Infested    1      2     3     4     5     Total
-#' # ----------------------------------------------------
-#' #   No           87    33    66    34    11      231
-#' #   Yes          14    16    14     7     6       57
-#' #   Total       101    49    80    41    17      288
-#' # ----------------------------------------------------
-#' #
-#' #
-#' # Support: Marginal main effects and interaction analyses, against the Null model
-#' # ---------------------------------------------------------------------------------------------------
-#' #   Component           Expected value    S             Sc           G             df    p
-#' # ---------------------------------------------------------------------------------------------------
-#' #   Infested                 144.00000     56.346183    56.346183    112.692366     1    < .0000001
-#' #   Age                       57.60000     40.395080    38.895080     77.790159     4    < .0000001
-#' #   Infested  ⨯  Age                        4.806653     3.306653      6.613306     4     0.1577897
-#' #   Total                     28.80000    101.547916    97.547916    195.095832     9    < .0000001
-#' # ---------------------------------------------------------------------------------------------------
-#' #   Note. Sc is S corrected for degrees of freedom using Edwards's Occam's bonus, see reference
-#' #
+#' jeva::contab(formula = Eggs ~ Infested:Age, data = dat, text = FALSE)
 #'
 #' @param data the data as a data frame
 #' @param rows the variable to use as the rows in the contingency table
 #' @param cols the variable to use as the columns in the contingency table
 #' @param counts the variable for counts, required
+#' @param correction correction for parameters, none, Occam's bonus (default)
+#'   or AIC
+#' @param obs \code{TRUE} or \code{FALSE} (default), provide the observed
+#'   counts
+#' @param exp \code{TRUE} or \code{FALSE} (default), provide the expected
+#'   counts
+#' @param sr \code{TRUE} or \code{FALSE} (default), provide the standardized
+#'   residuals
+#' @param ss \code{TRUE} or \code{FALSE} (default), provide the signed S
+#'   values
 #' @param pcRow \code{TRUE} or \code{FALSE} (default), provide row percentages
 #' @param pcCol \code{TRUE} or \code{FALSE} (default), provide column
+#'   percentages
+#' @param pcTot \code{TRUE} or \code{FALSE} (default), provide total
 #'   percentages
 #' @param varA \code{TRUE} or \code{FALSE} (default), perform variance
 #'   analysis against the null model
@@ -411,8 +465,14 @@ contab <- function(
     rows,
     cols,
     counts = NULL,
+    correction = "ob",
+    obs = TRUE,
+    exp = FALSE,
+    sr = FALSE,
+    ss = FALSE,
     pcRow = FALSE,
     pcCol = FALSE,
+    pcTot = FALSE,
     varA = FALSE,
     text = TRUE,
     barplot = FALSE,
@@ -447,6 +507,13 @@ contab <- function(
                 from="rhs",
                 type="vars",
                 subset="2")
+        if (missing(layers))
+            layers <- jmvcore::marshalFormula(
+                formula=formula,
+                data=`if`( ! missing(data), data, NULL),
+                from="rhs",
+                type="vars",
+                subset="3:")
     }
 
     if ( ! missing(rows)) rows <- jmvcore::resolveQuo(jmvcore::enquo(rows))
@@ -466,8 +533,14 @@ contab <- function(
         rows = rows,
         cols = cols,
         counts = counts,
+        correction = correction,
+        obs = obs,
+        exp = exp,
+        sr = sr,
+        ss = ss,
         pcRow = pcRow,
         pcCol = pcCol,
+        pcTot = pcTot,
         varA = varA,
         text = text,
         barplot = barplot,

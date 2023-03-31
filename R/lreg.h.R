@@ -8,6 +8,7 @@ LregOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         initialize = function(
             dep = NULL,
             pred = NULL,
+            correction = "ob",
             plt = FALSE,
             lin = TRUE,
             quad = FALSE,
@@ -40,6 +41,14 @@ LregOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 permitted=list(
                     "numeric"),
                 rejectInf=FALSE)
+            private$..correction <- jmvcore::OptionList$new(
+                "correction",
+                correction,
+                options=list(
+                    "nc",
+                    "ob",
+                    "aic"),
+                default="ob")
             private$..plt <- jmvcore::OptionBool$new(
                 "plt",
                 plt,
@@ -73,6 +82,7 @@ LregOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
             self$.addOption(private$..dep)
             self$.addOption(private$..pred)
+            self$.addOption(private$..correction)
             self$.addOption(private$..plt)
             self$.addOption(private$..lin)
             self$.addOption(private$..quad)
@@ -84,6 +94,7 @@ LregOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     active = list(
         dep = function() private$..dep$value,
         pred = function() private$..pred$value,
+        correction = function() private$..correction$value,
         plt = function() private$..plt$value,
         lin = function() private$..lin$value,
         quad = function() private$..quad$value,
@@ -94,6 +105,7 @@ LregOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     private = list(
         ..dep = NA,
         ..pred = NA,
+        ..correction = NA,
         ..plt = NA,
         ..lin = NA,
         ..quad = NA,
@@ -133,7 +145,8 @@ LregResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "dep",
                     "pred",
-                    "data"),
+                    "data",
+                    "correction"),
                 columns=list(
                     list(
                         `name`="var", 
@@ -141,32 +154,31 @@ LregResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="text"),
                     list(
                         `name`="S", 
-                        `title`="<i>S</i>", 
-                        `type`="number"),
-                    list(
-                        `name`="Sc", 
-                        `title`="<i>S</i>c", 
+                        `title`="S", 
                         `type`="number"),
                     list(
                         `name`="Param", 
                         `type`="number"),
                     list(
                         `name`="r2", 
-                        `title`="<i>R</i>\u00B2", 
+                        `title`="R\u00B2", 
                         `type`="number"),
                     list(
                         `name`="aic", 
-                        `title`="<i>AIC</i>", 
+                        `title`="AIC", 
                         `type`="number"),
                     list(
                         `name`="df", 
-                        `title`="<i>df</i>", 
+                        `title`="df", 
                         `type`="integer"),
                     list(
                         `name`="p", 
-                        `title`="<i>p</i>", 
+                        `title`="p", 
                         `type`="number", 
-                        `format`="zto,pvalue"))))
+                        `format`="zto,pvalue")),
+                refs=list(
+                    "Edwards_OR",
+                    "Glover_Tut")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="coef",
@@ -190,7 +202,7 @@ LregResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="number"),
                     list(
                         `name`="S", 
-                        `title`="<i>S</i>", 
+                        `title`="S", 
                         `type`="number"),
                     list(
                         `name`="Lower", 
@@ -200,7 +212,7 @@ LregResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="number"),
                     list(
                         `name`="p", 
-                        `title`="<i>p</i>", 
+                        `title`="p", 
                         `type`="number", 
                         `format`="zto,pvalue"))))
             self$add(jmvcore::Html$new(
@@ -212,7 +224,8 @@ LregResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "dep",
                     "lint",
                     "pred",
-                    "data")))
+                    "data",
+                    "correction")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="SupportTab",
@@ -222,11 +235,11 @@ LregResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 columns=list(
                     list(
                         `name`="SS", 
-                        `title`="<i>S</i>", 
+                        `title`="S", 
                         `type`="number"),
                     list(
                         `name`="LR", 
-                        `title`="<i>LR</i>", 
+                        `title`="LR", 
                         `type`="number"),
                     list(
                         `name`="Interp", 
@@ -281,7 +294,7 @@ LregBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'
 #' @examples
 #' data('Prestige', package='carData')
-#' jeva::Lreg(data = Prestige, dep = income, pred = education)
+#' jeva::Lreg(data = Prestige, dep = income, pred = education, text = FALSE)
 #'
 #' #
 #' # POLYNOMIAL REGRESSION
@@ -295,8 +308,9 @@ LregBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' #   Cubic vs Lower Orders        2.078532      1.0785316     4, 5    0.4076818    1949.198     1, 97     0.0443862
 #' #   Quartic vs Lower Orders      1.420330      0.4203303     5, 6    0.4239500    1948.357     1, 97     0.1011348
 #' # ------------------------------------------------------------------------------------------------------------------
-#' #   Note. S is calculated hierarchically from all remaining SSq, while p values are calculated using residual
-#' #   MSq from the highest polynomial model.  Sc uses Akaike correction for parameters (Param)
+#' #   Note. S uses Occam's Bonus correction for parameters (Param). S is calculated hierarchically
+#' #   from all remaining SSq, while p values are calculated using residual MSq from the highest
+#' #   polynomial model.
 #' #
 #' #
 #' # Model Coefficients - income
@@ -316,6 +330,8 @@ LregBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param dep the dependent variable from \code{data}, variable must be
 #'   numeric
 #' @param pred the predictor variable, must be numeric
+#' @param correction correction for parameters, none, Occam's bonus (default)
+#'   or AIC
 #' @param plt \code{TRUE} or \code{FALSE} (default), do a scatter plot of the
 #'   data
 #' @param lin \code{TRUE} (default) or \code{FALSE}, plot line for linear
@@ -352,6 +368,7 @@ Lreg <- function(
     data,
     dep,
     pred,
+    correction = "ob",
     plt = FALSE,
     lin = TRUE,
     quad = FALSE,
@@ -375,6 +392,7 @@ Lreg <- function(
     options <- LregOptions$new(
         dep = dep,
         pred = pred,
+        correction = correction,
         plt = plt,
         lin = lin,
         quad = quad,

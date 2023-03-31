@@ -11,9 +11,12 @@ lrttestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             nul = 0,
             alt = 0,
             lint = 2,
+            correction = "ob",
+            pll = FALSE,
+            plotype = "lplot",
+            supplot = -10,
             dtab = FALSE,
             plt = FALSE,
-            pll = FALSE,
             text = TRUE, ...) {
 
             super$initialize(
@@ -58,6 +61,31 @@ lrttestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 min=1,
                 max=100,
                 default=2)
+            private$..correction <- jmvcore::OptionList$new(
+                "correction",
+                correction,
+                options=list(
+                    "nc",
+                    "ob",
+                    "aic"),
+                default="ob")
+            private$..pll <- jmvcore::OptionBool$new(
+                "pll",
+                pll,
+                default=FALSE)
+            private$..plotype <- jmvcore::OptionList$new(
+                "plotype",
+                plotype,
+                options=list(
+                    "lplot",
+                    "logplot"),
+                default="lplot")
+            private$..supplot <- jmvcore::OptionNumber$new(
+                "supplot",
+                supplot,
+                min=-100,
+                max=-1,
+                default=-10)
             private$..dtab <- jmvcore::OptionBool$new(
                 "dtab",
                 dtab,
@@ -65,10 +93,6 @@ lrttestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..plt <- jmvcore::OptionBool$new(
                 "plt",
                 plt,
-                default=FALSE)
-            private$..pll <- jmvcore::OptionBool$new(
-                "pll",
-                pll,
                 default=FALSE)
             private$..text <- jmvcore::OptionBool$new(
                 "text",
@@ -80,9 +104,12 @@ lrttestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..nul)
             self$.addOption(private$..alt)
             self$.addOption(private$..lint)
+            self$.addOption(private$..correction)
+            self$.addOption(private$..pll)
+            self$.addOption(private$..plotype)
+            self$.addOption(private$..supplot)
             self$.addOption(private$..dtab)
             self$.addOption(private$..plt)
-            self$.addOption(private$..pll)
             self$.addOption(private$..text)
         }),
     active = list(
@@ -91,9 +118,12 @@ lrttestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         nul = function() private$..nul$value,
         alt = function() private$..alt$value,
         lint = function() private$..lint$value,
+        correction = function() private$..correction$value,
+        pll = function() private$..pll$value,
+        plotype = function() private$..plotype$value,
+        supplot = function() private$..supplot$value,
         dtab = function() private$..dtab$value,
         plt = function() private$..plt$value,
-        pll = function() private$..pll$value,
         text = function() private$..text$value),
     private = list(
         ..depa = NA,
@@ -101,9 +131,12 @@ lrttestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..nul = NA,
         ..alt = NA,
         ..lint = NA,
+        ..correction = NA,
+        ..pll = NA,
+        ..plotype = NA,
+        ..supplot = NA,
         ..dtab = NA,
         ..plt = NA,
-        ..pll = NA,
         ..text = NA)
 )
 
@@ -135,6 +168,13 @@ lrttestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="lrttest",
                 title="Support",
+                clearWith=list(
+                    "depb",
+                    "depa",
+                    "nul",
+                    "alt",
+                    "data",
+                    "correction"),
                 rows=3,
                 columns=list(
                     list(
@@ -154,25 +194,39 @@ lrttestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="number"),
                     list(
                         `name`="S", 
-                        `title`="<i>S</i>", 
+                        `title`="S", 
+                        `type`="number"),
+                    list(
+                        `name`="Param", 
+                        `title`="Param", 
                         `type`="number"),
                     list(
                         `name`="t", 
-                        `title`="<i>t</i>", 
+                        `title`="t", 
                         `type`="number"),
                     list(
                         `name`="df", 
-                        `title`="<i>df</i>", 
+                        `title`="df", 
                         `type`="number"),
                     list(
                         `name`="p", 
-                        `title`="<i>p</i>", 
+                        `title`="p", 
                         `type`="number", 
-                        `format`="zto,pvalue"))))
+                        `format`="zto,pvalue", 
+                        `refs`=list(
+                            "Edwards_OR",
+                            "Glover_Tut")))))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="lrttest2",
                 title="Support Interval for mean difference",
+                clearWith=list(
+                    "depb",
+                    "depa",
+                    "nul",
+                    "alt",
+                    "data",
+                    "lint"),
                 rows=1,
                 columns=list(
                     list(
@@ -190,6 +244,10 @@ lrttestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="lrttestd",
                 title="Group Descriptives",
                 visible="(dtab)",
+                clearWith=list(
+                    "depb",
+                    "depa",
+                    "data"),
                 rows=2,
                 columns=list(
                     list(
@@ -215,6 +273,14 @@ lrttestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="tabText",
                 title="Summarizing an evidential analysis",
+                clearWith=list(
+                    "depb",
+                    "depa",
+                    "nul",
+                    "alt",
+                    "data",
+                    "lint",
+                    "correction"),
                 visible="(text)"))
             self$add(jmvcore::Table$new(
                 options=options,
@@ -225,11 +291,11 @@ lrttestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 columns=list(
                     list(
                         `name`="SS", 
-                        `title`="<i>S</i>", 
+                        `title`="S", 
                         `type`="number"),
                     list(
                         `name`="LR", 
-                        `title`="<i>LR</i>", 
+                        `title`="LR", 
                         `type`="number"),
                     list(
                         `name`="Interp", 
@@ -249,14 +315,30 @@ lrttestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 width=400,
                 height=300,
                 renderFun=".plot",
+                clearWith=list(
+                    "depb",
+                    "depa",
+                    "data",
+                    "lint"),
                 visible="(plt)"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plotc",
-                title="`Likelihood function with S-{lint} support interval`",
+                title="`Likelihood curve with S-{lint} support interval`",
                 width=500,
                 height=400,
                 renderFun=".plotc",
+                clearWith=list(
+                    "depb",
+                    "depa",
+                    "nul",
+                    "alt",
+                    "data",
+                    "lint",
+                    "logplot",
+                    "lplot",
+                    "plotype",
+                    "supplot"),
                 visible="(pll)"))}))
 
 lrttestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -282,27 +364,26 @@ lrttestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' Paired Samples T-Test
 #'
 #' Related samples analysis where null and alternative hypotheses can be 
-#' specified.
-#' Likelihood interval support level can be specified and plotted with the 
-#' mean difference.
-#' A likelihood function for the mean difference can be plotted. 
+#' specified. Likelihood interval support level can be specified and plotted 
+#' with the mean difference. A likelihood function for the mean difference can 
+#' be plotted. 
 #' 
 #'
 #' @examples
 #' data('bugs', package = 'jmv')
-#' jeva::lrttest(data = bugs, depa = LDLF, depb = LDHF)
+#' jeva::lrttest(data = bugs, depa = LDLF, depb = LDHF, text = FALSE)
 #'
 #' #
 #' # PAIRED SAMPLES T-TEST
 #' #
 #' # Support
-#' # ------------------------------------------------------------------------------------------------------------------
-#' #                     Value       Difference    SE difference    S             t            df          p
-#' # ------------------------------------------------------------------------------------------------------------------
-#' #   H₀ vs observed    0.000000      1.664835        0.2504032    -18.179626    -6.648618    90.00000    < .0000001
-#' #   Ha vs observed    0.000000      1.664835        0.2504032    -18.179626    -6.648618    90.00000    < .0000001
-#' #   Ha vs H₀                        0.000000        0.2504032      0.000000
-#' # ------------------------------------------------------------------------------------------------------------------
+#' #                                     Value       Difference    SE difference    S              Param    t            df          p
+#' # --------------------------------------------------------------------------------------------------------------------------------------------
+#' #   H₀ vs observed mean difference    0.000000      1.664835        0.2504032    -17.6796259     2, 3    -6.648618    90.00000    < .0000001
+#' #   Ha vs observed mean difference    0.000000      1.664835        0.2504032    -18.1796259     3, 3    -6.648618    90.00000    < .0000001
+#' #   Ha vs H₀                                        0.000000        0.2504032     -0.5000000     3, 2
+#' # --------------------------------------------------------------------------------------------------------------------------------------------
+#' #   Note. S uses Occam's Bonus correction for parameters (Param)
 #' #
 #' #
 #' # Support Interval for mean difference
@@ -320,14 +401,20 @@ lrttestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param alt difference value for an alternative hypothesis, default = 0
 #' @param lint likelihood interval given as support value, e.g. 2 or 3,
 #'   default = 2
+#' @param correction correction for parameters, none, Occam's bonus (default)
+#'   or AIC
+#' @param pll \code{TRUE} or \code{FALSE} (default), give the likelihood or
+#'   log likelihood function showing  null hypothesis (black line), alternative
+#'   hypothesis (blue line), mean (dashed line),  and specified support interval
+#'   (horizontal red line)
+#' @param plotype choose type of plot, likelihood function (default), support
+#'   function
+#' @param supplot To set the minimum likelihood display value in plot, in log
+#'   units (default = -10)  affects the x-axis range
 #' @param dtab \code{TRUE} or \code{FALSE} (default), provide descriptive
 #'   statistics
 #' @param plt \code{TRUE} or \code{FALSE} (default), give a plot of means with
 #'   specified support intervals
-#' @param pll \code{TRUE} or \code{FALSE} (default), give the likelihood
-#'   function showing null hypothesis (black line),  alternative hypothesis
-#'   (blue line), mean (dashed line), and specified support interval
-#'   (horizontal red line)
 #' @param text \code{TRUE} (default) or \code{FALSE}, how to report the
 #'   results
 #' @return A results object containing:
@@ -357,9 +444,12 @@ lrttest <- function(
     nul = 0,
     alt = 0,
     lint = 2,
+    correction = "ob",
+    pll = FALSE,
+    plotype = "lplot",
+    supplot = -10,
     dtab = FALSE,
     plt = FALSE,
-    pll = FALSE,
     text = TRUE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
@@ -380,9 +470,12 @@ lrttest <- function(
         nul = nul,
         alt = alt,
         lint = lint,
+        correction = correction,
+        pll = pll,
+        plotype = plotype,
+        supplot = supplot,
         dtab = dtab,
         plt = plt,
-        pll = pll,
         text = text)
 
     analysis <- lrttestClass$new(
