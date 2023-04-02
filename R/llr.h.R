@@ -560,6 +560,55 @@ llrBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   check.names=FALSE)
 #'
 #'   jeva::llr(formula = count ~ Treatment:Defect, data = dat, text = FALSE)
+#'   #
+#'   # RELATIVE RISK
+#'   #
+#'   # Contingency Tables
+#'   # --------------------------------------
+#'   #   Treatment     No      Yes    Total
+#'   # --------------------------------------
+#'   #   Folic acid     587      6      593
+#'   #   Placebo        581     21      602
+#'   #   Total         1168     27     1195
+#'   # --------------------------------------
+#'   #
+#'   #
+#'   # Support: Risk Ratio analyses
+#'   # -----------------------------------------------------------------------------------------------------
+#'   #                       RR Value    Difference     S             Param    G           df    p
+#'   # -----------------------------------------------------------------------------------------------------
+#'   #   H₀ vs risk ratio    1.000000    -0.02566082    -3.8944253     1, 2    8.788851     1    0.0030308
+#'   #   Ha vs risk ratio    1.000000    -0.02566082    -4.3944253     2, 2    8.788851     1    0.0030308
+#'   #   Ha vs H₀                         0.00000000    -0.5000000     2, 1    0.000000     1    1.0000000
+#'   # -----------------------------------------------------------------------------------------------------
+#'   #   Note. S uses Occam's Bonus correction for parameters (Param).
+#'   #
+#'   #
+#'   # Support: Marginal main effects and interaction analyses, against the Null model
+#'   # -------------------------------------------------------------------------------------------------------
+#'   #   Component               Expected value    S              Param    G                df    p
+#'   # -------------------------------------------------------------------------------------------------------
+#'   #   Treatment                     597.5000     -0.4661085     2, 1       0.06778307     1     0.7945924
+#'   #   Defect                        597.5000    698.7864811     2, 1    1398.57296214     1    < .0000001
+#'   #   Treatment  ⨯  Defect                        3.8944260     2, 1       8.78885199     1     0.0030308
+#'   #   Total                         298.7500    702.2147986     4, 1    1407.42959720     3    < .0000001
+#'   # -------------------------------------------------------------------------------------------------------
+#'   #   Note. S uses Occam's Bonus correction for parameters (Param).  The interaction and RR (against 1)
+#'   #   will have the same S value. Adding the S values for the 3 components will precisely sum to the
+#'   #   total S when no parameter correction is applied.
+#'   #
+#'   #
+#'   # Intervals for RR
+#'   # -------------------------------------------------------------------
+#'   #   Type of interval      Level    RR          Lower       Upper
+#'   # -------------------------------------------------------------------
+#'   #   Support               2        1.025661    1.008768    1.037945
+#'   #   Likelihood-based a    95\%      1.025661    1.009130    1.037758
+#'   # -------------------------------------------------------------------
+#'   #   a See reference Pritikin et al (2017) such intervals are more
+#'   #   accurate and are parameterization-invariant compared to
+#'   #   conventional confidence intervals
+#'   #
 #'
 #' @param data the data as a data frame
 #' @param rows the variable to use as the rows in the contingency table (not
@@ -682,13 +731,6 @@ llr <- function(
                 from="rhs",
                 type="vars",
                 subset="2")
-        if (missing(layers))
-            layers <- jmvcore::marshalFormula(
-                formula=formula,
-                data=`if`( ! missing(data), data, NULL),
-                from="rhs",
-                type="vars",
-                subset="3:")
     }
 
     if ( ! missing(rows)) rows <- jmvcore::resolveQuo(jmvcore::enquo(rows))

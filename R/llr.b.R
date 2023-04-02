@@ -446,7 +446,7 @@ llrClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           suppressWarnings(exa2 <- optimize(h, c(dvs, dve), tol = toler, c1tot, r1tot, r2tot, goal))
           xa <- unname(unlist(exa2[1]))
           nullh <- exp(-sum(a*log(a/xa), b*log(b/(c1tot-xa)), c*log(c/(r1tot-xa)), d*log(d/(r2tot-c1tot+xa))))
-          
+
           S2way <- log(nullh) # check that this should be negative but same abs value as S for observed OR
           if(rr == 1) S2way <- 0
           
@@ -671,7 +671,7 @@ llrClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         
         # do the plot with lines
         if(self$options$plotype=="lplot") {
-          plot <- plot(xs, ys, xlim=c(lolim,hilim),type="l", lwd = 1, xlab = "Risk Ratio", ylab = "Likelihood")        
+          plot <- plot(xs, ys, xlim=c(g$xmin,g$xmax),type="l", lwd = 1, xlab = "Risk Ratio", ylab = "Likelihood")        
           lines(c(g$rr,g$rr),c(0,1),lty=2) # add MLE as dashed line
           segments(g$begL, exp(g$goalL), g$endL, exp(g$goalL), lwd = 1, col = "red")
           lines(c(self$options$nul,self$options$nul),c(0,g$nullh), lty=1, col = "black") # add H prob as black line
