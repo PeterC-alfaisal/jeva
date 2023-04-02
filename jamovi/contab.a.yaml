@@ -22,7 +22,30 @@ description:
               check.names=FALSE)
             
             jeva::contab(formula = Eggs ~ Infested:Age, data = dat, text = FALSE)
-
+            #            
+            # INDEPENDENT SAMPLES
+            #
+            # Contingency Table                                    
+            # ──────────────────────────────────────────────────── 
+            #  Infested    1      2     3     4     5     Total   
+            # ──────────────────────────────────────────────────── 
+            #   No           87    33    66    34    11      231   
+            #   Yes          14    16    14     7     6       57   
+            #   Total       101    49    80    41    17      288   
+            # ──────────────────────────────────────────────────── 
+            #
+            #
+            # Support: Marginal main effects and interaction analyses, against the Null model                
+            # ────────────────────────────────────────────────────────────────────────────────────────────── 
+            #   Component           Expected value    S            Param    G             df    p            
+            # ────────────────────────────────────────────────────────────────────────────────────────────── 
+            #   Infested                 144.00000    55.846183     1, 2    112.692366     1    < .0000001   
+            #   Age                       57.60000    38.395080     1, 5     80.790159     4    < .0000001   
+            #   Infested  ⨯  Age                       2.806653     1, 5      9.613306     4     0.0474704   
+            #   Total                     28.80000    97.047916    1, 10    203.095832     9    < .0000001   
+            # ────────────────────────────────────────────────────────────────────────────────────────────── 
+            #   Note. S uses Occam's Bonus correction for parameters (Param).
+            #
 completeWhenFilled: true
 
 formula:
@@ -38,10 +61,6 @@ formula:
         from: rhs
         type: vars
         subset: 2
-    layers:
-        from: rhs
-        type: vars
-        subset: '3:'
 
 options:
     - name: data
