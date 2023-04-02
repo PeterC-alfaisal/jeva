@@ -9,8 +9,8 @@ Description: Analyses that calculate the log likelihood (support) for a
     function and support interval for the observed data are displayed.
     Intended as a companion to Evidence-Based Statistics by P. Cahusac 
     (2020, ISBN-13 : 978-1119549802).
-License: What license is it under?
+License: GPL-2
 Encoding: UTF-8
 LazyData: true
-Imports: jmvcore (>= 0.8.5), R6, ggplot2, graphics, stats
+Imports: jmvcore (>= 0.8.5), R6, ggplot2, graphics, stats, knitr
 RoxygenNote: 7.2.1
