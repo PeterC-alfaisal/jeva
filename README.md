@@ -1,3 +1,6 @@
+<figure>
+<img src="jeva_icon-removebg-preview.png" id="id" class="class" style="width:3.0%;height:3.0%" />
+</figure>
 # jeva :dromedary_camel: 
 
 This is a [jamovi](https://www.jamovi.org/) module for log likelihood ratio analyses of common statistical tests (jeva :arrow_backward: **j**amovi **ev**idential **a**nalyses)
@@ -40,9 +43,7 @@ support values are insensitive to transforms.
 **Table 1:** _Interpretation for values of S, the support, calculated as the natural logarithm of the likelihood
 ratio. Negative values would represent support for hypothesis values H<sub>2</sub> vs H<sub>1</sub>. Typically, it is
 sufficient to give S to one decimal place._
-<figure>
-<img src="jeva_icon-removebg-preview.png" id="id" class="class" style="width:10.0%;height:10.0%" />
-</figure>
+
 Support values give the relative strength of evidence for one hypothesis 
 value versus another, see **Table 1**. They range from negative infinity to positive infinity. 
 There is no specific threshold value (unlike 0.05 in frequentist testing), and
