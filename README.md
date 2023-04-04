@@ -2,7 +2,9 @@
 <figure>
 <img style="float: right;" img src="jeva_icon-removebg-preview.png" id="id" class="class" style="width:100px;height:70px" />
 </figure>
-
+img[alt$=">"] {
+  float: right;
+}
 This is a [jamovi](https://www.jamovi.org/) module for log likelihood ratio analyses of common statistical tests (jeva :arrow_backward: **j**amovi **ev**idential **a**nalyses)
 
 [jamovi](https://www.jamovi.org/) is a brilliant way to do statistics. It is open statistical software built on top of the powerful [R](https://cran.r-project.org/) statistical language. Moreover, it is free.
