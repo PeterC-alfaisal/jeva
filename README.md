@@ -1,6 +1,6 @@
 # jeva :dromedary_camel: 
 <figure>
-<img style="float: right;" img src="jeva_icon-removebg-preview.png" id="id" class="class" style="width:100px;height:70px" />
+<img src="jeva_icon-removebg-preview.png" id="id" class="class" style="width:100px;height:70px" />
 </figure>
 img[alt$=">"] {
   float: right;
