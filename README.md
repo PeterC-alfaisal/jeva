@@ -1,6 +1,6 @@
 # jeva :dromedary_camel: 
 <figure>
-<img src="jeva_icon-removebg-preview.png" id="id" class="class" style="width:1.0%;height:1.0%" />
+<img src="jeva_icon-removebg-preview.png" id="id" class="class" style="width:10px;height:10px" />
 </figure>
 
 This is a [jamovi](https://www.jamovi.org/) module for log likelihood ratio analyses of common statistical tests (jeva :arrow_backward: **j**amovi **ev**idential **a**nalyses)
