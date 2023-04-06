@@ -16,7 +16,7 @@ items:
       clearWith:
         - group
         - data
-        - deps
+        - dep
         - Ct1Values
         - Ct2Values
         - ct1
@@ -55,7 +55,7 @@ items:
       clearWith:
         - group
         - data
-        - deps
+        - dep
 
       columns:
         - name: dep
@@ -90,7 +90,7 @@ items:
       clearWith:
         - group
         - data
-        - deps
+        - dep
         - Ct1Values
         - Ct2Values
         - correction
@@ -135,8 +135,8 @@ items:
           clearWith:
             - group
             - dat
-            - deps
-          rows: (deps)
+            - dep
+          rows: (dep)
           columns:
             - name: dep
               title: ""
@@ -168,8 +168,8 @@ items:
           clearWith:
             - group
             - data
-            - deps
-          rows: (deps)
+            - dep
+          rows: (dep)
           notes:
               p: A low p-value suggests a violation of the assumption of normality
 
@@ -192,11 +192,11 @@ items:
       title: Plots
       type: Array
       description: an array of groups of plots
-      items: (deps)
+      items: (dep)
       clearWith:
         - group
         - data
-        - deps
+        - dep
       template:
           title: $key
           type: Group
@@ -211,7 +211,7 @@ items:
               - lint
               - group
               - data
-              - deps
+              - dep
             - name: qq
               type: Image
               description: Q-Q plot

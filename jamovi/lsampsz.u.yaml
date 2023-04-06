@@ -1,0 +1,80 @@
+title: Sample Size Calculator
+name: lsampsz
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: LayoutBox
+        cell:
+          column: 0
+          row: 0
+        stretchFactor: 1
+        children:
+          - type: Label
+            label: Settings
+            children:
+              - type: LayoutBox
+                margin: large
+                fitToGrid: true
+                children:
+                  - type: Label
+                    label: Type of <i>t</i>-test
+                    children:
+                      - type: RadioButton
+                        name: is
+                        optionName: ttype
+                        optionPart: is
+                      - type: RadioButton
+                        name: po
+                        optionName: ttype
+                        optionPart: po
+              - type: LayoutBox
+                margin: large
+                children:
+                  - type: TextBox
+                    name: MW
+                    format: number
+                  - type: TextBox
+                    name: S
+                    format: number
+                  - type: TextBox
+                    name: d
+                    format: number
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: Label
+                label: Probability plots
+                children:
+                  - type: LayoutBox
+                    margin: large
+                    children:
+                      - type: CheckBox
+                        name: plwm
+                      - type: Label
+                        label: "Tails for \u03B2"
+                        children:
+                          - type: RadioButton
+                            name: onet
+                            optionName: tail1
+                            optionPart: onet
+                            enable: (plwm)
+                          - type: RadioButton
+                            name: twot
+                            optionName: tail1
+                            optionPart: twot
+                            enable: (plwm)
+                      - type: TextBox
+                        label: "Probability of Type I error (\u03B1)"
+                        name: alpha
+                        format: number
+                        enable: (plwm)
+          - type: Label
+            label: Additional Options
+            children:
+              - type: CheckBox
+                name: text
+            verticalAlignment: bottom

@@ -1,7 +1,7 @@
 ---
 title: Evidential Analyses for Common Statistical Tests
 name: jeva
-version: 0.0.6
+version: 0.0.7
 jms: '1.0'
 authors:
   - Peter Cahusac
@@ -47,6 +47,16 @@ analyses:
       One sample analysis where null and alternative hypotheses can be
       specified. Likelihood interval support level can be specified and plotted
       with the mean. A likelihood function for the mean can be plotted.
+  - title: Sample Size Calculator
+    name: lsampsz
+    ns: jeva
+    menuGroup: jeva
+    menuTitle: Sample Size Calculator
+    menuSubgroup: T-Tests
+    description: >
+      Sample size calculation for all t-tests, specifying strength of evidence
+      required, the probability of misleading and weak evidence, and the effect
+      size. Shows a probability plot of types of error against sample size. 
   - title: One-Way ANOVA
     name: laov1w
     ns: jeva

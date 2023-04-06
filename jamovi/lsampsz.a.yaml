@@ -1,0 +1,113 @@
+---
+name:  lsampsz
+title: Sample Size Calculator
+menuGroup: jeva
+menuSubgroup: T-Tests
+menuTitle: Sample Size Calculator
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: |
+        Sample size calculation for all t-tests, specifying strength of evidence required, the probability of misleading and weak evidence, and the effect size. Shows a probability plot of types of error against sample size. 
+    R:
+        dontrun: false
+        usage: |
+            jeva::lsampsz(ttype = "is", MW = 0.05, S = 3, d = 1.2, text = FALSE)
+
+            #            
+            # SAMPLE SIZE CALCULATOR
+            #
+            # Evidential sample size estimate                                                   
+            # ───────────────────────────────────────────────────────────────────────────────── 
+            #                               MW prob       S           d           Sample size   
+            # ───────────────────────────────────────────────────────────────────────────────── 
+            #   Independent samples test    0.05000000    3.000000    1.200000       42.00000   
+            # ───────────────────────────────────────────────────────────────────────────────── 
+            #   Note. Divide the given sample size by 2 to get the number for each group
+            #
+
+options:
+    - name: ttype
+      title: 'Type of <i>t</i>-test'
+      type: List
+      options:
+        - name: is
+          title: "Independent samples"
+        - name: po
+          title: "Paired or One sample"
+      default: is
+      description:
+          R: >
+            type of t-test, independent (default) or paired/one sample
+      
+    - name: MW
+      title: Probability of Misleading + Weak evidence
+      type: Number
+      min: 0
+      max: 1
+      default: 0.05
+      description:
+          R: >
+              probability of misleading + weak evidence, default = 0.05
+
+    - name: S
+      title: Strength of evidence (support)
+      type: Number
+      min: 0
+      max: 100
+      default: 3
+      description:
+          R: >
+              strength of evidence required LLR, default = 3
+
+    - name: d
+      title: 'Effect size <i>d</i>'
+      type: Number
+      min: 0.05
+      max: 10
+      default: 1.2
+      description:
+          R: >
+              Cohen's d effect size, default = 1.2
+
+    - name: plwm
+      title: Plot of probability for different evidential measures
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), show the probability plots for weak 
+            and misleading evidence 
+
+    - name: tail1
+      title: Tails
+      type: List
+      options:
+        - name: onet
+          title: "One-tailed test"
+        - name: twot
+          title: "Two-tailed test"
+      default: onet
+      description:
+          R: >
+            whether one- (default) or two-tailed for beta calculations
+            
+    - name: alpha
+      title: alpha
+      type: Number
+      min: 0
+      max: 1
+      default: 0.05
+      description:
+          R: >
+              probability of Type I error, default = 0.05
+
+    - name: text
+      title: Explanatory text
+      type: Bool
+      default: true
+      description:
+          R: >
+            `TRUE` (default) or `FALSE`, brief explanation of evidential sample size analysis
+...

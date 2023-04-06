@@ -1,0 +1,78 @@
+---
+name:  lsampsz
+title: Sample Size Calculator
+jrs:   '1.1'
+
+items:
+    - name:  text
+      title: Log likelihood ratio analysis
+      type:  Preformatted
+
+    - name:  tab
+      title: Sample size
+      type: Table
+      rows:  1
+      refs:
+        - CahusacSS
+        - Royall
+      clearWith:
+        - ttype
+        - MW
+        - S
+        - sd
+        - d
+      columns:
+        - name: var
+          title: ''
+          type: text
+        - name: MW
+          title: MW prob
+          type: number
+        - name: S
+          title: S
+          type: number
+        - name: d
+          type: number
+        - name: N
+          title: Sample size
+          type: integer
+
+    - name:  space1
+      title: ' '
+      type:  Preformatted
+    - name:  space2
+      title: ' '
+      type:  Preformatted
+
+    - name: plotp
+      title: 'Probability of different outcomes according to sample size'
+      type: Image
+      width:  500
+      height: 400
+      renderFun: .plotp
+      clearWith:
+        - ttype
+        - tail1
+        - alpha
+        - MW
+        - S
+        - sd
+        - d
+      visible: (plwm)
+
+    - name: plotText
+      title: 'Figure explanation'
+      type: Html
+      visible: (plwm)
+
+    - name: exptext
+      title: 'Explanation of Evidential Approach'
+      type: Html
+      refs:
+        - RoyallMisL
+        - Royall
+        - RoyallSciEv
+        - Book
+      visible: (text)
+      
+...

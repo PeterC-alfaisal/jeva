@@ -44,7 +44,7 @@ description:
             #
 
 formula:
-    deps:
+    dep:
         from: lhs
         required: true
     group:
@@ -56,7 +56,7 @@ options:
       description:
           R: the data as a data frame
 
-    - name: deps
+    - name: dep
       title: Dependent Variable
       type: Variable
       required: true

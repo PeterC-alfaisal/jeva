@@ -12,7 +12,7 @@ children:
         label: Dependent Variable
         children:
           - type: VariablesListBox
-            name: deps
+            name: dep
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
