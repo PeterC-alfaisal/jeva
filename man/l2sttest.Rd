@@ -87,28 +87,6 @@ with the means. A likelihood function for the difference in means can be
 plotted.
 }
 \examples{
-data('ToothGrowth')
-jeva::l2sttest(data = ToothGrowth, dep = len, group = supp,   welch = TRUE, text = FALSE)
-
-#
-#        INDEPENDENT SAMPLES T-TEST
-#
-# Support
-# -----------------------------------------------------------------------------------------------------------------------------------------
-#                                     Value       Difference    SE difference    S             Param    t           df          p
-# -----------------------------------------------------------------------------------------------------------------------------------------
-#   H₀ vs observed mean difference    0.000000     -3.700000         1.931844    -1.4264707     2, 3    1.915268    55.30943    0.0606345
-#   Ha vs observed mean difference    0.000000     -3.700000         1.931844    -1.9264707     3, 3    1.915268    55.30943    0.0606345
-#   Ha vs H₀                                        0.000000         1.931844    -0.5000000     3, 2
-# -----------------------------------------------------------------------------------------------------------------------------------------
-#   Note. S uses Occam's Bonus correction for parameters (Param).  Uses Welch's procedure for unequal variances
-#
-# Support Interval for mean difference
-# -----------------------------------------
-#   Difference    Lower          Upper
-# -----------------------------------------
-#     3.700000    -0.07228534    7.472285
-# -----------------------------------------
 #
 
 }

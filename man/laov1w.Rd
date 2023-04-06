@@ -6,7 +6,7 @@
 \usage{
 laov1w(
   data,
-  deps,
+  dep,
   group,
   lint = 2,
   ct1 = FALSE,
@@ -26,7 +26,7 @@ laov1w(
 \arguments{
 \item{data}{the data as a data frame}
 
-\item{deps}{a string naming the dependent variables in \code{data}}
+\item{dep}{a string naming the dependent variables in \code{data}}
 
 \item{group}{the grouping or independent variable in \code{data}}
 
