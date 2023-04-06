@@ -448,6 +448,7 @@ llrClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           nullh <- exp(-sum(a*log(a/xa), b*log(b/(c1tot-xa)), c*log(c/(r1tot-xa)), d*log(d/(r2tot-c1tot+xa))))
 
           S2way <- log(nullh) # check that this should be negative but same abs value as S for observed OR
+                        # actually it is very close, approx to nearest 3 decimal places due to toler = .0001
           if(rr == 1) S2way <- 0
           
           # variance analysis

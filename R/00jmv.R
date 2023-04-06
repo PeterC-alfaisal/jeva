@@ -31,6 +31,17 @@
         `url`="https://physoc.onlinelibrary.wiley.com/doi/abs/10.1113/EP088664", 
         `year`=2020, 
         `type`="Journal Article"), 
+    `CahusacSS`=list(
+        `author`="Cahusac, P.M.B. and Mansour, S.E.", 
+        `title`="Estimating sample sizes for evidential t tests", 
+        `journal`="Research in Mathematics", 
+        `volume`=9, 
+        `number`=1, 
+        `pages`="1-12", 
+        `DOI`="10.1080/27684830.2022.2089373", 
+        `url`="https://www.tandfonline.com/doi/full/10.1080/27684830.2022.2089373", 
+        `year`=2022, 
+        `type`="Journal Article"), 
     `Dienes`=list(
         `author`="Dienes, Z.", 
         `title`="Understanding Psychology as a Science, An introduction to scientific and statistical inference", 
@@ -211,7 +222,7 @@
     `Royall`=list(
         `type`="book", 
         `author`="Royall, R.", 
-        `title`="Statistical Evidence", 
+        `title`="Statistical Evidence A likelihood paradigm", 
         `year`=1997, 
         `publisher`="Chapman & Hall", 
         `doi`="10.1201/9780203738665", 

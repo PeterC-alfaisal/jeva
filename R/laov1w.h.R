@@ -6,7 +6,7 @@ laov1wOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Options,
     public = list(
         initialize = function(
-            deps = NULL,
+            dep = NULL,
             group = NULL,
             lint = 2,
             ct1 = FALSE,
@@ -27,9 +27,9 @@ laov1wOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 requiresData=TRUE,
                 ...)
 
-            private$..deps <- jmvcore::OptionVariable$new(
-                "deps",
-                deps,
+            private$..dep <- jmvcore::OptionVariable$new(
+                "dep",
+                dep,
                 required=TRUE,
                 suggested=list(
                     "continuous"),
@@ -101,7 +101,7 @@ laov1wOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 eqv,
                 default=FALSE)
 
-            self$.addOption(private$..deps)
+            self$.addOption(private$..dep)
             self$.addOption(private$..group)
             self$.addOption(private$..lint)
             self$.addOption(private$..ct1)
@@ -117,7 +117,7 @@ laov1wOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..eqv)
         }),
     active = list(
-        deps = function() private$..deps$value,
+        dep = function() private$..dep$value,
         group = function() private$..group$value,
         lint = function() private$..lint$value,
         ct1 = function() private$..ct1$value,
@@ -132,7 +132,7 @@ laov1wOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         qq = function() private$..qq$value,
         eqv = function() private$..eqv$value),
     private = list(
-        ..deps = NA,
+        ..dep = NA,
         ..group = NA,
         ..lint = NA,
         ..ct1 = NA,
@@ -179,7 +179,7 @@ laov1wResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "group",
                     "data",
-                    "deps",
+                    "dep",
                     "Ct1Values",
                     "Ct2Values",
                     "ct1",
@@ -223,7 +223,7 @@ laov1wResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "group",
                     "data",
-                    "deps"),
+                    "dep"),
                 columns=list(
                     list(
                         `name`="dep", 
@@ -258,7 +258,7 @@ laov1wResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "group",
                     "data",
-                    "deps",
+                    "dep",
                     "Ct1Values",
                     "Ct2Values",
                     "correction")))
@@ -311,8 +311,8 @@ laov1wResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                             clearWith=list(
                                 "group",
                                 "dat",
-                                "deps"),
-                            rows="(deps)",
+                                "dep"),
+                            rows="(dep)",
                             columns=list(
                                 list(
                                     `name`="dep", 
@@ -344,8 +344,8 @@ laov1wResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                             clearWith=list(
                                 "group",
                                 "data",
-                                "deps"),
-                            rows="(deps)",
+                                "dep"),
+                            rows="(dep)",
                             notes=list(
                                 `p`="A low p-value suggests a violation of the assumption of normality"),
                             columns=list(
@@ -367,11 +367,11 @@ laov1wResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="plots",
                 title="Plots",
-                items="(deps)",
+                items="(dep)",
                 clearWith=list(
                     "group",
                     "data",
-                    "deps"),
+                    "dep"),
                 template=R6::R6Class(
                     inherit = jmvcore::Group,
                     active = list(
@@ -394,7 +394,7 @@ laov1wResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                                     "lint",
                                     "group",
                                     "data",
-                                    "deps")))
+                                    "dep")))
                             self$add(jmvcore::Image$new(
                                 options=options,
                                 name="qq",
@@ -460,7 +460,7 @@ laov1wBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' #
 #'
 #' @param data the data as a data frame
-#' @param deps a string naming the dependent variables in \code{data}
+#' @param dep a string naming the dependent variables in \code{data}
 #' @param group the grouping or independent variable in \code{data}
 #' @param lint likelihood interval given as support values, e.g. 2 or 3,
 #'   default = 2
@@ -505,7 +505,7 @@ laov1wBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @export
 laov1w <- function(
     data,
-    deps,
+    dep,
     group,
     lint = 2,
     ct1 = FALSE,
@@ -525,8 +525,8 @@ laov1w <- function(
         stop("laov1w requires jmvcore to be installed (restart may be required)")
 
     if ( ! missing(formula)) {
-        if (missing(deps))
-            deps <- jmvcore::marshalFormula(
+        if (missing(dep))
+            dep <- jmvcore::marshalFormula(
                 formula=formula,
                 data=`if`( ! missing(data), data, NULL),
                 from="lhs",
@@ -538,18 +538,18 @@ laov1w <- function(
                 from="rhs")
     }
 
-    if ( ! missing(deps)) deps <- jmvcore::resolveQuo(jmvcore::enquo(deps))
+    if ( ! missing(dep)) dep <- jmvcore::resolveQuo(jmvcore::enquo(dep))
     if ( ! missing(group)) group <- jmvcore::resolveQuo(jmvcore::enquo(group))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
-            `if`( ! missing(deps), deps, NULL),
+            `if`( ! missing(dep), dep, NULL),
             `if`( ! missing(group), group, NULL))
 
     for (v in group) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- laov1wOptions$new(
-        deps = deps,
+        dep = dep,
         group = group,
         lint = lint,
         ct1 = ct1,
