@@ -6,6 +6,9 @@ laov1wClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       #### Init + run functions ----
       .init = function() {
         
+        if (is.null(self$options$group) || length(self$options$dep) == 0)
+          return()
+        
         private$.initSupportTab()
         
         private$.initAnovaTable()
@@ -41,10 +44,6 @@ laov1wClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         table$setRow(rowNo=3, values=list(var=paste0('Contrast 2 (',con2txt,') vs observed means')))
         table$setRow(rowNo=4, values=list(var="Contrast 1 vs Contrast 2"))
         table$setRow(rowNo=5, values=list(var="Linear vs Non-linear"))
-        
-        if (is.null(self$options$group) || length(self$options$dep) == 0)
-          return()
-        
         
       },
       .run = function() {
