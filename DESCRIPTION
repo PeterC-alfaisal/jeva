@@ -12,5 +12,5 @@ Description: Analyses that calculate the log likelihood (support) for a
 License: GPL-2
 Encoding: UTF-8
 LazyData: true
-Imports: jmvcore (>= 0.8.5), R6, ggplot2, graphics, stats, knitr, car, jmv
+Imports: jmvcore (>= 0.8.5), R6, ggplot2, graphics, stats, knitr, car
 RoxygenNote: 7.2.1
