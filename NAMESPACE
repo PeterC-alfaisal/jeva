@@ -1,6 +1,5 @@
 exportPattern("^[[:alpha:]]+")
 import(jmvcore)
-import(jmv)
 importFrom(jmvcore,.)
 import(ggplot2)
 import(graphics)
