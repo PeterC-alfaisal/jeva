@@ -2,7 +2,7 @@
 <figure>
 <img src="jeva_icon-removebg-preview.png" id="id" class="class" style="width:100px;height:60px" />
 </figure>
-This is a [jamovi](https://www.jamovi.org/) module for log likelihood ratio analyses of common statistical tests (jeva :arrow_backward: **j**amovi **ev**idential **a**nalyses)
+This is a [jamovi](https://www.jamovi.org/) module for log likelihood ratio analyses of common statistical tests
 
 [jamovi](https://www.jamovi.org/) is a brilliant way to do statistics. It is open statistical software built on top of the powerful [R](https://cran.r-project.org/) statistical language. Moreover, it is free.
 
@@ -81,8 +81,15 @@ The analyses in the module complement my recent book: [Cahusac, P.M.B.
 (2020) Evidence-Based Statistics, Wiley](https://onlinelibrary.wiley.com/doi/book/10.1002/9781119549833)  
 [Amazon.co.uk](https://www.amazon.co.uk/Evidence-Based-Statistics-Introduction-Evidential-Statistical/dp/1119549809/)  
 
-In jamovi the **.jmo** file can be sideloaded, and the module will appear among the other modules.
+In jamovi the **.jmo** file [dropbox](https://www.dropbox.com/scl/fi/c69bk4fefbqdgtr5wigf5/jeva_0.0.8.jmo?rlkey=r9a0vz85866nhb25wep0g1x61&dl=0) can be sideloaded, and the module will appear among the other modules.
 Example jamovi analyses with data from the book are given in the **Test Data Analyses - Blank** folder.
+
+It can also be installed as a regular R package. To do this download the tar.gz file from [dropbox](https://www.dropbox.com/scl/fi/qx5rga80eg0mbe83me03l/jeva_0.0.8.tar.gz?rlkey=juyko8yn79aow5lhuen10kyot&dl=0)
+Install the R package jmvcore and then in R:
+
+library(jeva)
+
+library(jmvcore)
 
 I would be interested in feedback <pcahusac@alfaisal.edu>  or   <peteqsac@gmail.com>     Peter Cahusac  
 
