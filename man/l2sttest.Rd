@@ -87,6 +87,7 @@ with the means. A likelihood function for the difference in means can be
 plotted.
 }
 \examples{
-#
+data('ToothGrowth')
+jeva::l2sttest(data = ToothGrowth, dep = len, group = supp, text = FALSE)
 
 }
