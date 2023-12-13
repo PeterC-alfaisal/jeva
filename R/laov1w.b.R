@@ -169,7 +169,7 @@ laov1wClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         tss <- sum(r$fisher$`Sum Sq`)  # total SS
         N <- (sum(r$fisher$Df)+1)
         k <- r$fisher$Df[1]+1
-        S_12 <- -(-0.5 * N * (log(r$fisher$`Sum Sq`[2]) - log(tss)))
+        S_12 <- 0.5 * N * (log(r$fisher$`Sum Sq`[2]) - log(tss))
         
         np <- attr(logLik(r$model0),"df")  # parameter each for variance and grand mean
         mp <- attr(logLik(r$model1),"df")
@@ -630,7 +630,7 @@ laov1wClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           <br> One advantage of the evidential approach is that <i>S</i> quantifies the strength of evidence for or against the 
           null hypothesis. "
         str2 <- "Another advantage is that we can select hypothesis values that reflect our research interests. "
-        str3 <- "For example, we could choose a meaningful effect size <i>H</i>\u2090 to compare with any <i>H</i>\u2080. 
+        str3 <- "For example, we could choose a meaningful contrast to compare with observed means or with a second contrast. 
         This is shown by the last line of the main Support table, where the <i>p</i> value cannot be calculated. "
         str = paste0(str1, str2, str3, "As data accumulates the strength of evidence for one hypothesis over another will tend to increase.")
         

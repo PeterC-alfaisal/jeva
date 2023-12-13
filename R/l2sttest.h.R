@@ -360,7 +360,7 @@ l2sttestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 analysisId = analysisId,
                 revision = revision,
                 pause = NULL,
-                completeWhenFilled = FALSE,
+                completeWhenFilled = TRUE,
                 requiresMissings = FALSE)
         }))
 
@@ -373,7 +373,8 @@ l2sttestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #'
 #' @examples
-#' #
+#' data('ToothGrowth')
+#' jeva::l2sttest(data = ToothGrowth, dep = len, group = supp, text = FALSE)
 #'
 #' @param data the data as a data frame
 #' @param dep a (non-empty) numeric vector of data values

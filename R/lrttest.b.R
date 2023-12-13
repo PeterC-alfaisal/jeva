@@ -24,13 +24,6 @@ lrttestClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         
         private$.initSupportTab()
         
-        data1 <- jmvcore::toNumeric(self$data[[self$options$depa]])
-        data2 <- jmvcore::toNumeric(self$data[[self$options$depb]])
-        #        if (is.null(data1) || is.null(data2))
-        #          return()
-        
-        #          self$results$tabText$setContent(NULL)
-        
       },
       .run = function() {
         
