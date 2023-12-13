@@ -1,12 +1,12 @@
 ---
 title: Evidential Analyses for Common Statistical Tests
 name: jeva
-version: 0.0.7
+version: 0.0.8
 jms: '1.0'
 authors:
   - Peter Cahusac
 maintainer: Peter Cahusac <peteqsac@gmail.com>
-date: '2023-03-29'
+date: '2023-04-29'
 type: R
 description: >-
   Analyses that calculate the log likelihood ratio (support) for a  range of
@@ -73,6 +73,29 @@ analyses:
       S, represent log likelihood ratio. They are given for each model 
       comparison. Sc represent Akaike corrected values according to the 
       number of parameters
+  - title: Two-Way Factorial ANOVA
+    name: l2waov
+    ns: jeva
+    menuGroup: jeva
+    menuTitle: Two-Way Factorial ANOVA
+    menuSubgroup: ANOVA
+    description: >
+      The Analysis of Variance (ANOVA) is used to explore the relationship
+      between a continuous dependent variable and two categorical explanatory
+      variables. Contrasts can be specified. Support values can be corrected
+      according to the number of parameters in the models being compared.
+  - title: Repeated Measures ANOVA
+    name: lrm1waov
+    ns: jeva
+    menuGroup: jeva
+    menuTitle: Repeated Measures ANOVA
+    menuSubgroup: ANOVA
+    description: |-
+      The Repeated Measures ANOVA is used to explore the relationship
+      between a continuous dependent variable and one or two categorical
+      explanatory variables, where one or more of the explanatory variables
+      are 'within subjects' (where multiple measurements are from the same
+      subject). 
   - title: Polynomial Regression
     name: Lreg
     ns: jeva

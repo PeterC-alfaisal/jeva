@@ -1,0 +1,606 @@
+---
+name:  lrm1waov
+title: Repeated Measures ANOVA
+jrs:   '1.1'
+
+items:
+
+    - name:  text
+      title: Log likelihood ratio analysis
+      type:  Preformatted
+      
+    - name: rmTable
+      title: Within Subjects Effects
+      type: Table
+      refs:
+        - Book
+        - Edwards_OR
+        - DixonPa
+
+      clearWith:
+        - dependent
+        - ss
+        - rmCells
+        - rmcModelTerms
+        - bscModelTerms
+        - bs
+        - rm
+        - rmTerms
+        - bsTerms
+        - correction
+
+      columns:
+        - name: name[none]
+          title: ""
+          type: text
+          combineBelow: true
+          visible: (spherCorr:none)
+
+        - name: correction[none]
+          title: 'Sphericity Correction'
+          type: text
+          content: 'None'
+          visible: (spherCorr:none && (spherCorr:GG || spherCorr:HF))
+
+        - name: S[none]
+          title: S
+          type: number
+          visible: (spherCorr:none)
+
+        - name: Param[none]
+          title: Param
+          type: number
+          visible: (spherCorr:none)
+
+        - name: F[none]
+          title: F
+          type: number
+          visible: (spherCorr:none)
+
+        - name: df[none]
+          title: df
+          type: integer
+          visible: (spherCorr:none)
+
+        - name: p[none]
+          title: p
+          type: number
+          format: zto,pvalue
+          visible: (spherCorr:none)
+
+        - name: ges[none]
+          title: η²<sub>G</sub>
+          type: number
+          format: zto
+          visible: (effectSize:ges && spherCorr:none)
+
+        - name: eta[none]
+          title: η²
+          type: number
+          format: zto
+          visible: (effectSize:eta && spherCorr:none)
+
+        - name: partEta[none]
+          title: η²<sub>p</sub>
+          type: number
+          format: zto
+          visible: (effectSize:partEta && spherCorr:none)
+
+        - name: omega[none]
+          title: ω²
+          type: number
+          format: zto
+          visible: (effectSize:omega && spherCorr:none)
+
+        - name: name[GG]
+          title: ""
+          type: text
+          combineBelow: true
+          visible: (spherCorr:GG)
+
+        - name: correction[GG]
+          title: 'Sphericity Correction'
+          type: text
+          content: 'Greenhouse-Geisser'
+          visible: (spherCorr:GG)
+
+        - name: ss[GG]
+          title: Sum of Squares
+          type: number
+          visible: (spherCorr:GG)
+
+        - name: df[GG]
+          title: df
+          type: number
+          visible: (spherCorr:GG)
+
+        - name: ms[GG]
+          title: Mean Square
+          type: number
+          visible: (spherCorr:GG)
+
+        - name: F[GG]
+          title: F
+          type: number
+          visible: (spherCorr:GG)
+
+        - name: p[GG]
+          title: p
+          type: number
+          format: zto,pvalue
+          visible: (spherCorr:GG)
+
+        - name: ges[GG]
+          title: η²<sub>G</sub>
+          type: number
+          format: zto
+          visible: (effectSize:ges && spherCorr:GG)
+
+        - name: eta[GG]
+          title: η²
+          type: number
+          format: zto
+          visible: (effectSize:eta && spherCorr:GG)
+
+        - name: partEta[GG]
+          title: η²<sub>p</sub>
+          type: number
+          format: zto
+          visible: (effectSize:partEta && spherCorr:GG)
+
+        - name: omega[GG]
+          title: ω²
+          type: number
+          format: zto
+          visible: (effectSize:omega && spherCorr:GG)
+
+        - name: name[HF]
+          title: ""
+          type: text
+          combineBelow: true
+          visible: (spherCorr:HF)
+
+        - name: correction[HF]
+          title: 'Sphericity Correction'
+          type: text
+          content: 'Huynh-Feldt'
+          visible: (spherCorr:HF)
+
+        - name: ss[HF]
+          title: Sum of Squares
+          type: number
+          visible: (spherCorr:HF)
+
+        - name: df[HF]
+          title: df
+          type: number
+          visible: (spherCorr:HF)
+
+        - name: ms[HF]
+          title: Mean Square
+          type: number
+          visible: (spherCorr:HF)
+
+        - name: F[HF]
+          title: F
+          type: number
+          visible: (spherCorr:HF)
+
+        - name: p[HF]
+          title: p
+          type: number
+          format: zto,pvalue
+          visible: (spherCorr:HF)
+
+        - name: ges[HF]
+          title: η²<sub>G</sub>
+          type: number
+          format: zto
+          visible: (effectSize:ges && spherCorr:HF)
+
+        - name: eta[HF]
+          title: η²
+          type: number
+          format: zto
+          visible: (effectSize:eta && spherCorr:HF)
+
+        - name: partEta[HF]
+          title: η²<sub>p</sub>
+          type: number
+          format: zto
+          visible: (effectSize:partEta && spherCorr:HF)
+
+        - name: omega[HF]
+          title: ω²
+          type: number
+          format: zto
+          visible: (effectSize:omega && spherCorr:HF)
+
+    - name: bsTable
+      title: Between Subjects Effects
+      type: Table
+      visible: (bs)
+      clearWith:
+        - dependent
+        - ss
+        - rmCells
+        - rmcModelTerms
+        - bscModelTerms
+        - bs
+        - rm
+        - rmTerms
+        - bsTerms
+
+      columns:
+        - name: name
+          title: ""
+          content: .
+          type: text
+
+        - name: S
+          title: S
+          type: number
+
+        - name: Param
+          title: Param
+          type: number
+
+        - name: F
+          title: F
+          type: number
+
+        - name: df
+          title: df
+          type: integer
+
+        - name: p
+          title: p
+          type: number
+          format: zto,pvalue
+
+        - name: ges
+          title: η²<sub>G</sub>
+          type: number
+          format: zto
+          visible: (effectSize:ges)
+
+        - name: eta
+          title: η²
+          type: number
+          format: zto
+          visible: (effectSize:eta)
+
+        - name: partEta
+          title: η²<sub>p</sub>
+          type: number
+          format: zto
+          visible: (effectSize:partEta)
+
+        - name: omega
+          title: ω²
+          type: number
+          format: zto
+          visible: (effectSize:omega)
+
+    - name:  conts
+      title: Contrasts
+      type: Table
+      visible: (ct1 || ct2)
+      description: a table of the test results
+      rows:  3
+      clearWith:
+        - dependent
+        - ss
+        - rmCells
+        - rmcModelTerms
+        - bscModelTerms
+        - bs
+        - rm
+        - rmTerms
+        - bsTerms
+        - correction
+        - ct1
+        - ct2
+        - Ct1Values
+        - Ct2Values
+      columns:
+        - name: var
+          title: Contrast Comparisons
+          type: text
+        - name: S
+          title: S
+          type: number
+        - name: Param
+          title: Param
+          type: number
+        - name: SSq
+          title: SSq
+          type: number
+        - name: df
+          title: df
+          type: number
+          refs:
+            - GloverDixon
+
+    - name:  cvals
+      title: Contrast values and group means
+      type: Table
+      visible: (ct1 || ct2)
+      description: a table of the test results
+      rows: 3
+      clearWith:
+        - dependent
+        - ss
+        - rmCells
+        - rmcModelTerms
+        - bscModelTerms
+        - bs
+        - rm
+        - rmTerms
+        - bsTerms
+        - correction
+        - ct1
+        - ct2
+        - Ct1Values
+        - Ct2Values
+
+      columns:
+        - name: var
+          title: ''
+        - name: L1
+          title: '1'
+          type: number
+        - name: L2
+          title: '2'
+          type: number
+        - name: L3
+          title: '3'
+          type: number
+        - name: L4
+          title: '4'
+          type: number
+        - name: L5
+          title: '5'
+          type: number
+        - name: L6
+          title: '6'
+          type: number
+        - name: L7
+          title: '7'
+          type: number
+        - name: L8
+          title: '8'
+          type: number
+        - name: L9
+          title: '9'
+          type: number
+        - name: L10
+          title: '10'
+          type: number
+
+    - name: assump
+      title: Assumptions
+      type: Group
+      items:
+          - name: spherTable
+            title: Tests of Sphericity
+            type: Table
+            visible: (spherTests)
+            clearWith:
+                - dependent
+                - ss
+                - rmCells
+                - rmcModelTerms
+                - bscModelTerms
+                - bs
+                - rm
+                - rmTerms
+                - bsTerms
+            columns:
+                - name: name
+                  title: ''
+                  type: text
+                - name: mauch
+                  title: Mauchly's W
+                  type: number
+                - name: p
+                  title: p
+                  type: number
+                  format: zto,pvalue
+                - name: gg
+                  title: Greenhouse-Geisser ε
+                  type: number
+                - name: hf
+                  title: Huynh-Feldt ε
+                  type: number
+
+          - name: leveneTable
+            title: Homogeneity of Variances Test (Levene's)
+            type: Table
+            visible: (leveneTest)
+            clearWith:
+                - bs
+                - rmCells
+
+            columns:
+                - name: name
+                  title: ''
+                  type: text
+
+                - name: F
+                  type: number
+
+                - name: df1
+                  type: integer
+
+                - name: df2
+                  type: integer
+
+                - name: p
+                  type: number
+                  format: zto,pvalue
+
+          - name: qq
+            title: Q-Q Plot
+            visible: (qq)
+            type: Image
+            description: a q-q plot
+            width: 450
+            height: 400
+            renderFun: .qqPlot
+            clearWith:
+                - dependent
+                - ss
+                - rmCells
+                - rmcModelTerms
+                - bscModelTerms
+                - bs
+                - rm
+                - rmTerms
+                - bsTerms
+
+    - name: contrasts
+      title: Contrasts
+      type: Array
+      items: 0
+      visible: (contrasts)
+
+      template:
+        title: Contrasts - $key
+        type: Table
+        rows: 0
+
+        columns:
+          - name: contrast
+            title: ""
+            type: text
+
+          - name: est
+            title: Estimate
+            type: number
+
+          - name: se
+            title: SE
+            type: number
+
+          - name: t
+            type: number
+
+          - name: p
+            title: p
+            type: number
+            format: zto,pvalue
+
+    - name: emm
+      title: Estimated Marginal Means
+      type: Array
+      description: an array of the estimated marginal means plots + tables
+
+      refs: emmeans
+
+      clearWith:
+        - emMeans
+      template:
+
+          title: ''
+          type: Group
+          items:
+
+            - name: emmPlot
+              title: ''
+              type: Image
+              width: 450
+              height: 400
+              renderFun: .emmPlot
+              visible: (emmPlots)
+              clearWith:
+                - ciWidthEmm
+                - emmWeights
+                - rmCells
+                - rmcModelTerms
+                - bscModelTerms
+                - bs
+                - rm
+                - rmTerms
+                - bsTerms
+                - emmPlotData
+                - emmPlotError
+                - depLabel
+
+            - name: emmTable
+              title: ''
+              type: Table
+              description: a table containing estimated marginal means
+              visible: (emmTables)
+              columns: []
+              clearWith:
+                - ciWidthEmm
+                - emmWeights
+                - rmCells
+                - rmcModelTerms
+                - bscModelTerms
+                - bs
+                - rm
+                - rmTerms
+                - bsTerms
+
+    - name: groupSummary
+      title: Group Summary
+      type: Table
+      description: a summary of the groups
+      visible: (groupSumm)
+
+      clearWith:
+        - dep
+        - factors
+
+      columns:
+
+        - name: n
+          title: 'N'
+          type: integer
+
+        - name: ex
+          title: Excluded
+          type: integer
+
+    - name: tabText
+      title: 'Summarizing an evidential analysis'
+      type: Html
+      visible: (text)
+      clearWith:
+        - factor1
+        - factor2
+        - data
+        - dep
+        - ct1
+        - ct2
+        - Ct1Values
+        - Ct2Values
+        - correction
+
+    - name:  SupportTab
+      title: Interpreting Support S (log LR)
+      type: Table
+      rows:  7
+      visible: (text)
+      columns:
+        - name: SS
+          title: S
+          type: number
+
+        - name: LR
+          title: LR
+          type: number
+
+        - name: Interp
+          title: 'Interpretation Comparing Hypotheses'
+          type: text
+
+    - name: MoretabText
+      title: 'More details about summaries'
+      type: Html
+      visible: (text)
+      refs: 
+          - Book
+...

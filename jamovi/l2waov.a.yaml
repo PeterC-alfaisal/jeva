@@ -1,0 +1,178 @@
+---
+name:  l2waov
+title: Two-Way Factorial ANOVA
+menuGroup: jeva
+menuSubgroup: ANOVA
+menuTitle: Two-Way Factorial ANOVA
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: |
+        The Analysis of Variance (ANOVA) is used to explore the relationship between a continuous dependent variable and two categorical explanatory variables. Contrasts can be specified. Support values can be corrected according to the number of parameters in the models being compared.
+    R:
+        dontrun: false
+        usage: |
+            data('ToothGrowth')
+            jeva::l2waov(data = ToothGrowth,
+            dep = len,
+            factor1 = dose,
+            factor2 = supp,
+            text = FALSE)
+            #
+            # TWO-WAY FACTORIAL ANOVA
+            #
+            # Support                                                                                         
+            # ─────────────────────────────────────────────────────────────────────────────────────────────── 
+            #   Model Comparisons                 S               Param    F            df       p            
+            # ─────────────────────────────────────────────────────────────────────────────────────────────── 
+            #   H₀ vs full model                  -44.85628744     2, 7    41.557178    5, 54    < .0000001   
+            #   H₀ versus dose                     35.40697964     4, 2    91.999965    2, 54    < .0000001   
+            #   H₀ versus supp                      1.33978727     3, 2    15.571979    1, 54     0.0002312   
+            #   H₀ versus both main effects        41.60841579     5, 2    66.523970    3, 54    < .0000001   
+            #   H₀ versus Interaction              -0.04361461     4, 2     4.106991    2, 54     0.0218603   
+            #   Full model versus main effects      3.24787166     7, 5                                       
+            #   Full model versus interaction      44.89990206     7, 4                                       
+            #   H₀ versus Contrast 1                                                                   
+            #   H₀ versus Contrast 2                                                                  
+            #   Contrast 1 versus Contrast 2                                                                  
+            # ─────────────────────────────────────────────────────────────────────────────────────────────── 
+            #   Note. S uses Occam's Bonus correction for parameters (Param).
+            #            
+completeWhenFilled: true
+
+formula:
+    dep:
+        from: lhs
+        subset: 1
+        required: true
+    factor1:
+        from: rhs
+    factor2:
+        from: rhs
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    - name: dep
+      title: Dependent Variable
+      type: Variable
+      required: true
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      rejectInf: false
+      description:
+          ui: >
+            the dependent variable. For ANOVA, these will be continuous.
+          R: >
+            the dependent variable from `data`, variable must be numeric (not
+            necessary when providing a formula, see examples)
+
+    - name: factor1
+      title: First fixed factor
+      type: Variable
+      required: true
+      rejectUnusedLevels: true
+      suggested:
+        - nominal
+        - ordinal
+      permitted:
+        - factor
+      default: null
+      description:
+          R: >
+            the 1st grouping or independent variable
+            
+    - name: factor2
+      title: Second fixed factor
+      type: Variable
+      required: true
+      rejectUnusedLevels: true
+      suggested:
+        - nominal
+        - ordinal
+      permitted:
+        - factor
+      default: null
+      description:
+          R: >
+            the 2nd grouping or independent variable
+            
+    - name: ct1
+      title: Contrast 1
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), for contrast 1
+
+    - name: Ct1Values
+      title: Values
+      type: String
+      default: "1,-1,..."
+      description:
+          R: >
+            a comma-separated list specifying the contrast
+
+    - name: ct2
+      title: Contrast 2
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), for contrast 2
+
+    - name: Ct2Values
+      title: Values
+      type: String
+      default: "1,-1,..."
+      description:
+          R: >
+            a comma-separated list specifying the contrast
+
+    - name: correction
+      title: Correction for parameters
+      type: List
+      options:
+        - name: nc
+          title: "None"
+        - name: ob
+          title: "Occam's Bonus"
+        - name: aic
+          title: 'AIC'
+        - name: aicsm
+          title: 'AICs'
+      default: ob
+      description:
+          R: >
+            correction for parameters, none, Occam's bonus (default) or AIC
+
+    - name: plt
+      title: Interaction Plot
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), provide interaction plot
+
+    - name: ME
+      title: Show Main Effects Model
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), for showing main effects model in plot
+
+    - name: text
+      title: Explanatory text
+      type: Bool
+      default: true
+      description:
+          R: >
+            `TRUE` (default) or `FALSE`, how to report the results
+...
