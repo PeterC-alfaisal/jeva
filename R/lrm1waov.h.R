@@ -41,7 +41,7 @@ lrm1waovOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             text = TRUE, ...) {
 
             super$initialize(
-                package="jeva",
+                package="lrm1waov",
                 name="lrm1waov",
                 requiresData=TRUE,
                 ...)
@@ -990,9 +990,9 @@ lrm1waovBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     public = list(
         initialize = function(options, data=NULL, datasetId="", analysisId="", revision=0) {
             super$initialize(
-                package = "jeva",
+                package = "lrm1waov",
                 name = "lrm1waov",
-                version = c(1,0,0),
+                version = c(2,0,0),
                 options = options,
                 results = lrm1waovResults$new(options=options),
                 data = data,
@@ -1039,16 +1039,27 @@ lrm1waovBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'     rmTerms = list(
 #'         'Frightening'))
 #'
-#' # REPEATED MEASURES ANOVA
 #' #
-#' #   Within Subjects Effects
-#' #   -------------------------------------------------------------------------------
-#' #                           S            Param    F           df       p
-#' #   -------------------------------------------------------------------------------
-#' #     H₀  vs Frightening    -17.67963     3, 4    44.20412    1, 90    < .0000001
-#' #   -------------------------------------------------------------------------------
-#' #     Note. Type 3 Sums of Squares.  S uses Occam's Bonus correction for
-#' #     parameters (Param).
+#' #  REPEATED MEASURES ANOVA
+#' #
+#' #  Within Subjects Effects
+#' #  -----------------------------------------------------------------------
+#' #                  Sum of Squares    df    Mean Square    F       p
+#' #  -----------------------------------------------------------------------
+#' #    Frightening              126     1         126.11    44.2    < .001
+#' #    Residual                 257    90           2.85
+#' #  -----------------------------------------------------------------------
+#' #    Note. Type 3 Sums of Squares
+#' #
+#' #
+#' #
+#' #  Between Subjects Effects
+#' #  -----------------------------------------------------------------
+#' #                Sum of Squares    df    Mean Square    F    p
+#' #  -----------------------------------------------------------------
+#' #    Residual               954    90           10.6
+#' #  -----------------------------------------------------------------
+#' #    Note. Type 3 Sums of Squares
 #' #
 #'
 #' @param data the data as a data frame
