@@ -113,7 +113,7 @@ options:
 
     - name: bs
       title: Between Subject Factor
-      type: Variables
+      type: Variable
       rejectUnusedLevels: true
       suggested:
         - nominal
@@ -125,23 +125,8 @@ options:
           ui: >
             the between subjects factor (optional).
           R: >
-            a vector of strings naming the between subjects factors from
+            a string naming the between subjects factor from
             `data`
-
-    - name: cov
-      title: Covariates
-      type: Variables
-      suggested:
-        - continuous
-      permitted:
-        - numeric
-      default: null
-      description:
-          ui: >
-            the covariates (specifying these makes this an ANCOVA)
-          R: >
-            a vector of strings naming the covariates from `data`.
-            Variables must be numeric
 
     - name: ct1
       title: Contrast 1
