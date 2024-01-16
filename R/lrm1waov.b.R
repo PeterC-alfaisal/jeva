@@ -22,9 +22,6 @@ lrm1waovClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       
       measures <- lapply(self$options$rmCells, function(x) x$measure)
       areNull  <- vapply(measures, is.null, FALSE, USE.NAMES=FALSE)
-
-      if (length(self$options$cov) > 0)
-        jmvcore::reject(.("No covariates allowed"), code='')
       
       if (any(areNull))
         self$setStatus('complete')

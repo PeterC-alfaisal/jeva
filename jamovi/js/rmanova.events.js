@@ -29,10 +29,6 @@ const events = {
         updateModelTerms(ui, this);
     },
 
-    onChange_cov: function(ui) {
-        updateModelTerms(ui, this);
-    },
-
     onChange_rmTerms: function(ui) {
         filterModelRMTerms(ui, this);
     },
@@ -53,10 +49,8 @@ const events = {
     },
 
     onUpdate_bscModelSupplier: function(ui) {
-        let variableList = this.cloneArray(ui.bs.value(), []);
-        let covariatesList = this.cloneArray(ui.cov.value(), []);
-        let combinedList = variableList.concat(covariatesList);
-        ui.bscModelSupplier.setValue(this.valuesToItems(combinedList, FormatDef.variable));
+        let variableList = ui.bs.value() ? [ui.bs.value()] : []; //this.cloneArray(ui.bs.value(), []);
+        ui.bscModelSupplier.setValue(this.valuesToItems(variableList, FormatDef.variable));
     },
 
     onChange_emMeansSupplier: function(ui) {
@@ -77,7 +71,7 @@ let updateModelLabels = function(list, blockName) {
 
 let calcMarginalMeansSupplier = function(ui, context) {
 
-    let b1 = context.cloneArray(ui.bs.value(), []);
+    let b1 = ui.bs.value() ? [ui.bs.value()] : []; //context.cloneArray(ui.bs.value(), []);
     let b2 = context.itemsToValues(ui.rmcModelSupplier.value());
 
     b1 = context.valuesToItems(b2.concat(b1), FormatDef.variable);
@@ -134,19 +128,22 @@ var calcRMTerms = function(ui, factorList, context) {
     var termsList = ui.rmTerms.value();
     termsList = context.clone(termsList);
     var termsChanged = false;
-
-    for (var i = 0; i < diff.removed.length; i++) {
-        for (var j = 0; j < termsList.length; j++) {
-            if (FormatDef.term.contains(termsList[j], diff.removed[i])) {
-                termsList.splice(j, 1);
-                termsChanged = true;
-                j -= 1;
+    if (diff.removed) {
+        for (var i = 0; i < diff.removed.length; i++) {
+            for (var j = 0; j < termsList.length; j++) {
+                if (FormatDef.term.contains(termsList[j], diff.removed[i])) {
+                    termsList.splice(j, 1);
+                    termsChanged = true;
+                    j -= 1;
+                }
             }
         }
     }
 
-    termsList = context.getCombinations(diff.added, termsList);
-    termsChanged = termsChanged || diff.added.length > 0;
+    if (diff.added) {
+        termsList = context.getCombinations(diff.added, termsList);
+        termsChanged = termsChanged || diff.added.length > 0;
+    }
 
     if (termsChanged)
         ui.rmTerms.setValue(termsList);
@@ -154,7 +151,7 @@ var calcRMTerms = function(ui, factorList, context) {
 
 var updateRMModelTerms = function(ui, context, variableList, updateEMMeans) {
     if (variableList === undefined)
-        variableList = context.cloneArray(ui.bs.value(), []);
+        variableList = ui.bs.value() ? [ui.bs.value()] : []; //context.cloneArray(ui.bs.value(), []);
 
     let factorList = context.cloneArray(ui.rm.value(), []);
 
@@ -179,58 +176,50 @@ var updateRMModelTerms = function(ui, context, variableList, updateEMMeans) {
 };
 
 var updateModelTerms = function(ui, context) {
-    var variableList = context.cloneArray(ui.bs.value(), []);
-    var covariatesList = context.cloneArray(ui.cov.value(), []);
+    var variableList = ui.bs.value() ? [ui.bs.value()] : []; //context.cloneArray(ui.bs.value(), []);
 
     updateRMModelTerms(ui, context, variableList, false);
 
-    var combinedList = variableList.concat(covariatesList);
-    ui.bscModelSupplier.setValue(context.valuesToItems(combinedList, FormatDef.variable));
+    ui.bscModelSupplier.setValue(context.valuesToItems(variableList, FormatDef.variable));
 
     calcMarginalMeansSupplier(ui, context);
 
     var diff = context.findChanges("variableList", variableList, true, FormatDef.variable);
-    var diff2 = context.findChanges("covariatesList", covariatesList, true, FormatDef.variable);
-    var combinedDiff = context.findChanges("combinedList", combinedList, true, FormatDef.variable);
 
     var termsList = context.cloneArray(ui.bsTerms.value(), []);
     var termsChanged = false;
-    for (var i = 0; i < combinedDiff.removed.length; i++) {
-        for (var j = 0; j < termsList.length; j++) {
-            if (FormatDef.term.contains(termsList[j], combinedDiff.removed[i])) {
-                termsList.splice(j, 1);
-                termsChanged = true;
-                j -= 1;
-            }
-        }
-    }
-
-    for (var a = 0; a < diff.added.length; a++) {
-        let item = diff.added[a];
-        var listLength = termsList.length;
-        for (var j = 0; j < listLength; j++) {
-            var newTerm = context.clone(termsList[j]);
-            if (containsCovariate(newTerm, covariatesList) === false) {
-                if (context.listContains(newTerm, item, FormatDef.variable) === false) {
-                    newTerm.push(item)
-                    if (context.listContains(termsList, newTerm , FormatDef.term) === false) {
-                        termsList.push(newTerm);
-                        termsChanged = true;
-                    }
+    if (diff.removed) {
+        for (var i = 0; i < diff.removed.length; i++) {
+            for (var j = 0; j < termsList.length; j++) {
+                if (FormatDef.term.contains(termsList[j], diff.removed[i])) {
+                    termsList.splice(j, 1);
+                    termsChanged = true;
+                    j -= 1;
                 }
             }
         }
-        if (context.listContains(termsList, [item] , FormatDef.term) === false) {
-            termsList.push([item]);
-            termsChanged = true;
-        }
     }
 
-    for (var a = 0; a < diff2.added.length; a++) {
-        let item = diff2.added[a];
-        if (context.listContains(termsList, [item] , FormatDef.term) === false) {
-            termsList.push([item]);
-            termsChanged = true;
+    if (diff.added) {
+        for (var a = 0; a < diff.added.length; a++) {
+            let item = diff.added[a];
+            var listLength = termsList.length;
+            for (var j = 0; j < listLength; j++) {
+                var newTerm = context.clone(termsList[j]);
+                if (containsCovariate(newTerm, covariatesList) === false) {
+                    if (context.listContains(newTerm, item, FormatDef.variable) === false) {
+                        newTerm.push(item)
+                        if (context.listContains(termsList, newTerm, FormatDef.term) === false) {
+                            termsList.push(newTerm);
+                            termsChanged = true;
+                        }
+                    }
+                }
+            }
+            if (context.listContains(termsList, [item], FormatDef.term) === false) {
+                termsList.push([item]);
+                termsChanged = true;
+            }
         }
     }
 
@@ -243,7 +232,7 @@ var filterModelTerms = function(ui, context) {
     var diff = context.findChanges("bsTerms", termsList, true, FormatDef.term);
 
     var changed = false;
-    if (diff.removed.length > 0) {
+    if (diff.removed && diff.removed.length > 0) {
         var itemsRemoved = false;
         for (var i = 0; i < diff.removed.length; i++) {
             var item = diff.removed[i];
@@ -273,7 +262,7 @@ var filterModelRMTerms = function(ui, context) {
     var diff = context.findChanges("rmTerms", termsList, true, FormatDef.term);
 
     var changed = false;
-    if (diff.removed.length > 0) {
+    if (diff.removed && diff.removed.length > 0) {
         var itemsRemoved = false;
         for (var i = 0; i < diff.removed.length; i++) {
             var item = diff.removed[i];
