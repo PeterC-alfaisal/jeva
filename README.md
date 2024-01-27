@@ -82,7 +82,7 @@ The analyses in the module complement my recent book: [Cahusac, P.M.B.
 [Amazon.co.uk](https://www.amazon.co.uk/Evidence-Based-Statistics-Introduction-Evidential-Statistical/dp/1119549809/)  
 
 In jamovi the **.jmo** file [dropbox](https://www.dropbox.com/scl/fi/c69bk4fefbqdgtr5wigf5/jeva_0.0.8.jmo?rlkey=r9a0vz85866nhb25wep0g1x61&dl=0) can be sideloaded, and the module will appear among the other modules.
-Example jamovi analyses with data from the book are given in the **Test Data Analyses - Blank** folder.
+Example datasets from the book are provided by the jamovi **Data Library** (see Open file menu).
 
 It can also be installed as a regular R package. To do this download the tar.gz file from [dropbox](https://www.dropbox.com/scl/fi/qx5rga80eg0mbe83me03l/jeva_0.0.8.tar.gz?rlkey=juyko8yn79aow5lhuen10kyot&dl=0)
 Install the R package jmvcore and then in R:
