@@ -80,7 +80,7 @@ refs:
 
     Edwards_OR:
        author: Edwards, A. W. F.
-       title: Occam's Bonus
+       title: Occams Bonus
        booktitle: Simplicity, Inference and Modelling; Keeping it Sophisticatedly Simple
        editor: Zellner, A.; Keuzenkamp, H.A.; McAleer, M.
        publisher: Cambridge University Press
@@ -223,7 +223,21 @@ refs:
        pages: 1568-1574
        ISSN: 0090-0036
        DOI: 10.2105/AJPH.78.12.1568
+       url: https://ajph.aphapublications.org/doi/abs/10.2105/AJPH.78.12.1568
        year: 1988
+       type: Journal Article
+
+    Hawass:
+       author: Hawass, N.E.D.
+       title: Comparing the sensitivities and specificities of two diagnostic procedures performed on the same group of patients
+       journal: The British journal of Radiology
+       volume: 70
+       number: 832
+       pages: 360-366
+       ISSN: 0007-1285
+       DOI: 10.1259/bjr.70.832.9166071
+       url: https://doi.org/10.1259/bjr.70.832.9166071
+       year: 1997
        type: Journal Article
 
     Pritikin:

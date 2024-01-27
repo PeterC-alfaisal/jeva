@@ -1,5 +1,5 @@
 ---
-name:  Lreg
+name:  lreg
 title: Polynomial Regression
 menuGroup: jeva
 menuSubgroup: Regression & Correlation
@@ -14,7 +14,7 @@ description:
         dontrun: false
         usage: |
             data('mtcars')
-            jeva::Lreg(data = mtcars, dep = mpg, pred = hp, text = FALSE)
+            jeva::lreg(data = mtcars, dep = mpg, pred = hp, text = FALSE)
             
             #
             # POLYNOMIAL REGRESSION

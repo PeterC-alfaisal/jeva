@@ -1,7 +1,7 @@
 ---
-title: Evidential Analyses for Common Statistical Tests
+title: Evidential Analyses for Common Statistical Analyses
 name: jeva
-version: 0.0.8
+version: 0.0.9
 jms: '1.0'
 authors:
   - Peter Cahusac
@@ -97,7 +97,7 @@ analyses:
       are 'within subjects' (where multiple measurements are from the same
       subject). 
   - title: Polynomial Regression
-    name: Lreg
+    name: lreg
     ns: jeva
     menuGroup: jeva
     menuSubgroup: Regression & Correlation
@@ -168,6 +168,88 @@ analyses:
       Paired samples analysis (McNemar test) where null and alternative odds can
       be specified.
     menuSubtitle: McNemar test
+  - title: Polynomial Regression
+    name: lreg
+    ns: jeva
+    menuGroup: jeva
+    menuSubgroup: Regression & Correlation
+    menuTitle: Polynomial Regression
+    description: >
+      Polynomial regression of two variables where different orders are
+      compared. Akaike corrected support values are calculated hierarchically.
+      R-squared and AIC values are given. P values are calculated in the usual
+      way from the residual mean sums of squares from the highest polynomial in
+      the model, but these are not comparable with the support values. Model
+      coefficients are given with their specified likelihood support level.
+      Plots for different polynomial orders can be plotted. 
+datasets:
+  - name: independent_samples_t
+    path: independent_samples_t.csv
+    description: 'Additional hours sleep in M & F, given either drug A'
+    tags:
+      - Independent Samples T-Test
+  - name: paired_samples_t
+    path: paired_samples_t.csv
+    description: Additional hours sleep given drugs A and B
+    tags:
+      - Paired Samples T-Test
+  - name: one_sample_t
+    path: one_sample_t.csv
+    description: Additional hours sleep given drug A
+    tags:
+      - One Sample T-Test
+  - name: 1_way_anova
+    path: 1_way_anova.csv
+    description: Fitness levels for different types of training
+    tags:
+      - One-Way ANOVA
+  - name: 2_way_factorial_anova
+    path: 2_way_factorial_anova.csv
+    description: >-
+      Blood clotting times in haemophiliac patients and healthy patients given 3
+      treatments
+    tags:
+      - Two-Way Factorial ANOVA
+  - name: repeated_measures
+    path: repeated_measures.csv
+    description: 'Additional hours sleep in M & F, given nothing and drugs A, B, C'
+    tags:
+      - Repeated measures ANOVA
+  - name: regression
+    path: regression.csv
+    description: Womens world record times for 1500m event
+    tags:
+      - Polynomial Regression
+  - name: correlation
+    path: correlation.csv
+    description: Heptathlon running times in 200m and 800m events
+    tags:
+      - Correlation
+  - name: n_outcomes
+    path: n_outcomes.csv
+    description: Disease outcomes in 10 patients
+    tags:
+      - N Outcomes for categorical analysis
+  - name: 2_way_association
+    path: 2_way_association.csv
+    description: Presence of S. mansoni eggs in stools according to age group
+    tags:
+      - Independent Samples association for categorical analysis
+  - name: odds_ratio
+    path: odds_ratio.csv
+    description: Folic acid vs placebo and neural tube defects
+    tags:
+      - Odds Ratio folic acid and birth defects
+  - name: relative_risk
+    path: relative_risk.csv
+    description: Relative risk for treatment effectiveness and sex
+    tags:
+      - Relative Risk
+  - name: mcnemar
+    path: mcnemar.csv
+    description: Allergic reaction to two handcreams
+    tags:
+      - McNemar Test
 usesNative: true
 minApp: 1.0.8
 
