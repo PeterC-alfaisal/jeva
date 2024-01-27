@@ -23,6 +23,8 @@ lrm1waovClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       measures <- lapply(self$options$rmCells, function(x) x$measure)
       areNull  <- vapply(measures, is.null, FALSE, USE.NAMES=FALSE)
       
+      if (length(self$options$rm) > 1) jmvcore::reject(.("More than one repeated measures factor is not supported at this time"), 
+                                                       code='')
       if (any(areNull))
         self$setStatus('complete')
     },

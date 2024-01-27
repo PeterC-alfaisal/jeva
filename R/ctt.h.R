@@ -64,13 +64,13 @@ cttOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..nul <- jmvcore::OptionNumber$new(
                 "nul",
                 nul,
-                min=-100000000000,
+                min=0,
                 max=100000000000,
                 default=1)
             private$..alt <- jmvcore::OptionNumber$new(
                 "alt",
                 alt,
-                min=-100000000000,
+                min=0,
                 max=100000000000,
                 default=1)
             private$..lint <- jmvcore::OptionNumber$new(
@@ -278,7 +278,7 @@ cttResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Table$new(
                 options=options,
                 name="freqs",
-                title="Contingency Tables",
+                title="Contingency Table",
                 columns=list(),
                 clearWith=list(
                     "rows",
@@ -543,7 +543,8 @@ cttBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 revision = revision,
                 pause = NULL,
                 completeWhenFilled = TRUE,
-                requiresMissings = FALSE)
+                requiresMissings = FALSE,
+                weightsSupport = 'auto')
         }))
 
 #' Odds Ratio

@@ -19,7 +19,7 @@ l2waovOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             text = TRUE, ...) {
 
             super$initialize(
-                package="l2waov",
+                package="jeva",
                 name="l2waov",
                 requiresData=TRUE,
                 ...)
@@ -320,7 +320,7 @@ l2waovBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     public = list(
         initialize = function(options, data=NULL, datasetId="", analysisId="", revision=0) {
             super$initialize(
-                package = "l2waov",
+                package = "jeva",
                 name = "l2waov",
                 version = c(1,0,0),
                 options = options,
@@ -331,7 +331,8 @@ l2waovBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 revision = revision,
                 pause = NULL,
                 completeWhenFilled = TRUE,
-                requiresMissings = FALSE)
+                requiresMissings = FALSE,
+                weightsSupport = 'auto')
         }))
 
 #' Two-Way Factorial ANOVA

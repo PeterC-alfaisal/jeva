@@ -12,7 +12,6 @@ lrm1waovOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "Level 2"))),
             rmCells = NULL,
             bs = NULL,
-            cov = NULL,
             ct1 = FALSE,
             Ct1Values = "1,-1,...",
             ct2 = FALSE,
@@ -41,7 +40,7 @@ lrm1waovOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             text = TRUE, ...) {
 
             super$initialize(
-                package="lrm1waov",
+                package="jeva",
                 name="lrm1waov",
                 requiresData=TRUE,
                 ...)
@@ -83,7 +82,7 @@ lrm1waovOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                             template=jmvcore::OptionString$new(
                                 "cell",
                                 NULL)))))
-            private$..bs <- jmvcore::OptionVariables$new(
+            private$..bs <- jmvcore::OptionVariable$new(
                 "bs",
                 bs,
                 rejectUnusedLevels=TRUE,
@@ -92,14 +91,6 @@ lrm1waovOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "ordinal"),
                 permitted=list(
                     "factor"),
-                default=NULL)
-            private$..cov <- jmvcore::OptionVariables$new(
-                "cov",
-                cov,
-                suggested=list(
-                    "continuous"),
-                permitted=list(
-                    "numeric"),
                 default=NULL)
             private$..ct1 <- jmvcore::OptionBool$new(
                 "ct1",
@@ -250,7 +241,6 @@ lrm1waovOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..rm)
             self$.addOption(private$..rmCells)
             self$.addOption(private$..bs)
-            self$.addOption(private$..cov)
             self$.addOption(private$..ct1)
             self$.addOption(private$..Ct1Values)
             self$.addOption(private$..ct2)
@@ -280,7 +270,6 @@ lrm1waovOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         rm = function() private$..rm$value,
         rmCells = function() private$..rmCells$value,
         bs = function() private$..bs$value,
-        cov = function() private$..cov$value,
         ct1 = function() private$..ct1$value,
         Ct1Values = function() private$..Ct1Values$value,
         ct2 = function() private$..ct2$value,
@@ -309,7 +298,6 @@ lrm1waovOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..rm = NA,
         ..rmCells = NA,
         ..bs = NA,
-        ..cov = NA,
         ..ct1 = NA,
         ..Ct1Values = NA,
         ..ct2 = NA,
@@ -990,9 +978,9 @@ lrm1waovBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     public = list(
         initialize = function(options, data=NULL, datasetId="", analysisId="", revision=0) {
             super$initialize(
-                package = "lrm1waov",
+                package = "jeva",
                 name = "lrm1waov",
-                version = c(2,0,0),
+                version = c(1,0,0),
                 options = options,
                 results = lrm1waovResults$new(options=options),
                 data = data,
@@ -1001,7 +989,8 @@ lrm1waovBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 revision = revision,
                 pause = NULL,
                 completeWhenFilled = TRUE,
-                requiresMissings = FALSE)
+                requiresMissings = FALSE,
+                weightsSupport = 'auto')
         }))
 
 #' Repeated Measures ANOVA
@@ -1039,27 +1028,16 @@ lrm1waovBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'     rmTerms = list(
 #'         'Frightening'))
 #'
+#' # REPEATED MEASURES ANOVA
 #' #
-#' #  REPEATED MEASURES ANOVA
-#' #
-#' #  Within Subjects Effects
-#' #  -----------------------------------------------------------------------
-#' #                  Sum of Squares    df    Mean Square    F       p
-#' #  -----------------------------------------------------------------------
-#' #    Frightening              126     1         126.11    44.2    < .001
-#' #    Residual                 257    90           2.85
-#' #  -----------------------------------------------------------------------
-#' #    Note. Type 3 Sums of Squares
-#' #
-#' #
-#' #
-#' #  Between Subjects Effects
-#' #  -----------------------------------------------------------------
-#' #                Sum of Squares    df    Mean Square    F    p
-#' #  -----------------------------------------------------------------
-#' #    Residual               954    90           10.6
-#' #  -----------------------------------------------------------------
-#' #    Note. Type 3 Sums of Squares
+#' #   Within Subjects Effects
+#' #   -------------------------------------------------------------------------------
+#' #                           S            Param    F           df       p
+#' #   -------------------------------------------------------------------------------
+#' #     H₀  vs Frightening    -17.67963     3, 4    44.20412    1, 90    < .0000001
+#' #   -------------------------------------------------------------------------------
+#' #     Note. Type 3 Sums of Squares.  S uses Occam's Bonus correction for
+#' #     parameters (Param).
 #' #
 #'
 #' @param data the data as a data frame
@@ -1070,10 +1048,7 @@ lrm1waovBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   (as a string) from \code{data} defined as \code{measure} and the particular
 #'   combination of levels from \code{rm} that it belongs to (as a vector of
 #'   strings) defined as \code{cell}
-#' @param bs a vector of strings naming the between subjects factors from
-#'   \code{data}
-#' @param cov a vector of strings naming the covariates from \code{data}.
-#'   Variables must be numeric
+#' @param bs a string naming the between subjects factor from \code{data}
 #' @param ct1 \code{TRUE} or \code{FALSE} (default), for contrast 1
 #' @param Ct1Values a comma-separated list specifying the contrast
 #' @param ct2 \code{TRUE} or \code{FALSE} (default), for contrast 2
@@ -1154,7 +1129,6 @@ lrm1waov <- function(
                     "Level 2"))),
     rmCells = NULL,
     bs = NULL,
-    cov = NULL,
     ct1 = FALSE,
     Ct1Values = "1,-1,...",
     ct2 = FALSE,
@@ -1186,12 +1160,10 @@ lrm1waov <- function(
         stop("lrm1waov requires jmvcore to be installed (restart may be required)")
 
     if ( ! missing(bs)) bs <- jmvcore::resolveQuo(jmvcore::enquo(bs))
-    if ( ! missing(cov)) cov <- jmvcore::resolveQuo(jmvcore::enquo(cov))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
-            `if`( ! missing(bs), bs, NULL),
-            `if`( ! missing(cov), cov, NULL))
+            `if`( ! missing(bs), bs, NULL))
 
     for (v in bs) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
     if (inherits(rmTerms, "formula")) rmTerms <- jmvcore::decomposeFormula(rmTerms)
@@ -1202,7 +1174,6 @@ lrm1waov <- function(
         rm = rm,
         rmCells = rmCells,
         bs = bs,
-        cov = cov,
         ct1 = ct1,
         Ct1Values = Ct1Values,
         ct2 = ct2,

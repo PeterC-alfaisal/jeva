@@ -1,6 +1,6 @@
-LregClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
-    "LregClass",
-    inherit = LregBase,
+lregClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
+    "lregClass",
+    inherit = lregBase,
     private = list(
       .init = function() {
         
