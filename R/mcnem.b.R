@@ -645,7 +645,7 @@ mcnemClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         for (layerName in layerNames)
           data[[layerName]] <- as.factor(data[[layerName]])
         if ( ! is.null(countsName))
-          data[[countsName]] <- toNumeric(data[[countsName]])
+          data[[countsName]] <- jmvcore::toNumeric(data[[countsName]])
         
         data
       },

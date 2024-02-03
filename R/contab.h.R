@@ -199,11 +199,11 @@ contabResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         freqs = function() private$.items[["freqs"]],
         text = function() private$.items[["text"]],
         cttma = function() private$.items[["cttma"]],
+        ctt3 = function() private$.items[["ctt3"]],
+        barplot = function() private$.items[["barplot"]],
         tabText = function() private$.items[["tabText"]],
         SupportTab = function() private$.items[["SupportTab"]],
-        MoretabText = function() private$.items[["MoretabText"]],
-        ctt3 = function() private$.items[["ctt3"]],
-        barplot = function() private$.items[["barplot"]]),
+        MoretabText = function() private$.items[["MoretabText"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -275,44 +275,6 @@ contabResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                             "EdwardsCT",
                             "Edwards_OR",
                             "Glover_Tut")))))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="tabText",
-                title="Summarizing an evidential analysis",
-                clearWith=list(
-                    "varA",
-                    "data",
-                    "counts",
-                    "rows",
-                    "cols",
-                    "correction"),
-                visible="(text)"))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="SupportTab",
-                title="Interpreting Support S (log LR)",
-                rows=7,
-                visible="(text)",
-                columns=list(
-                    list(
-                        `name`="SS", 
-                        `title`="S", 
-                        `type`="number"),
-                    list(
-                        `name`="LR", 
-                        `title`="LR", 
-                        `type`="number"),
-                    list(
-                        `name`="Interp", 
-                        `title`="Interpretation Comparing Hypotheses", 
-                        `type`="text"))))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="MoretabText",
-                title="More details about summaries",
-                visible="(text)",
-                refs=list(
-                    "Book")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="ctt3",
@@ -372,7 +334,45 @@ contabResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "bartype",
                     "pcTot",
                     "pcCol",
-                    "pcRow")))}))
+                    "pcRow")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="tabText",
+                title="Summarizing an evidential analysis",
+                clearWith=list(
+                    "varA",
+                    "data",
+                    "counts",
+                    "rows",
+                    "cols",
+                    "correction"),
+                visible="(text)"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="SupportTab",
+                title="Interpreting Support S (log LR)",
+                rows=7,
+                visible="(text)",
+                columns=list(
+                    list(
+                        `name`="SS", 
+                        `title`="S", 
+                        `type`="number"),
+                    list(
+                        `name`="LR", 
+                        `title`="LR", 
+                        `type`="number"),
+                    list(
+                        `name`="Interp", 
+                        `title`="Interpretation Comparing Hypotheses", 
+                        `type`="text"))))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="MoretabText",
+                title="More details about summaries",
+                visible="(text)",
+                refs=list(
+                    "Book")))}))
 
 contabBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "contabBase",
@@ -471,11 +471,11 @@ contabBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$freqs} \tab \tab \tab \tab \tab a proportions table \cr
 #'   \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$cttma} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$ctt3} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$barplot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$tabText} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$SupportTab} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$MoretabText} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$ctt3} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$barplot} \tab \tab \tab \tab \tab an image \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

@@ -136,10 +136,10 @@ lttestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         lttest2 = function() private$.items[["lttest2"]],
         lttestd = function() private$.items[["lttestd"]],
         tabText = function() private$.items[["tabText"]],
-        SupportTab = function() private$.items[["SupportTab"]],
-        MoretabText = function() private$.items[["MoretabText"]],
         plot = function() private$.items[["plot"]],
-        plotc = function() private$.items[["plotc"]]),
+        plotc = function() private$.items[["plotc"]],
+        SupportTab = function() private$.items[["SupportTab"]],
+        MoretabText = function() private$.items[["MoretabText"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -260,32 +260,6 @@ lttestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "data",
                     "lint"),
                 visible="(text)"))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="SupportTab",
-                title="Interpreting Support S (log LR)",
-                rows=7,
-                visible="(text)",
-                columns=list(
-                    list(
-                        `name`="SS", 
-                        `title`="S", 
-                        `type`="number"),
-                    list(
-                        `name`="LR", 
-                        `title`="LR", 
-                        `type`="number"),
-                    list(
-                        `name`="Interp", 
-                        `title`="Interpretation Comparing Hypotheses", 
-                        `type`="text"))))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="MoretabText",
-                title="More details about summaries",
-                visible="(text)",
-                refs=list(
-                    "Book")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
@@ -315,7 +289,33 @@ lttestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "lplot",
                     "plotype",
                     "supplot"),
-                visible="(pll)"))}))
+                visible="(pll)"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="SupportTab",
+                title="Interpreting Support S (log LR)",
+                rows=7,
+                visible="(text)",
+                columns=list(
+                    list(
+                        `name`="SS", 
+                        `title`="S", 
+                        `type`="number"),
+                    list(
+                        `name`="LR", 
+                        `title`="LR", 
+                        `type`="number"),
+                    list(
+                        `name`="Interp", 
+                        `title`="Interpretation Comparing Hypotheses", 
+                        `type`="text"))))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="MoretabText",
+                title="More details about summaries",
+                visible="(text)",
+                refs=list(
+                    "Book")))}))
 
 lttestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "lttestBase",
@@ -399,10 +399,10 @@ lttestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$lttest2} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$lttestd} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$tabText} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$SupportTab} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$MoretabText} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plotc} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$SupportTab} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$MoretabText} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

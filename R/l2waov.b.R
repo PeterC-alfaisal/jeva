@@ -83,7 +83,7 @@ l2waovClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         varF2name <- self$options$factor2
         vardepname <- self$options$dep
         
-
+        
         if(self$options$correction=="ob") { notext <- "S uses Occam's Bonus correction for parameters (Param). "
         } else if(self$options$correction=="aic") { notext <- "S uses AIC correction for parameters (Param). "
         } else if(self$options$correction=="aicsm") { notext <- "S uses AIC small sample correction for parameters (Param). "
@@ -264,7 +264,7 @@ l2waovClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           SS_cont1 <- sum(contrast1*means)^2/(sum(contrast1^2/(numbers)))
           LSS_c1 <- log(tss - SS_cont1)
           S_c1N <- -0.5 * N * (LSS_null - LSS_c1)
-          S_c1Nc <- S_c1N + Ac(self$options$correction,np,cp,N)
+          S_c1Nc <- S_c1N + Ac(self$options$correction,cp,np,N)
           
           # compare contrast 1 versus main effects
           S_c1M <- -0.5 * N * (LSS_c1 - LSS_main)
@@ -282,17 +282,17 @@ l2waovClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           S_c1I <- -0.5 * N * (LSS_c1 - LSS_I)
           S_c1Ic <- S_c1I + Ac(self$options$correction,cp,ip,N)
         }
+        
+        # Null versus contrast 2
+        if ( self$options$ct2 ) {
           
-          # Null versus contrast 2
-          if ( self$options$ct2 ) {
-            
-            SS_cont2 <- sum(contrast2*means)^2/(sum(contrast2^2/(numbers)))
-            LSS_c2 <- log(tss - SS_cont2)
-            S_c2N <- -0.5 * N * (LSS_null - LSS_c2)
-            S_c2Nc <- S_c2N  + Ac(self$options$correction,np,cp,N)
-            if (abs(sum(contrast2)) >= 0.03) footnote <- 1
-            # no correction necessary using contrasts
-          }
+          SS_cont2 <- sum(contrast2*means)^2/(sum(contrast2^2/(numbers)))
+          LSS_c2 <- log(tss - SS_cont2)
+          S_c2N <- -0.5 * N * (LSS_null - LSS_c2)
+          S_c2Nc <- S_c2N  + Ac(self$options$correction,cp,np,N)
+          if (abs(sum(contrast2)) >= 0.03) footnote <- 1
+          # no correction necessary using contrasts
+        }
         
         # compare contrast 1 versus contrast 2
         if ( self$options$ct1 && self$options$ct2) {
@@ -306,7 +306,7 @@ l2waovClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         res_msq <- r$m1$RSS[1]/dfres
         
         if ( self$options$ct1 ){
-          Parval_c1N <- paste0(c(np,cp), collapse = ', ')
+          Parval_c1N <- paste0(c(cp,np), collapse = ', ')
           Parval_c1M <- paste0(c(cp,mp), collapse = ', ')
           Parval_c1M1 <- paste0(c(cp,mp1), collapse = ', ')
           Parval_c1M2 <- paste0(c(cp,mp2), collapse = ', ')
@@ -315,18 +315,18 @@ l2waovClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           DFval_c1 <- paste0(c(1,r$m2$Df[4]), collapse = ', ')
           Pval_c1 <- pf(Fval_c1, 1, dfres, lower.tail = FALSE)
         }
+        
+        if ( self$options$ct2 ){        
+          Parval_c2N <- paste0(c(cp,np), collapse = ', ')
+          Fval_c2 <- unname(SS_cont2/res_msq)
+          DFval_c2 <- paste0(c(1,r$m2$Df[4]), collapse = ', ')
+          Pval_c2 <- pf(Fval_c2, 1, dfres, lower.tail = FALSE)
           
-          if ( self$options$ct2 ){        
-            Parval_c2N <- paste0(c(np,cp), collapse = ', ')
-            Fval_c2 <- unname(SS_cont2/res_msq)
-            DFval_c2 <- paste0(c(1,r$m2$Df[4]), collapse = ', ')
-            Pval_c2 <- pf(Fval_c2, 1, dfres, lower.tail = FALSE)
-            
-          }
+        }
         if ( self$options$ct1 && self$options$ct2) {
           Parval_c2 <- paste0(c(cp,cp), collapse = ', ')
         }
-          
+        
         ############################################# end old code
         if(self$options$correction=="ob") { notext <- "S uses Occam's Bonus correction for parameters (Param). "
         } else if(self$options$correction=="aic") { notext <- "S uses AIC correction for parameters (Param). "

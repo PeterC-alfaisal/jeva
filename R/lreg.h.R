@@ -122,10 +122,10 @@ lregResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         text = function() private$.items[["text"]],
         lreg = function() private$.items[["lreg"]],
         coef = function() private$.items[["coef"]],
+        plot = function() private$.items[["plot"]],
         tabText = function() private$.items[["tabText"]],
         SupportTab = function() private$.items[["SupportTab"]],
-        MoretabText = function() private$.items[["MoretabText"]],
-        plot = function() private$.items[["plot"]]),
+        MoretabText = function() private$.items[["MoretabText"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -215,6 +215,14 @@ lregResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `title`="p", 
                         `type`="number", 
                         `format`="zto,pvalue"))))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="plot",
+                title="Scatterplot with Model fits",
+                width=500,
+                height=450,
+                renderFun=".plot",
+                visible="(plt)"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="tabText",
@@ -251,15 +259,7 @@ lregResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 title="More details about summaries",
                 visible="(text)",
                 refs=list(
-                    "Book")))
-            self$add(jmvcore::Image$new(
-                options=options,
-                name="plot",
-                title="Scatterplot with Model fits",
-                width=500,
-                height=450,
-                renderFun=".plot",
-                visible="(plt)"))}))
+                    "Book")))}))
 
 lregBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "lregBase",
@@ -351,10 +351,10 @@ lregBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$lreg} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$coef} \tab \tab \tab \tab \tab a table of model coefficients \cr
+#'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$tabText} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$SupportTab} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$MoretabText} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

@@ -155,11 +155,11 @@ laov1wResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         text = function() private$.items[["text"]],
         anova = function() private$.items[["anova"]],
         desc = function() private$.items[["desc"]],
+        assump = function() private$.items[["assump"]],
+        plots = function() private$.items[["plots"]],
         tabText = function() private$.items[["tabText"]],
         SupportTab = function() private$.items[["SupportTab"]],
-        MoretabText = function() private$.items[["MoretabText"]],
-        assump = function() private$.items[["assump"]],
-        plots = function() private$.items[["plots"]]),
+        MoretabText = function() private$.items[["MoretabText"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -250,44 +250,6 @@ laov1wResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `name`="se", 
                         `title`="SE", 
                         `type`="number"))))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="tabText",
-                title="Summarizing an evidential analysis",
-                visible="(text)",
-                clearWith=list(
-                    "group",
-                    "data",
-                    "dep",
-                    "Ct1Values",
-                    "Ct2Values",
-                    "correction")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="SupportTab",
-                title="Interpreting Support S (log LR)",
-                rows=7,
-                visible="(text)",
-                columns=list(
-                    list(
-                        `name`="SS", 
-                        `title`="S", 
-                        `type`="number"),
-                    list(
-                        `name`="LR", 
-                        `title`="LR", 
-                        `type`="number"),
-                    list(
-                        `name`="Interp", 
-                        `title`="Interpretation Comparing Hypotheses", 
-                        `type`="text"))))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="MoretabText",
-                title="More details about summaries",
-                visible="(text)",
-                refs=list(
-                    "Book")))
             self$add(R6::R6Class(
                 inherit = jmvcore::Group,
                 active = list(
@@ -303,7 +265,7 @@ laov1wResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         self$add(jmvcore::Table$new(
                             options=options,
                             name="eqv",
-                            title="Homogeneity of Variances Test (Levene's)",
+                            title="Homogeneity of Variances Test (Levene)",
                             refs=list(
                                 "car",
                                 "EdwardsF"),
@@ -403,7 +365,45 @@ laov1wResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                                 requiresData=TRUE,
                                 visible="(qq)",
                                 renderFun=".qq",
-                                clearWith=list()))}))$new(options=options)))}))
+                                clearWith=list()))}))$new(options=options)))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="tabText",
+                title="Summarizing an evidential analysis",
+                visible="(text)",
+                clearWith=list(
+                    "group",
+                    "data",
+                    "dep",
+                    "Ct1Values",
+                    "Ct2Values",
+                    "correction")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="SupportTab",
+                title="Interpreting Support S (log LR)",
+                rows=7,
+                visible="(text)",
+                columns=list(
+                    list(
+                        `name`="SS", 
+                        `title`="S", 
+                        `type`="number"),
+                    list(
+                        `name`="LR", 
+                        `title`="LR", 
+                        `type`="number"),
+                    list(
+                        `name`="Interp", 
+                        `title`="Interpretation Comparing Hypotheses", 
+                        `type`="text"))))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="MoretabText",
+                title="More details about summaries",
+                visible="(text)",
+                refs=list(
+                    "Book")))}))
 
 laov1wBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "laov1wBase",
@@ -489,12 +489,12 @@ laov1wBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$anova} \tab \tab \tab \tab \tab a table of the test results \cr
 #'   \code{results$desc} \tab \tab \tab \tab \tab a table containing the group descriptives \cr
-#'   \code{results$tabText} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$SupportTab} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$MoretabText} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$assump$eqv} \tab \tab \tab \tab \tab a table of homogeneity of variances tests \cr
 #'   \code{results$assump$norm} \tab \tab \tab \tab \tab a table containing the normality tests \cr
 #'   \code{results$plots} \tab \tab \tab \tab \tab an array of groups of plots \cr
+#'   \code{results$tabText} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$SupportTab} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$MoretabText} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

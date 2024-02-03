@@ -159,11 +159,11 @@ lcorrResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         text = function() private$.items[["text"]],
         lcor = function() private$.items[["lcor"]],
         lcor1 = function() private$.items[["lcor1"]],
+        plotc = function() private$.items[["plotc"]],
+        plot = function() private$.items[["plot"]],
         tabText = function() private$.items[["tabText"]],
         SupportTab = function() private$.items[["SupportTab"]],
-        MoretabText = function() private$.items[["MoretabText"]],
-        plotc = function() private$.items[["plotc"]],
-        plot = function() private$.items[["plot"]]),
+        MoretabText = function() private$.items[["MoretabText"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -263,6 +263,39 @@ lcorrResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     list(
                         `name`="Upper", 
                         `type`="number"))))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="plotc",
+                title="`Likelihood curve with S-{lint} support interval`",
+                width=500,
+                height=400,
+                clearWith=list(
+                    "depa",
+                    "depb",
+                    "alt",
+                    "data",
+                    "lint",
+                    "logplot",
+                    "lplot",
+                    "plotype",
+                    "supplot"),
+                renderFun=".plotc",
+                visible="(pll)"))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="plot",
+                title="Scatterplot",
+                width=500,
+                height=450,
+                clearWith=list(
+                    "depa",
+                    "depb",
+                    "data",
+                    "lint",
+                    "line",
+                    "se"),
+                renderFun=".plot",
+                visible="(plt)"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="tabText",
@@ -300,40 +333,7 @@ lcorrResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 title="More details about summaries",
                 visible="(text)",
                 refs=list(
-                    "Book")))
-            self$add(jmvcore::Image$new(
-                options=options,
-                name="plotc",
-                title="`Likelihood curve with S-{lint} support interval`",
-                width=500,
-                height=400,
-                clearWith=list(
-                    "depa",
-                    "depb",
-                    "alt",
-                    "data",
-                    "lint",
-                    "logplot",
-                    "lplot",
-                    "plotype",
-                    "supplot"),
-                renderFun=".plotc",
-                visible="(pll)"))
-            self$add(jmvcore::Image$new(
-                options=options,
-                name="plot",
-                title="Scatterplot",
-                width=500,
-                height=450,
-                clearWith=list(
-                    "depa",
-                    "depb",
-                    "data",
-                    "lint",
-                    "line",
-                    "se"),
-                renderFun=".plot",
-                visible="(plt)"))}))
+                    "Book")))}))
 
 lcorrBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "lcorrBase",
@@ -422,11 +422,11 @@ lcorrBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$lcor} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$lcor1} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$plotc} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$tabText} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$SupportTab} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$MoretabText} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$plotc} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
