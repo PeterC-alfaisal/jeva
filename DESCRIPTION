@@ -1,7 +1,7 @@
 Package: jeva
 Type: Package
 Title: Evidential Analyses for Common Statistical Tests
-Version: 0.0.9
+Version: 0.1.0
 Author: Peter Cahusac
 Maintainer: Peter Cahusac <peteqsac@gmail.com>
 Description: Jamovi analyses that calculate the log likelihood (support) for a 
@@ -12,5 +12,5 @@ Description: Jamovi analyses that calculate the log likelihood (support) for a
 License: GPL-2
 Encoding: UTF-8
 LazyData: true
-Imports: jmvcore (>= 0.8.5), R6, ggplot2, graphics, stats, knitr, car
+Imports: jmvcore (>= 0.8.5), R6, ggplot2, graphics, stats, knitr, car, scales
 RoxygenNote: 7.2.3
