@@ -64,11 +64,11 @@ A results object containing:
   \code{results$lrttest} \tab \tab \tab \tab \tab a table \cr
   \code{results$lrttest2} \tab \tab \tab \tab \tab a table \cr
   \code{results$lrttestd} \tab \tab \tab \tab \tab a table \cr
+  \code{results$plot} \tab \tab \tab \tab \tab an image \cr
+  \code{results$plotc} \tab \tab \tab \tab \tab an image \cr
   \code{results$tabText} \tab \tab \tab \tab \tab a html \cr
   \code{results$SupportTab} \tab \tab \tab \tab \tab a table \cr
   \code{results$MoretabText} \tab \tab \tab \tab \tab a html \cr
-  \code{results$plot} \tab \tab \tab \tab \tab an image \cr
-  \code{results$plotc} \tab \tab \tab \tab \tab an image \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

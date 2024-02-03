@@ -70,11 +70,11 @@ A results object containing:
   \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
   \code{results$lcor} \tab \tab \tab \tab \tab a table \cr
   \code{results$lcor1} \tab \tab \tab \tab \tab a table \cr
+  \code{results$plotc} \tab \tab \tab \tab \tab an image \cr
+  \code{results$plot} \tab \tab \tab \tab \tab an image \cr
   \code{results$tabText} \tab \tab \tab \tab \tab a html \cr
   \code{results$SupportTab} \tab \tab \tab \tab \tab a table \cr
   \code{results$MoretabText} \tab \tab \tab \tab \tab a html \cr
-  \code{results$plotc} \tab \tab \tab \tab \tab an image \cr
-  \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

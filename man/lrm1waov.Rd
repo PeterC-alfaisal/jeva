@@ -9,7 +9,6 @@ lrm1waov(
   rm = list(list(label = "RM Factor 1", levels = list("Level 1", "Level 2"))),
   rmCells = NULL,
   bs = NULL,
-  cov = NULL,
   ct1 = FALSE,
   Ct1Values = "1,-1,...",
   ct2 = FALSE,
@@ -48,11 +47,7 @@ repeated measures factor}
 combination of levels from \code{rm} that it belongs to (as a vector of
 strings) defined as \code{cell}}
 
-\item{bs}{a vector of strings naming the between subjects factors from
-\code{data}}
-
-\item{cov}{a vector of strings naming the covariates from \code{data}.
-Variables must be numeric}
+\item{bs}{a string naming the between subjects factor from \code{data}}
 
 \item{ct1}{\code{TRUE} or \code{FALSE} (default), for contrast 1}
 

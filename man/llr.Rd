@@ -114,12 +114,12 @@ A results object containing:
   \code{results$ctt} \tab \tab \tab \tab \tab a table \cr
   \code{results$cttma} \tab \tab \tab \tab \tab a table \cr
   \code{results$ctt2} \tab \tab \tab \tab \tab a table \cr
-  \code{results$tabText} \tab \tab \tab \tab \tab a html \cr
-  \code{results$SupportTab} \tab \tab \tab \tab \tab a table \cr
-  \code{results$MoretabText} \tab \tab \tab \tab \tab a html \cr
   \code{results$ctt3} \tab \tab \tab \tab \tab a table \cr
   \code{results$plotc} \tab \tab \tab \tab \tab an image \cr
   \code{results$barplot} \tab \tab \tab \tab \tab an image \cr
+  \code{results$tabText} \tab \tab \tab \tab \tab a html \cr
+  \code{results$SupportTab} \tab \tab \tab \tab \tab a table \cr
+  \code{results$MoretabText} \tab \tab \tab \tab \tab a html \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
