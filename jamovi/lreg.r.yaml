@@ -73,6 +73,15 @@ items:
           type: number
           format: zto,pvalue
 
+    - name: plot
+      title: Scatterplot with Model fits
+      type: Image
+      width:  500
+      height: 450
+      renderFun: .plot
+      visible: (plt)
+
+
     - name: tabText
       title: 'Summarizing an evidential analysis'
       type: Html
@@ -108,13 +117,4 @@ items:
       visible: (text)
       refs: 
           - Book
-
-    - name: plot
-      title: Scatterplot with Model fits
-      type: Image
-      width:  500
-      height: 450
-      renderFun: .plot
-      visible: (plt)
-
 ...

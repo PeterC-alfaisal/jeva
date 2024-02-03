@@ -99,31 +99,6 @@ items:
           - lint
       visible: (text)
 
-    - name:  SupportTab
-      title: Interpreting Support S (log LR)
-      type: Table
-      rows:  7
-      visible: (text)
-      columns:
-        - name: SS
-          title: S
-          type: number
-
-        - name: LR
-          title: LR
-          type: number
-
-        - name: Interp
-          title: 'Interpretation Comparing Hypotheses'
-          type: text
-
-    - name: MoretabText
-      title: 'More details about summaries'
-      type: Html
-      visible: (text)
-      refs: 
-          - Book
-
     - name: plot
       title: '`Mean with S-{lint} support interval`'
       type: Image
@@ -154,4 +129,28 @@ items:
         - supplot
       visible: (pll)
 
+    - name:  SupportTab
+      title: Interpreting Support S (log LR)
+      type: Table
+      rows:  7
+      visible: (text)
+      columns:
+        - name: SS
+          title: S
+          type: number
+
+        - name: LR
+          title: LR
+          type: number
+
+        - name: Interp
+          title: 'Interpretation Comparing Hypotheses'
+          type: text
+
+    - name: MoretabText
+      title: 'More details about summaries'
+      type: Html
+      visible: (text)
+      refs: 
+          - Book
 ...

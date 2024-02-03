@@ -62,43 +62,6 @@ items:
             - Edwards_OR
             - Glover_Tut
 
-    - name: tabText
-      title: 'Summarizing an evidential analysis'
-      type: Html
-      clearWith:
-          - varA
-          - data
-          - counts
-          - rows
-          - cols
-          - correction
-      visible: (text)
-
-    - name:  SupportTab
-      title: Interpreting Support S (log LR)
-      type: Table
-      rows:  7
-      visible: (text)
-      columns:
-        - name: SS
-          title: S
-          type: number
-
-        - name: LR
-          title: LR
-          type: number
-
-        - name: Interp
-          title: 'Interpretation Comparing Hypotheses'
-          type: text
-
-    - name: MoretabText
-      title: 'More details about summaries'
-      type: Html
-      visible: (text)
-      refs: 
-          - Book
-
     - name:  ctt3
       title: Variance analysis versus Null model
       type: Table
@@ -152,4 +115,41 @@ items:
         - pcTot
         - pcCol
         - pcRow
+
+    - name: tabText
+      title: 'Summarizing an evidential analysis'
+      type: Html
+      clearWith:
+          - varA
+          - data
+          - counts
+          - rows
+          - cols
+          - correction
+      visible: (text)
+
+    - name:  SupportTab
+      title: Interpreting Support S (log LR)
+      type: Table
+      rows:  7
+      visible: (text)
+      columns:
+        - name: SS
+          title: S
+          type: number
+
+        - name: LR
+          title: LR
+          type: number
+
+        - name: Interp
+          title: 'Interpretation Comparing Hypotheses'
+          type: text
+
+    - name: MoretabText
+      title: 'More details about summaries'
+      type: Html
+      visible: (text)
+      refs: 
+          - Book
 ...

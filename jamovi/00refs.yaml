@@ -9,6 +9,17 @@ refs:
         publisher: Clarendon Press
         ISBN: 978-0198522034
         url: https://www.amazon.com/Statistical-Modelling-GLIM-Oxford-Science-dp-0198522037/dp/0198522037
+        
+        
+        
+
+    ILR:
+        type: 'book'
+        title: Evidence Syntheses Appendix E
+        year: 2015
+        author: Berkman ND, Wallace I, Watson L, et al
+        publisher:  NLM
+        url: https://www.ncbi.nlm.nih.gov/books/NBK305683/#appe.s2
 
     Book:
         type: 'book'
@@ -162,6 +173,19 @@ refs:
        year: 2015
        type: Book Section
 
+    Fagan:
+       author: Fagan, T. F.
+       title: Nomogram for Bayes theorem
+       journal: The New England Journal of Medicine
+       volume: 293
+       number: 5
+       pages: 257-257
+       ISSN: 0028-4793
+       DOI: 10.1056/nejm197507312930513
+       url: https://doi.org/10.1056/nejm197507312930513
+       year: 1975
+       type: Journal Article
+
     Glover_Tut:
        author: Glover, S.
        title: Likelihood Ratios; A Tutorial
@@ -298,6 +322,19 @@ refs:
        DOI: 10.1111/1467-9868.00392
        url: http://dx.doi.org/10.1111/1467-9868.00392
        year: 2003
+       type: Journal Article
+
+    Youden:
+       author: Youden, W. J.
+       title: Index for rating diagnostic tests
+       journal: Cancer
+       volume: 3
+       number: 1
+       pages: 32-35
+       ISSN: 0008-543X
+       DOI: 10.1002/1097-0142(1950)3:1<32::AID-CNCR2820030106>3.0.CO;2-3
+       url: https://doi.org/10.1002/1097-0142(1950)3:1<32::AID-CNCR2820030106>3.0.CO;2-3
+       year: 1950
        type: Journal Article
 
     emmeans:

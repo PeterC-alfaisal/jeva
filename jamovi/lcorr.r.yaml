@@ -81,6 +81,40 @@ items:
         - name: Upper
           type: number
 
+    - name: plotc
+      title: '`Likelihood curve with S-{lint} support interval`'
+      type: Image
+      width:  500
+      height: 400
+      clearWith:
+        - depa
+        - depb
+        - alt
+        - data
+        - lint
+        - logplot
+        - lplot
+        - plotype
+        - supplot
+      renderFun: .plotc
+      visible: (pll)
+
+    - name: plot
+      title: Scatterplot
+      type: Image
+      width:  500
+      height: 450
+      clearWith:
+        - depa
+        - depb
+        - data
+        - lint
+        - line
+        - se
+      renderFun: .plot
+      visible: (plt)
+
+
     - name: tabText
       title: 'Summarizing an evidential analysis'
       type: Html
@@ -117,38 +151,4 @@ items:
       visible: (text)
       refs: 
           - Book
-
-    - name: plotc
-      title: '`Likelihood curve with S-{lint} support interval`'
-      type: Image
-      width:  500
-      height: 400
-      clearWith:
-        - depa
-        - depb
-        - alt
-        - data
-        - lint
-        - logplot
-        - lplot
-        - plotype
-        - supplot
-      renderFun: .plotc
-      visible: (pll)
-
-    - name: plot
-      title: Scatterplot
-      type: Image
-      width:  500
-      height: 450
-      clearWith:
-        - depa
-        - depb
-        - data
-        - lint
-        - line
-        - se
-      renderFun: .plot
-      visible: (plt)
-
 ...

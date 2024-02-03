@@ -1,12 +1,12 @@
 ---
 title: Evidential Analyses for Common Statistical Analyses
 name: jeva
-version: 0.0.9
+version: 0.1.0
 jms: '1.0'
 authors:
   - Peter Cahusac
 maintainer: Peter Cahusac <peteqsac@gmail.com>
-date: '2023-04-29'
+date: '2024-02-03'
 type: R
 description: >-
   Analyses that calculate the log likelihood ratio (support) for a  range of
@@ -168,20 +168,14 @@ analyses:
       Paired samples analysis (McNemar test) where null and alternative odds can
       be specified.
     menuSubtitle: McNemar test
-  - title: Polynomial Regression
-    name: lreg
+  - title: Diagnostic Test
+    name: ldiag
     ns: jeva
     menuGroup: jeva
-    menuSubgroup: Regression & Correlation
-    menuTitle: Polynomial Regression
-    description: >
-      Polynomial regression of two variables where different orders are
-      compared. Akaike corrected support values are calculated hierarchically.
-      R-squared and AIC values are given. P values are calculated in the usual
-      way from the residual mean sums of squares from the highest polynomial in
-      the model, but these are not comparable with the support values. Model
-      coefficients are given with their specified likelihood support level.
-      Plots for different polynomial orders can be plotted. 
+    menuSubgroup: Categorical Data
+    menuTitle: Diagnostic Test
+    description: |
+      Analysis of a 2 x 2 contingency table using diagnostic test
 datasets:
   - name: independent_samples_t
     path: independent_samples_t.csv
@@ -250,6 +244,11 @@ datasets:
     description: Allergic reaction to two handcreams
     tags:
       - McNemar Test
+  - name: diagnostic
+    path: CT_scan_diagnosis.csv
+    description: Detection of disease by CT scan versus final diagnosis
+    tags:
+      - Diagnostic Test
 usesNative: true
 minApp: 1.0.8
 

@@ -1,0 +1,385 @@
+---
+name:  ldiag
+title: Diagnostic Test
+menuGroup: jeva
+menuSubgroup: Categorical Data
+menuTitle: Diagnostic Test
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: |
+        Analysis of a 2 x 2 contingency table using diagnostic test
+    R:
+        dontrun: false
+        usage: |
+            dat <- data.frame(
+              CT_scan = c('+', '+', '-', '-'),
+              Final_diagnosis = c('+', '-','+', '-'),
+              count = c(52, 11, 37, 100),
+              check.names=FALSE)
+            
+              jeva::ldiag(formula = count ~ CT_scan:Final_diagnosis, data = dat, text = FALSE)
+          # DIAGNOSTIC TEST
+          #
+          # Contingency Tables                
+          # ───────────────────────────────── 
+          #   CT_scan    -      +     Total   
+          # ───────────────────────────────── 
+          #   -          100    37      137   
+          #   +           11    52       63   
+          #   Total      111    89      200   
+          # ───────────────────────────────── 
+          #
+          #
+          # Diagnostic statistics                                                                                                         
+          # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+          #   Statistic    LR          Neg LR       Accuracy     Odds Ratio    Prevalence    PPV          NPV          Youden's index J   
+          # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+          #   Value        2.167032    0.1696119    0.7600000      12.77641     0.5550000    0.7299270    0.8253968           0.4851706   
+          # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+          #
+          #
+          # Support: Diagnostic statistics                                                                             
+          # ────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+          #                        Value        Difference     S              Param    G            df    p            
+          # ────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+          #   H₀ vs Sensitivity    0.5000000    -0.40090090    -40.5753513     1, 2    82.150703     1    < .0000001   
+          #   H₀ vs Specificity    0.5000000    -0.08426966     -0.7700983     1, 2     2.540197     1     0.1109810   
+          # ────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+          #   Note. S uses Occam's Bonus correction for parameters (Param).
+          #
+          #
+          # Intervals for Sensitivity                                            
+          # ──────────────────────────────────────────────────────────────────── 
+          #   Type of interval    Level    Value        Lower        Upper       
+          # ──────────────────────────────────────────────────────────────────── 
+          #   Support             2        0.9009009    0.8347795    0.9480215   
+          #   Likelihood-based    95%      0.9009009    0.8362807    0.9472634   
+          # ──────────────────────────────────────────────────────────────────── 
+          #
+          #
+          # Intervals for Specificity                                              
+          # ────────────────────────────────────────────────────────────────────── 
+          #   Type of interval      Level    Value        Lower        Upper       
+          # ────────────────────────────────────────────────────────────────────── 
+          #   Support               2        0.5842697    0.4784431    0.6851143   
+          #   Likelihood-based ᵃ    95%      0.5842697    0.4805649    0.6831872   
+          # ────────────────────────────────────────────────────────────────────── 
+          #   ᵃ See reference Pritikin et al (2017), such intervals are more
+          #   accurate and are parameterization-invariant compared to
+          #   conventional confidence intervalsompleteWhenFilled: true
+
+formula:
+    counts:
+        from: lhs
+        type: vars
+        subset: 1
+    rows:
+        from: rhs
+        type: vars
+        subset: 1
+    cols:
+        from: rhs
+        type: vars
+        subset: 2
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    - name: rows
+      title: Rows - Test Results
+      type: Variable
+      suggested:
+        - nominal
+        - ordinal
+      permitted:
+        - factor
+      description:
+          R: >
+              the variable to use as the rows in the contingency table (not
+              necessary when providing a formula, see the examples)
+
+    - name: cols
+      title: Columns - Final Diagnosis/Gold Standard
+      type: Variable
+      suggested:
+        - nominal
+        - ordinal
+      permitted:
+        - factor
+      description:
+          R: >
+              the variable to use as the columns in the contingency table (not
+              necessary when providing a formula, see the examples)
+
+    - name: counts
+      title: Counts (optional)
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      default:
+      description:
+          R: >
+              the variable to use as the counts in the contingency table (not
+              necessary when providing a formula, see the examples)
+
+
+    - name: nulsens
+      title: '<i>H</i>₀ Sensitivity'
+      type: Number
+      min: 0
+      max: 10e+10
+      default: 0.5
+      description:
+          R: >
+              value for the null hypothesis, default = 0.5
+      
+    - name: nulspec
+      title: '<i>H</i>₀ Specificity'
+      type: Number
+      min: 0
+      max: 1
+      default: 0.5
+      description:
+          R: >
+              value for the alternative hypothesis, default = 0.5
+
+    - name: pprob
+      title: Prior probability (Prevalence)
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), select the prior probability or prevalence
+    - name: ppval
+      type: Number
+      title: Enter value
+      min: 0
+      max: 1
+      default: 0.1
+      description:
+          R: >
+            To set the prior probability/prevalence
+
+    - name: lint
+      type: Number
+      title: Likelihood interval support level
+      min: 1
+      max: 100
+      default: 2
+      description:
+          R: >
+            likelihood interval given as support value, e.g. 2 or 3, default = 2
+      
+    - name: ciWidth
+      title: Likelihood-based confidence interval
+      type: Number
+      min: 50
+      max: 99.9999
+      default: 95
+      description:
+          R: >
+            a number between 50 and 99.9 (default: 95), width of the confidence
+            intervals to provide
+      
+    - name: correction
+      title: Correction for parameters
+      type: List
+      options:
+        - name: nc
+          title: "None"
+        - name: ob
+          title: "Occam's Bonus"
+        - name: aic
+          title: "AIC"
+      default: ob
+      description:
+          R: >
+            correction for parameters, none, Occam's bonus (default) or AIC
+
+    - name: fagan
+      title: ''
+      type: Bool
+      default: false
+      
+    - name: pll
+      title: Likelihood function
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), give the likelihood function showing null hypothesis (black line), 
+            alternative hypothesis (blue line), mean (dashed line), and specified support interval 
+            (horizontal red line)
+
+    - name: plotype
+      type: List
+      options:
+        - name: lplot
+          title: "Likelihood function"
+        - name: logplot
+          title: "Support function"
+      default: lplot
+      description:
+          R: >
+            choose type of plot, likelihood function (default), support function
+
+    - name: supplot
+      type: Number
+      title: Minimum LL display value
+      min: -200
+      max: -1
+      default: -10
+      description:
+          R: >
+            To set the minimum likelihood display value in plot, in log units (default = -10) 
+            affects the x-axis range
+
+    - name: choice
+      type: List
+      options:
+        - name: sens_plot
+          title: "Sensitivity plot"
+        - name: spec_plot
+          title: "Specificity plot"
+      default: sens_plot
+      description:
+          R: >
+            choose to show likelihood function for sensitivity (default) or specificity
+
+    - name: varA
+      title: Variance analysis
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), perform variance analysis for null and alternative hypothesis
+
+    - name: cc
+      title: χ² continuity correction
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), use continuity correction
+
+    - name: text
+      title: Explanatory text
+      type: Bool
+      default: true
+      description:
+          R: >
+            `TRUE` (default) or `FALSE`, how to report the results
+
+    - name: obs
+      title: Observed counts
+      type: Bool
+      default: true
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), provide the observed counts
+
+    - name: exp
+      title: Expected counts
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), provide the expected counts
+
+    - name: pcRow
+      title: Row
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), provide row percentages
+
+    - name: pcCol
+      title: Column
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), provide column percentages
+
+    - name: pcTot
+      title: Total
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), provide total percentages
+
+    - name: barplot
+      title: Bar Plot
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), show barplots
+
+    - name: yaxis
+      title: Y-axis
+      type: List
+      options:
+        - name: ycounts
+          title: "Counts"
+        - name: ypc
+          title: "Percentages"
+      default: ycounts
+      description:
+          R: >
+            ycounts (default) or ypc. Use respectively `counts` or `percentages`
+            for the bar plot y-axis
+
+    - name: yaxisPc
+      title: ''
+      type: List
+      options:
+        - name: total_pc
+          title: "of total"
+        - name: column_pc
+          title: "within column"
+        - name: row_pc
+          title: "within rows"
+      default: total_pc
+      description:
+          R: >
+            total_pc (default), column_pc, or row_pc. Use respectively
+            percentages `of total`, `within columns`, or `within rows` for the
+            bar plot y-axis.
+
+    - name: xaxis
+      title: X-axis
+      type: List
+      options:
+        - name: xrows
+          title: "Rows"
+        - name: xcols
+          title: "Columns"
+      default: xrows
+      description:
+          R: >
+            rows (default), or columns in bar plot X axis
+
+    - name: bartype
+      title: Bar Type
+      type: List
+      options:
+        - name: dodge
+          title: "Side by side"
+        - name: stack
+          title: "Stacked"
+      default: dodge
+      description:
+          R: >
+            stack or side by side (default), barplot type
+
+...

@@ -95,6 +95,38 @@ items:
         - name: SE
           type: number
 
+    - name: plot
+      title: '`Mean difference with S-{lint} support interval`'
+      type: Image
+      width:  400
+      height: 300
+      renderFun: .plot
+      clearWith:
+          - depb
+          - depa
+          - data
+          - lint
+      visible: (plt)
+
+    - name: plotc
+      title: '`Likelihood curve with S-{lint} support interval`'
+      type: Image
+      width:  500
+      height: 400
+      renderFun: .plotc
+      clearWith:
+          - depb
+          - depa
+          - nul
+          - alt
+          - data
+          - lint
+          - logplot
+          - lplot
+          - plotype
+          - supplot
+      visible: (pll)
+
     - name: tabText
       title: 'Summarizing an evidential analysis'
       type: Html
@@ -132,37 +164,4 @@ items:
       visible: (text)
       refs: 
           - Book
-
-    - name: plot
-      title: '`Mean difference with S-{lint} support interval`'
-      type: Image
-      width:  400
-      height: 300
-      renderFun: .plot
-      clearWith:
-          - depb
-          - depa
-          - data
-          - lint
-      visible: (plt)
-
-    - name: plotc
-      title: '`Likelihood curve with S-{lint} support interval`'
-      type: Image
-      width:  500
-      height: 400
-      renderFun: .plotc
-      clearWith:
-          - depb
-          - depa
-          - nul
-          - alt
-          - data
-          - lint
-          - logplot
-          - lplot
-          - plotype
-          - supplot
-      visible: (pll)
-
 ...

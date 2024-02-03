@@ -1,11 +1,11 @@
 ---
-name:  ctt
-title: Odds Ratio
+name:  ldiag
+title: Diagnostic Test
 jrs:   '1.1'
 
 items:
     - name: freqs
-      title: Contingency Table
+      title: Contingency Tables
       type: Table
       description: a table of proportions
       columns: [ ]
@@ -14,31 +14,75 @@ items:
         - cols
         - counts
 
+    - name:  stats
+      title: Diagnostic Statistics
+      type: Table
+      rows:  1
+      refs:
+        - Youden
+      clearWith:
+        - rows
+        - cols
+        - counts
+        - data
+        - nulsens
+        - nulspec
+        - ppval
+        - pprob
+      columns:
+        - name: var
+          title: 'Statistic'
+          type: text
+        - name: LR
+          title: LR
+          type: number
+        - name: NLR
+          title: Neg LR
+          type: number
+        - name: Acc
+          title: Accuracy
+          type: number
+        - name: OR
+          title: Odds Ratio
+          type: number
+        - name: Prev
+          title: Prevalence
+          type: number
+        - name: PPV
+          title: PPV
+          type: number
+        - name: NPV
+          title: NPV
+          type: number
+        - name: Youd
+          title: "Youden's index J"
+          type: number
+
     - name:  text
       title: Log likelihood ratio analysis
       type:  Preformatted
 
     - name:  ctt
-      title: Odds Ratio analyses
+      title: Diagnostic analyses
       type: Table
-      rows:  3
+      rows:  2
       refs:
-        - Glover_Tut
+        - Book
+        - Hawass
         - Edwards_OR
       clearWith:
         - rows
         - cols
         - counts
         - data
-        - nul
-        - alt
-        - correction
+        - nulsens
+        - nulspec
       columns:
         - name: var
           title: ''
           type: text
         - name: Value
-          title: OR Value
+          title: Value
           type: number
         - name: ordiff
           title: Difference
@@ -59,45 +103,8 @@ items:
           type: number
           format: zto,pvalue
 
-    - name:  cttma
-      title: Marginal main effects and interaction analyses
-      type: Table
-      rows:  4
-      clearWith:
-        - rows
-        - cols
-        - counts
-        - data
-        - correction
-      columns:
-        - name: var
-          title: Component
-          type: text
-        - name: Value
-          title: Expected value
-          type: number
-        - name: S
-          title: S
-          type: number
-        - name: Param
-          type: number
-        - name: G
-          title: G
-          type: number
-        - name: df
-          title: df
-          type: number
-        - name: p
-          title: p
-          type: number
-          format: zto,pvalue
-          refs:
-            - Glover_Tut
-            - Edwards_OR
-            - EdwardsCT
-
-    - name:  ctt2
-      title: Intervals for OR
+    - name:  cttsens
+      title: Intervals for Sensitivity
       type: Table
       rows:  2
       clearWith:
@@ -113,8 +120,33 @@ items:
           type: text
         - name: Level
           type: text
-        - name: OR
-          title: OR
+        - name: sens
+          title: Value
+          type: number
+        - name: Lower
+          type: number
+        - name: Upper
+          type: number
+
+    - name:  cttspec
+      title: Intervals for Specificity
+      type: Table
+      rows:  2
+      clearWith:
+        - rows
+        - cols
+        - counts
+        - data
+        - lint
+        - ciWidth
+      columns:
+        - name: Interval
+          title: Type of interval
+          type: text
+        - name: Level
+          type: text
+        - name: spec
+          title: Value
           type: number
         - name: Lower
           type: number
@@ -158,7 +190,7 @@ items:
               - EdwardsVA
 
     - name: plotc
-      title: '`Likelihood curve for OR with S-{lint} support interval`'
+      title: '`Likelihood curve for Sensitivity/Specificity with S-{lint} support interval`'
       type: Image
       width:  500
       height: 400
@@ -169,11 +201,32 @@ items:
         - counts
         - data
         - lint
-        - nul
-        - alt
+        - ciWidth
+        - nulsens
+        - nulspec
         - plotype
         - supplot
+        - choice
       visible: (pll)
+
+    - name: plot1
+      title: 'Fagan Nomogram'
+      type: Image
+      width:  600
+      height: 450
+      renderFun: .plot1
+      requiresData: true
+      visible: (fagan)
+      clearWith:
+          - rows
+          - cols
+          - counts
+          - data
+          - prev
+          - pprob
+          - ppval
+      refs:
+        - Fagan
 
     - name: barplot
       title: Plots
@@ -196,17 +249,22 @@ items:
         - pcCol
         - pcRow
 
+
     - name: tabText
       title: 'Summarizing an evidential analysis'
       type: Html
       visible: (text)
+      refs:
+          - ILR
       clearWith:
         - rows
         - cols
         - counts
         - data
-        - correction
         - lint
+        - ciWidth
+        - nulsens
+        - nulspec
 
     - name:  SupportTab
       title: Interpreting Support S (log LR)

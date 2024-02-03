@@ -83,49 +83,12 @@ items:
           title: SE
           type: number
 
-    - name: tabText
-      title: 'Summarizing an evidential analysis'
-      type: Html
-      visible: (text)
-      clearWith:
-        - group
-        - data
-        - dep
-        - Ct1Values
-        - Ct2Values
-        - correction
-
-    - name:  SupportTab
-      title: Interpreting Support S (log LR)
-      type: Table
-      rows:  7
-      visible: (text)
-      columns:
-        - name: SS
-          title: S
-          type: number
-
-        - name: LR
-          title: LR
-          type: number
-
-        - name: Interp
-          title: 'Interpretation Comparing Hypotheses'
-          type: text
-
-    - name: MoretabText
-      title: 'More details about summaries'
-      type: Html
-      visible: (text)
-      refs: 
-          - Book
-
     - name: assump
       title: Assumption Checks
       type: Group
       items:
         - name: eqv
-          title: Homogeneity of Variances Test (Levene's)
+          title: Homogeneity of Variances Test (Levene)
           type: Table
           description: a table of homogeneity of variances tests
           refs: 
@@ -222,4 +185,41 @@ items:
               renderFun: .qq
               clearWith: []
 
+
+    - name: tabText
+      title: 'Summarizing an evidential analysis'
+      type: Html
+      visible: (text)
+      clearWith:
+        - group
+        - data
+        - dep
+        - Ct1Values
+        - Ct2Values
+        - correction
+
+    - name:  SupportTab
+      title: Interpreting Support S (log LR)
+      type: Table
+      rows:  7
+      visible: (text)
+      columns:
+        - name: SS
+          title: S
+          type: number
+
+        - name: LR
+          title: LR
+          type: number
+
+        - name: Interp
+          title: 'Interpretation Comparing Hypotheses'
+          type: text
+
+    - name: MoretabText
+      title: 'More details about summaries'
+      type: Html
+      visible: (text)
+      refs: 
+          - Book
 ...
