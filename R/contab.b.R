@@ -219,15 +219,12 @@ contabClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           jmvcore::reject(.("Row variable '{var}' contains fewer than 2 levels"), code='', var=rowVarName)
         if (nlevels(data[[colVarName]]) < 2)
           jmvcore::reject(.("Column variable '{var}' contains fewer than 2 levels"), code='', var=colVarName)
-        
-        if ( ! is.null(countsName)) {
-          countCol <- data[[countsName]]
-          if (any(countCol < 0, na.rm=TRUE))
-            jmvcore::reject(.('Counts may not be negative'))
-          if (any(is.infinite(countCol)))
-            jmvcore::reject(.('Counts may not be infinite'))
-        }
-        
+
+        if (any(data$.COUNTS < 0, na.rm=TRUE))
+          jmvcore::reject(.('Counts may not be negative'))
+        if (any(is.infinite(data$.COUNTS)))
+          jmvcore::reject(.('Counts may not be infinite'))
+
         freqs <- self$results$freqs
         
         freqRowNo <- 1
@@ -240,6 +237,18 @@ contabClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         nCols  <- base::nlevels(data[[colVarName]])
         nCells <- nRows * nCols
         
+
+        # set state for plot
+        if (self$options$barplot) {
+          countsDF <- as.data.frame(mats[[1]])
+          expand <- list()
+          for (v in c(rowVarName, colVarName))
+            expand[[v]] <- base::levels(data[[v]])
+          tab <- expand.grid(expand)
+          tab$Counts <- countsDF$Freq
+          self$results$barplot$setState(tab)
+        }
+
         for (mat in mats) {
           
           suppressWarnings({
@@ -493,25 +502,9 @@ contabClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         
         if (is.null(rowVarName) || is.null(colVarName))
           return()
-        
-        data <- private$.cleanData()
-        data <- na.omit(data)
-        
-        if (! is.null(countsName)){
-          untable <- function (df, counts) df[rep(1:nrow(df), counts), ]
-          data <- untable(data[, c(rowVarName, colVarName)], counts=data[, countsName])
-        }
-        
-        formula <- jmvcore::composeFormula(NULL, c(rowVarName, colVarName))
-        counts <- xtabs(formula, data)
-        d <- dim(counts)
-        
-        expand <- list()
-        for (i in c(rowVarName, colVarName))
-          expand[[i]] <- base::levels(data[[i]])
-        tab <- expand.grid(expand)
-        tab$Counts <- as.numeric(counts)
-        
+
+        tab <- image$state
+
         if (self$options$yaxis == "ypc") { # percentages
           props <- counts
           
@@ -565,16 +558,22 @@ contabClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         colVarName <- self$options$cols
         layerNames <- NULL
         countsName <- self$options$counts
-        
+        weights <- attr(data, 'jmv-weights')
+
         if ( ! is.null(rowVarName))
           data[[rowVarName]] <- as.factor(data[[rowVarName]])
         if ( ! is.null(colVarName))
           data[[colVarName]] <- as.factor(data[[colVarName]])
         for (layerName in layerNames)
           data[[layerName]] <- as.factor(data[[layerName]])
-        if ( ! is.null(countsName))
-          data[[countsName]] <- jmvcore::toNumeric(data[[countsName]])
-        
+        if ( ! is.null(countsName)) {
+          data$.COUNTS <- jmvcore::toNumeric(data[[countsName]])
+        } else if ( ! is.null(weights)) {
+          data$.COUNTS <- weights
+        } else {
+          data$.COUNTS <- rep(1, nrow(data))
+        }
+
         data
       },
       
@@ -588,14 +587,8 @@ contabClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         countsName <- self$options$counts
         
         if (length(layerNames) == 0) {
-          
-          subData <- jmvcore::select(data, c(rowVarName, colVarName))
-          
-          if (is.null(countsName))
-            .COUNTS <- rep(1, nrow(subData))
-          else
-            .COUNTS <- jmvcore::toNumeric(data[[countsName]])
-          
+
+          subData <- jmvcore::select(data, c('.COUNTS', rowVarName, colVarName))
           matrices <- list(ftable(xtabs(.COUNTS ~ ., data=subData)))
           
         } else {
@@ -606,12 +599,6 @@ contabClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           tables <- lapply(dataList, function(x) {
             
             xTemp <- jmvcore::select(x, c(rowVarName, colVarName))
-            
-            if (is.null(countsName))
-              .COUNTS <- rep(1, nrow(xTemp))
-            else
-              .COUNTS <- jmvcore::toNumeric(x[[countsName]])
-            
             ftable(xtabs(.COUNTS ~ ., data=xTemp))
           })
           
