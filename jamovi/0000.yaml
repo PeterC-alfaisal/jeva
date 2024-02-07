@@ -177,74 +177,74 @@ analyses:
     description: |
       Analysis of a 2 x 2 contingency table using diagnostic test
 datasets:
-  - name: independent_samples_t
+  - name: Independent Samples t
     path: independent_samples_t.csv
     description: 'Additional hours sleep in M & F, given either drug A'
     tags:
       - Independent Samples T-Test
-  - name: paired_samples_t
+  - name: Paired Samples t
     path: paired_samples_t.csv
     description: Additional hours sleep given drugs A and B
     tags:
       - Paired Samples T-Test
-  - name: one_sample_t
+  - name: One Sample t
     path: one_sample_t.csv
     description: Additional hours sleep given drug A
     tags:
       - One Sample T-Test
-  - name: 1_way_anova
+  - name: One-Way ANOVA
     path: 1_way_anova.csv
     description: Fitness levels for different types of training
     tags:
       - One-Way ANOVA
-  - name: 2_way_factorial_anova
+  - name: Two-Way Factorial ANOVA
     path: 2_way_factorial_anova.csv
     description: >-
       Blood clotting times in haemophiliac patients and healthy patients given 3
       treatments
     tags:
       - Two-Way Factorial ANOVA
-  - name: repeated_measures
+  - name: Repeated Measures ANOVA
     path: repeated_measures.csv
     description: 'Additional hours sleep in M & F, given nothing and drugs A, B, C'
     tags:
       - Repeated measures ANOVA
-  - name: regression
+  - name: Regression
     path: regression.csv
     description: Womens world record times for 1500m event
     tags:
       - Polynomial Regression
-  - name: correlation
+  - name: Correlation
     path: correlation.csv
     description: Heptathlon running times in 200m and 800m events
     tags:
       - Correlation
-  - name: n_outcomes
+  - name: N Outcomes
     path: n_outcomes.csv
     description: Disease outcomes in 10 patients
     tags:
       - N Outcomes for categorical analysis
-  - name: 2_way_association
+  - name: 2-Way Association
     path: 2_way_association.csv
     description: Presence of S. mansoni eggs in stools according to age group
     tags:
       - Independent Samples association for categorical analysis
-  - name: odds_ratio
+  - name: Odds Ratio
     path: odds_ratio.csv
     description: Folic acid vs placebo and neural tube defects
     tags:
-      - Odds Ratio folic acid and birth defects
-  - name: relative_risk
+      - Odds Ratio
+  - name: Relative Risk
     path: relative_risk.csv
     description: Relative risk for treatment effectiveness and sex
     tags:
       - Relative Risk
-  - name: mcnemar
+  - name: McNemar Test
     path: mcnemar.csv
     description: Allergic reaction to two handcreams
     tags:
       - McNemar Test
-  - name: diagnostic
+  - name: Diagnostic Test
     path: CT_scan_diagnosis.csv
     description: Detection of disease by CT scan versus final diagnosis
     tags:
