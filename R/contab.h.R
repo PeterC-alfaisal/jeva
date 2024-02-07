@@ -392,7 +392,7 @@ contabBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 pause = NULL,
                 completeWhenFilled = TRUE,
                 requiresMissings = FALSE,
-                weightsSupport = 'auto')
+                weightsSupport = 'integerOnly')
         }))
 
 #' Independent Samples

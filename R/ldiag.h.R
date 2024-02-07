@@ -647,7 +647,7 @@ ldiagBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 pause = NULL,
                 completeWhenFilled = FALSE,
                 requiresMissings = FALSE,
-                weightsSupport = 'auto')
+                weightsSupport = 'integerOnly')
         }))
 
 #' Diagnostic Test
