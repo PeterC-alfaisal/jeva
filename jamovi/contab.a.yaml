@@ -9,6 +9,8 @@ menuSubtitle: Two-way association
 version: '1.0.0'
 jas: '1.2'
 
+weightsSupport: 'integerOnly'
+
 description:
     main: |
         Two-way analysis of a contingency table where main effects and interaction can be assessed.

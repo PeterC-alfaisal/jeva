@@ -9,6 +9,8 @@ menuSubtitle: McNemar test
 version: '1.0.0'
 jas: '1.2'
 
+weightsSupport: 'integerOnly'
+
 description:
     main: |
         Paired samples analysis (McNemar test) where null and alternative odds can be specified.

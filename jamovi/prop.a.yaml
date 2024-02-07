@@ -9,6 +9,8 @@ menuSubtitle: One-way including binomial test
 version: '1.0.0'
 jas: '1.2'
 
+weightsSupport: 'integerOnly'
+
 description:
     main: >
         The one-way analysis examines how well the observed proportions match those expected according to a null

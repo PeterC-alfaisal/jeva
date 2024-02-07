@@ -7,6 +7,8 @@ menuTitle: Diagnostic Test
 version: '1.0.0'
 jas: '1.2'
 
+weightsSupport: 'integerOnly'
+
 description:
     main: |
         Analysis of a 2 x 2 contingency table using diagnostic test
