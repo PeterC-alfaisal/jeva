@@ -506,19 +506,21 @@ contabClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         tab <- image$state
 
         if (self$options$yaxis == "ypc") { # percentages
-          props <- counts
-          
+
           if (self$options$yaxisPc == "column_pc") {
             pctVarName <- colVarName
+            pctTotals <- tapply(tab$Counts, tab[colVarName], sum)
+            props <- tab$Counts / pctTotals[tab[[colVarName]]]
           } else if (self$options$yaxisPc == "row_pc") {
             pctVarName <- rowVarName
+            pctTotals <- tapply(tab$Counts, tab[rowVarName], sum)
+            props <- tab$Counts / pctTotals[tab[[rowVarName]]]
           } else { # total
             pctVarName <- NULL
+            props <- tab$Counts / sum(tab$Counts)
           }
-          
-          props <- proportions(counts, pctVarName)
-          
-          tab$Percentages <- as.numeric(props) * 100
+
+          tab$Percentages <- props * 100
         }
         
         if (self$options$xaxis == "xcols") {
