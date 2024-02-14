@@ -73,6 +73,9 @@ items:
         - name: var
           title: Hypotheses
           type: text
+        - name: rat
+          title: Ratio
+          type: text
         - name: Values
           title: Expected values
           type: text
@@ -121,6 +124,41 @@ items:
           refs:
               - Pritikin
 
+    - name: tabText
+      title: 'Summarizing an evidential analysis'
+      type: Html
+      visible: (text)
+      clearWith:
+        - var
+        - ratio
+        - counts
+        - correction
+
+    - name:  SupportTab
+      title: Interpreting Support S (log LR)
+      type: Table
+      rows:  7
+      visible: (text)
+      columns:
+        - name: SS
+          title: S
+          type: number
+
+        - name: LR
+          title: LR
+          type: number
+
+        - name: Interp
+          title: 'Interpretation Comparing Hypotheses'
+          type: text
+
+    - name: MoretabText
+      title: 'More details about summaries'
+      type: Html
+      visible: (text)
+      refs: 
+          - Book
+
     - name:  ctt3
       title: Variance analyses
       type: Table
@@ -162,6 +200,7 @@ items:
       renderFun: .plotc
       visible: (pll)
       clearWith:
+        - data
         - var
         - ratio
         - counts
@@ -170,40 +209,5 @@ items:
         - lplot
         - plotype
         - supplot
-
-    - name: tabText
-      title: 'Summarizing an evidential analysis'
-      type: Html
-      visible: (text)
-      clearWith:
-        - var
-        - ratio
-        - counts
-        - correction
-
-    - name:  SupportTab
-      title: Interpreting Support S (log LR)
-      type: Table
-      rows:  7
-      visible: (text)
-      columns:
-        - name: SS
-          title: S
-          type: number
-
-        - name: LR
-          title: LR
-          type: number
-
-        - name: Interp
-          title: 'Interpretation Comparing Hypotheses'
-          type: text
-
-    - name: MoretabText
-      title: 'More details about summaries'
-      type: Html
-      visible: (text)
-      refs: 
-          - Book
 
 ...
