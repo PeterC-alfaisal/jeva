@@ -1,4 +1,3 @@
-
 propClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     "propClass",
     inherit = propBase,
@@ -98,6 +97,7 @@ propClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         df <- (len-1)
         exp_n <- exp.p*n
         exp_ntext <- paste(round(exp_n,2),collapse=" | ")
+        ratio_ntext <- paste(round(exp_n/exp_n,2),collapse=" : ")
         count1 <- counts               # removing zero counts for support calculations
         for (i in 1:length(count1)) {
           count1[i] <- counts[i]
@@ -117,6 +117,7 @@ propClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         
         exp <- expProps*n
         exp_text <- paste(round(exp,2),collapse=" | ")
+        ratio_atext <- paste(round(ratio,2),collapse=" : ")
         Sup <- -sum(counts*(log(count1)-log(exp)))
         Supc <- Sup + Ac(self$options$correction,len,len) # corrected for df
         
@@ -134,11 +135,11 @@ propClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         toogood_a <- df/2*(log(df/chi_a)) - (df - chi_a)/2
         
         table <- self$results$tests
-        table$setRow(rowNo=1, values=list(Values=exp_ntext, S=Supc_n, 
+        table$setRow(rowNo=1, values=list(rat=ratio_ntext, Values=exp_ntext, S=Supc_n, 
                                           Param=paste0(c(1,len), collapse = ', '), G=lrt_n, df=df, p=LRt_p_n))
-        table$setRow(rowNo=2, values=list(Values=exp_text, S=Supc, 
+        table$setRow(rowNo=2, values=list(rat=ratio_atext, Values=exp_text, S=Supc, 
                                           Param=paste0(c(len,len), collapse = ', '), G=lrt, df=df, p=LRt_p))
-        table$setRow(rowNo=3, values=list(Values="", S=Supc_an, 
+        table$setRow(rowNo=3, values=list(rat="", Values="", S=Supc_an, 
                                           Param=paste0(c(len,1), collapse = ', '), G=lrt_an, df=df, p=LRt_p_an))
         
         table <- self$results$ctt3
@@ -232,7 +233,7 @@ propClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         g <- imagec$state
         
         if(self$options$plotype=="lplot") {
-          plot <- curve((x^g$a*(1-x)^g$r)/(g$p^g$a*(1-g$p)^g$r), from = 0, to = 1, xlim = c(g$xmin,g$xmax), 
+          plot <- curve(exp(g$a*log(x)+g$r*log(1-x)-(g$a*log(g$p)+g$r*log(1-g$p))), xlim = c(g$xmin,g$xmax), 
                         ylim = c(0,1), xlab = "Proportion", ylab = "Likelihood")
           lines(c(g$p,g$p),c(0,1),lty=2) # add MLE as dashed line
           lines(c(g$expprop,g$expprop),c(0,(g$expprop^g$a*(1-g$expprop)^g$r)/(g$p^g$a*(1-g$p)^g$r)),

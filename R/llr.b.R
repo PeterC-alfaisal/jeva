@@ -2,6 +2,7 @@ llrClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     "llrClass",
     inherit = llrBase,
     private=list(
+      #### Init + run functions ----
       .init=function() {
         
         private$.initSupportTab()
@@ -230,13 +231,10 @@ llrClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         if (nlevels(data[[colVarName]]) > 2)
           jmvcore::reject(.("Column variable '{var}' contains more than 2 levels"), code='', var=colVarName)
         
-        if ( ! is.null(countsName)) {
-          countCol <- data[[countsName]]
-          if (any(countCol < 0, na.rm=TRUE))
-            jmvcore::reject(.('Counts may not be negative'))
-          if (any(is.infinite(countCol)))
-            jmvcore::reject(.('Counts may not be infinite'))
-        }
+        if (any(data$.COUNTS < 0, na.rm=TRUE))
+          jmvcore::reject(.('Counts may not be negative'))
+        if (any(is.infinite(data$.COUNTS)))
+          jmvcore::reject(.('Counts may not be infinite'))
         
         freqs <- self$results$freqs
         
@@ -249,6 +247,17 @@ llrClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         nRows  <- base::nlevels(data[[rowVarName]])
         nCols  <- base::nlevels(data[[colVarName]])
         nCells <- nRows * nCols
+        
+        # set state for plot
+        if (self$options$barplot) {
+          countsDF <- as.data.frame(mats[[1]])
+          expand <- list()
+          for (v in c(rowVarName, colVarName))
+            expand[[v]] <- base::levels(data[[v]])
+          tab <- expand.grid(expand)
+          tab$Counts <- countsDF$Freq
+          self$results$barplot$setState(tab)
+        }
         
         ciWidth <- self$options$ciWidth / 100
         
@@ -391,6 +400,7 @@ llrClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           
           rr <- (a*(b+d))/(b*(a+c)) # RR from the contingency table
           
+          #          orv <- (a*d)/(b*c) # actual odds ratio from the contingency table
           f <- function(x,a,b,c,d,c1tot,r1tot,r2tot,goal) {
             (-sum(a*log(a/x), b*log(b/(c1tot-x)), c*log(c/(r1tot-x)),
                   d*log(d/(r2tot-c1tot+x)))-goal)^2
@@ -429,6 +439,8 @@ llrClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           goalx <- self$options$supplot   # with e^-10 we get x values for when curve is down to 0.00004539
           suppressWarnings(xmin1x <- optimize(f, c(0, a), tol = toler, a, b, c, d, c1tot, r1tot, r2tot, goalx))
           suppressWarnings(xmin2x <- optimize(f, c(a, dve), tol = toler, a, b, c, d, c1tot, r1tot, r2tot, goalx))
+          #          xmin <- xmin1x$minimum*(r2tot-c1tot+xmin1x$minimum)/((c1tot-xmin1x$minimum)*(r1tot-xmin1x$minimum))
+          #          xmax <- xmin2x$minimum*(r2tot-c1tot+xmin2x$minimum)/((c1tot-xmin2x$minimum)*(r1tot-xmin2x$minimum))
           xmin <- xmin1x$minimum*r2tot/((c1tot-xmin1x$minimum)*r1tot)
           xmax <- xmin2x$minimum*r2tot/((c1tot-xmin2x$minimum)*r1tot)
           
@@ -446,9 +458,8 @@ llrClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           suppressWarnings(exa2 <- optimize(h, c(dvs, dve), tol = toler, c1tot, r1tot, r2tot, goal))
           xa <- unname(unlist(exa2[1]))
           nullh <- exp(-sum(a*log(a/xa), b*log(b/(c1tot-xa)), c*log(c/(r1tot-xa)), d*log(d/(r2tot-c1tot+xa))))
-
+          
           S2way <- log(nullh) # check that this should be negative but same abs value as S for observed OR
-                        # actually it is very close, approx to nearest 3 decimal places due to toler = .0001
           if(rr == 1) S2way <- 0
           
           # variance analysis
@@ -559,6 +570,7 @@ llrClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
           }
           
+          
           ########################################################
           
         }
@@ -585,38 +597,24 @@ llrClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         if (is.null(rowVarName) || is.null(colVarName))
           return()
         
-        data <- private$.cleanData()
-        data <- na.omit(data)
-        
-        if (! is.null(countsName)){
-          untable <- function (df, counts) df[rep(1:nrow(df), counts), ]
-          data <- untable(data[, c(rowVarName, colVarName)], counts=data[, countsName])
-        }
-        
-        formula <- jmvcore::composeFormula(NULL, c(rowVarName, colVarName))
-        counts <- xtabs(formula, data)
-        d <- dim(counts)
-        
-        expand <- list()
-        for (i in c(rowVarName, colVarName))
-          expand[[i]] <- base::levels(data[[i]])
-        tab <- expand.grid(expand)
-        tab$Counts <- as.numeric(counts)
+        tab <- image$state
         
         if (self$options$yaxis == "ypc") { # percentages
-          props <- counts
           
           if (self$options$yaxisPc == "column_pc") {
             pctVarName <- colVarName
+            pctTotals <- tapply(tab$Counts, tab[colVarName], sum)
+            props <- tab$Counts / pctTotals[tab[[colVarName]]]
           } else if (self$options$yaxisPc == "row_pc") {
             pctVarName <- rowVarName
+            pctTotals <- tapply(tab$Counts, tab[rowVarName], sum)
+            props <- tab$Counts / pctTotals[tab[[rowVarName]]]
           } else { # total
             pctVarName <- NULL
+            props <- tab$Counts / sum(tab$Counts)
           }
           
-          props <- proportions(counts, pctVarName)
-          
-          tab$Percentages <- as.numeric(props) * 100
+          tab$Percentages <- props * 100
         }
         
         if (self$options$xaxis == "xcols") {
@@ -657,7 +655,7 @@ llrClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         minmarg <- min(g$r1tot,g$r2tot,g$c1tot,g$c2tot)
         arrlen <- res*minmarg-1
         xs <- 0; ys <- 0
-        for (i in 1:arrlen) {     # arrays to plot likelihood vs RR
+        for (i in 1:arrlen) {     # arrays to plot likelihood vs OR
           dv <- i/res+g$dvs
           ys[i] <- exp(-sum(g$a*log(g$a/dv), g$b*log(g$b/(g$c1tot-dv)),
                             g$c*log(g$c/(g$r1tot-dv)), g$d*log(g$d/(g$r2tot-g$c1tot+dv))))
@@ -665,9 +663,17 @@ llrClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           
         }
         
+        # to determine x axis space for plot
+        seor <- sqrt(1/g$a+1/g$b+1/g$c+1/g$d)
+        lolim <- exp(log(g$rr)-3*seor); hilim <- exp(log(g$rr)+3*seor)
+        if (lolim < 0) {lolim <- 0}
+        
+        #-sum(a*log(a/x), b*log(b/(c1tot-x)), c*log(c/(r1tot-x)),
+        # d*log(d/(r2tot-c1tot+x)))
+        
         # do the plot with lines
         if(self$options$plotype=="lplot") {
-          plot <- plot(xs, ys, xlim=c(g$xmin,g$xmax),type="l", lwd = 1, xlab = "Risk Ratio", ylab = "Likelihood")        
+          plot <- plot(xs, ys, xlim=c(lolim,hilim),type="l", lwd = 1, xlab = "Risk Ratio", ylab = "Likelihood")        
           lines(c(g$rr,g$rr),c(0,1),lty=2) # add MLE as dashed line
           segments(g$begL, exp(g$goalL), g$endL, exp(g$goalL), lwd = 1, col = "red")
           lines(c(self$options$nul,self$options$nul),c(0,g$nullh), lty=1, col = "black") # add H prob as black line
@@ -692,14 +698,21 @@ llrClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         layerNames <- NULL
         countsName <- self$options$counts
         
+        weights <- attr(data, 'jmv-weights')
+        
         if ( ! is.null(rowVarName))
           data[[rowVarName]] <- as.factor(data[[rowVarName]])
         if ( ! is.null(colVarName))
           data[[colVarName]] <- as.factor(data[[colVarName]])
         for (layerName in layerNames)
           data[[layerName]] <- as.factor(data[[layerName]])
-        if ( ! is.null(countsName))
-          data[[countsName]] <- jmvcore::toNumeric(data[[countsName]])
+        if ( ! is.null(countsName)) {
+          data$.COUNTS <- jmvcore::toNumeric(data[[countsName]])
+        } else if ( ! is.null(weights)) {
+          data$.COUNTS <- weights
+        } else {
+          data$.COUNTS <- rep(1, nrow(data))
+        }
         
         data
       },
@@ -714,13 +727,7 @@ llrClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         
         if (length(layerNames) == 0) {
           
-          subData <- jmvcore::select(data, c(rowVarName, colVarName))
-          
-          if (is.null(countsName))
-            .COUNTS <- rep(1, nrow(subData))
-          else
-            .COUNTS <- jmvcore::toNumeric(data[[countsName]])
-          
+          subData <- jmvcore::select(data, c('.COUNTS', rowVarName, colVarName))
           matrices <- list(ftable(xtabs(.COUNTS ~ ., data=subData)))
           
         } else {
@@ -731,11 +738,6 @@ llrClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           tables <- lapply(dataList, function(x) {
             
             xTemp <- jmvcore::select(x, c(rowVarName, colVarName))
-            
-            if (is.null(countsName))
-              .COUNTS <- rep(1, nrow(xTemp))
-            else
-              .COUNTS <- jmvcore::toNumeric(x[[countsName]])
             
             ftable(xtabs(.COUNTS ~ ., data=xTemp))
           })
@@ -857,6 +859,11 @@ llrClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                          than expected")
         if (2*st$tg > st$chi) {
           stg8 <- paste0("For the observed <i>RR</i>", sv, ", that it was closer to the H\u2080 = 1 than expected")
+        }
+        if(self$options$correction=="ob") { stg0 <- "<i>Using Occam's Bonus correction, the analysis shows that:</i>"
+        } else if(self$options$correction=="aic") { stg0 <- "<i>Using AIC correction, the analysis shows that:</i>"
+        } else {
+          stg0 <- "<i>Using no correction, the analysis shows that:</i>"
         }
         if(self$options$correction=="ob") { stg0 <- "<i>Using Occam's Bonus correction, the analysis shows that:</i>"
         } else if(self$options$correction=="aic") { stg0 <- "<i>Using AIC correction, the analysis shows that:</i>"

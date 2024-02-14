@@ -231,13 +231,11 @@ cttClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         if (nlevels(data[[colVarName]]) > 2)
           jmvcore::reject(.("Column variable '{var}' contains more than 2 levels"), code='', var=colVarName)
         
-        if ( ! is.null(countsName)) {
-          countCol <- data[[countsName]]
-          if (any(countCol < 0, na.rm=TRUE))
-            jmvcore::reject(.('Counts may not be negative'))
-          if (any(is.infinite(countCol)))
-            jmvcore::reject(.('Counts may not be infinite'))
-        }
+        if (any(data$.COUNTS < 0, na.rm=TRUE))
+          jmvcore::reject(.('Counts may not be negative'))
+        if (any(is.infinite(data$.COUNTS)))
+          jmvcore::reject(.('Counts may not be infinite'))
+        
         
         freqs <- self$results$freqs
         
@@ -252,6 +250,17 @@ cttClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         nCells <- nRows * nCols
         
         ciWidth <- self$options$ciWidth / 100
+        
+        # set state for plot
+        if (self$options$barplot) {
+          countsDF <- as.data.frame(mats[[1]])
+          expand <- list()
+          for (v in c(rowVarName, colVarName))
+            expand[[v]] <- base::levels(data[[v]])
+          tab <- expand.grid(expand)
+          tab$Counts <- countsDF$Freq
+          self$results$barplot$setState(tab)
+        }
         
         for (mat in mats) {
           
@@ -425,7 +434,7 @@ cttClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           endL <- xmin2L$minimum*(r2tot-c1tot+xmin2L$minimum)/((c1tot-xmin2L$minimum)*(r1tot-xmin2L$minimum))
           
           lintlev <- toString(self$options$lint); conflev <- paste0(self$options$ciWidth,"%")
-          
+
           # x axis limits
           goalx <- self$options$supplot   # with e^-10 we get x values for when curve is down to 0.00004539
           suppressWarnings(xmin1x <- optimize(f, c(0, a), tol = toler, a, b, c, d, c1tot, r1tot, r2tot, goalx))
@@ -490,24 +499,24 @@ cttClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           
           table <- self$results$ctt
           table$setRow(rowNo=1, values=list(Value=self$options$nul, ordiff= self$options$nul-orv, 
-                                            S=S2way + Ac(self$options$correction,1,2), Param=paste0(c(1,2), collapse = ', '), 
-                                            G=gn, df=df, p=gn_p))
+                      S=S2way + Ac(self$options$correction,1,2), Param=paste0(c(1,2), collapse = ', '), 
+                      G=gn, df=df, p=gn_p))
           table$setRow(rowNo=2, values=list(Value=self$options$alt, ordiff= self$options$alt-orv, 
-                                            S=Salt + Ac(self$options$correction,2,2), Param=paste0(c(2,2), collapse = ', '), 
-                                            G=ga, df=df, p=ga_p))
+                      S=Salt + Ac(self$options$correction,2,2), Param=paste0(c(2,2), collapse = ', '), 
+                      G=ga, df=df, p=ga_p))
           table$setRow(rowNo=3, values=list(Value="", ordiff= self$options$alt-self$options$nul, 
-                                            S=SexOR_null + Ac(self$options$correction,2,1), Param=paste0(c(2,1), collapse = ', '), 
-                                            G=gan, df=df, p=gan_p))
+                      S=SexOR_null + Ac(self$options$correction,2,1), Param=paste0(c(2,1), collapse = ', '), 
+                      G=gan, df=df, p=gan_p))
           
           table <- self$results$cttma
           table$setRow(rowNo=1, values=list(Value=exp_row, S=Srow + Ac(self$options$correction,2,1), 
-                                            G=2*Srow, Param=paste0(c(2,1), collapse = ', '),df=as.integer(df), p=gr_p))
+                      G=2*Srow, Param=paste0(c(2,1), collapse = ', '),df=as.integer(df), p=gr_p))
           table$setRow(rowNo=2, values=list(Value=exp_col, S=Scol + Ac(self$options$correction,2,1),
-                                            G=2*Scol, Param=paste0(c(2,1), collapse = ', '), df=as.integer(df), p=gc_p))
+                      G=2*Scol, Param=paste0(c(2,1), collapse = ', '), df=as.integer(df), p=gc_p))
           table$setRow(rowNo=3, values=list(Value="", S=Sint + Ac(self$options$correction,2,1), 
-                                            G=2*Sint, Param=paste0(c(2,1), collapse = ', '), df=as.integer(df), p=gi_p))
+                      G=2*Sint, Param=paste0(c(2,1), collapse = ', '), df=as.integer(df), p=gi_p))
           table$setRow(rowNo=4, values=list(Value=exp_int, S=Sgt + Ac(self$options$correction,4,1), 
-                                            G=2*Sgt, Param=paste0(c(4,1), collapse = ', '), df=as.integer(3), p=gt_p))
+                      G=2*Sgt, Param=paste0(c(4,1), collapse = ', '), df=as.integer(3), p=gt_p))
           table <- self$results$ctt2
           table$setRow(rowNo=1, values=list(Level=lintlev, OR = orv, Lower=begL, Upper=endL))
           table$setRow(rowNo=2, values=list(Level=conflev, OR = orv, Lower=beg, Upper=end))
@@ -585,38 +594,27 @@ cttClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         if (is.null(rowVarName) || is.null(colVarName))
           return()
         
+        tab <- image$state
+        
         data <- private$.cleanData()
         data <- na.omit(data)
         
-        if (! is.null(countsName)){
-          untable <- function (df, counts) df[rep(1:nrow(df), counts), ]
-          data <- untable(data[, c(rowVarName, colVarName)], counts=data[, countsName])
-        }
-        
-        formula <- jmvcore::composeFormula(NULL, c(rowVarName, colVarName))
-        counts <- xtabs(formula, data)
-        d <- dim(counts)
-        
-        expand <- list()
-        for (i in c(rowVarName, colVarName))
-          expand[[i]] <- base::levels(data[[i]])
-        tab <- expand.grid(expand)
-        tab$Counts <- as.numeric(counts)
-        
         if (self$options$yaxis == "ypc") { # percentages
-          props <- counts
-          
+
           if (self$options$yaxisPc == "column_pc") {
             pctVarName <- colVarName
+            pctTotals <- tapply(tab$Counts, tab[colVarName], sum)
+            props <- tab$Counts / pctTotals[tab[[colVarName]]]
           } else if (self$options$yaxisPc == "row_pc") {
             pctVarName <- rowVarName
+            pctTotals <- tapply(tab$Counts, tab[rowVarName], sum)
+            props <- tab$Counts / pctTotals[tab[[rowVarName]]]
           } else { # total
             pctVarName <- NULL
+            props <- tab$Counts / sum(tab$Counts)
           }
           
-          props <- proportions(counts, pctVarName)
-          
-          tab$Percentages <- as.numeric(props) * 100
+          tab$Percentages <- props * 100
         }
         
         if (self$options$xaxis == "xcols") {
@@ -676,19 +674,19 @@ cttClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         if(self$options$plotype=="lplot") {
           plot <- plot(xs, ys, xlim=c(lolim,hilim),type="l", lwd = 1, xlab = "Odds Ratio", ylab = "Likelihood")        
           lines(c(g$orv,g$orv),c(0,1),lty=2) # add MLE as dashed line
-          segments(g$begL, exp(g$goalL), g$endL, exp(g$goalL), lwd = 1, col = "red")
-          lines(c(self$options$nul,self$options$nul),c(0,g$nullh), lty=1, col = "black") # add H prob as black line
-          lines(c(self$options$alt,self$options$alt), c(0,g$xah), lty=1, col = "blue") # add H prob as blue line
+        segments(g$begL, exp(g$goalL), g$endL, exp(g$goalL), lwd = 1, col = "red")
+        lines(c(self$options$nul,self$options$nul),c(0,g$nullh), lty=1, col = "black") # add H prob as black line
+        lines(c(self$options$alt,self$options$alt), c(0,g$xah), lty=1, col = "blue") # add H prob as blue line
         } else {
           plot <- plot(xs, log(ys), xlim=c(g$xmin,g$xmax),type="l", lwd = 1, xlab = "Odds Ratio", 
-                       ylim=c(self$options$supplot,0), ylab = "Log Likelihood")
+                ylim=c(self$options$supplot,0), ylab = "Log Likelihood")
           lines(c(g$orv,g$orv),c(self$options$supplot,0),lty=2) # add MLE as dashed line
           segments(g$begL, g$goalL, g$endL, g$goalL, lwd = 1, col = "red")
           lines(c(self$options$nul,self$options$nul),c(self$options$supplot,log(g$nullh)), lty=1, col = "black") # add H prob as black line
           lines(c(self$options$alt,self$options$alt), c(self$options$supplot,log(g$xah)), lty=1, col = "blue") # add H prob as blue line
         }
-        
-        #        print(plot)
+          
+#        print(plot)
         TRUE
       },
       #### Helper functions ----
@@ -701,14 +699,23 @@ cttClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         layerNames <- NULL
         countsName <- self$options$counts
         
+        weights <- attr(data, 'jmv-weights')
+        
+        
         if ( ! is.null(rowVarName))
           data[[rowVarName]] <- as.factor(data[[rowVarName]])
         if ( ! is.null(colVarName))
           data[[colVarName]] <- as.factor(data[[colVarName]])
         for (layerName in layerNames)
           data[[layerName]] <- as.factor(data[[layerName]])
-        if ( ! is.null(countsName))
-          data[[countsName]] <- jmvcore::toNumeric(data[[countsName]])
+        
+        if ( ! is.null(countsName)) {
+          data$.COUNTS <- jmvcore::toNumeric(data[[countsName]])
+        } else if ( ! is.null(weights)) {
+          data$.COUNTS <- weights
+        } else {
+          data$.COUNTS <- rep(1, nrow(data))
+        }
         
         data
       },
@@ -723,12 +730,7 @@ cttClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         
         if (length(layerNames) == 0) {
           
-          subData <- jmvcore::select(data, c(rowVarName, colVarName))
-          
-          if (is.null(countsName))
-            .COUNTS <- rep(1, nrow(subData))
-          else
-            .COUNTS <- jmvcore::toNumeric(data[[countsName]])
+          subData <- jmvcore::select(data, c('.COUNTS', rowVarName, colVarName))
           
           matrices <- list(ftable(xtabs(.COUNTS ~ ., data=subData)))
           
@@ -740,11 +742,6 @@ cttClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           tables <- lapply(dataList, function(x) {
             
             xTemp <- jmvcore::select(x, c(rowVarName, colVarName))
-            
-            if (is.null(countsName))
-              .COUNTS <- rep(1, nrow(xTemp))
-            else
-              .COUNTS <- jmvcore::toNumeric(x[[countsName]])
             
             ftable(xtabs(.COUNTS ~ ., data=xTemp))
           })

@@ -225,23 +225,17 @@ mcnemClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         if (nlevels(data[[colVarName]]) > 2)
           jmvcore::reject(.("Column variable '{var}' contains more than 2 levels"), code='', var=colVarName)
         
-        if ( ! is.null(countsName)) {
-          countCol <- data[[countsName]]
-          if (any(countCol < 0, na.rm=TRUE))
-            jmvcore::reject(.('Counts may not be negative'))
-          if (any(is.infinite(countCol)))
-            jmvcore::reject(.('Counts may not be infinite'))
-        }
+        if (any(data$.COUNTS < 0, na.rm=TRUE))
+          jmvcore::reject(.('Counts may not be negative'))
+        if (any(is.infinite(data$.COUNTS)))
+          jmvcore::reject(.('Counts may not be infinite'))
         
         rowVar <- data[[rowVarName]]
         colVar <- data[[colVarName]]
         
         freqs <- self$results$freqs
         
-        if (! is.null(countsName))
-          result <- stats::xtabs(countCol ~ rowVar + colVar)
-        else
-          result <- base::table(rowVar, colVar)
+        result <- base::table(rowVar, colVar)
         
         
         freqRowNo <- 1
@@ -253,6 +247,17 @@ mcnemClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         nRows  <- base::nlevels(data[[rowVarName]])
         nCols  <- base::nlevels(data[[colVarName]])
         nCells <- nRows * nCols
+        
+        # set state for plot
+        if (self$options$barplot) {
+          countsDF <- as.data.frame(mats[[1]])
+          expand <- list()
+          for (v in c(rowVarName, colVarName))
+            expand[[v]] <- base::levels(data[[v]])
+          tab <- expand.grid(expand)
+          tab$Counts <- countsDF$Freq
+          self$results$barplot$setState(tab)
+        }
         
         ciWidth <- self$options$ciWidth / 100
         
@@ -341,6 +346,8 @@ mcnemClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           freqs$setRow(rowNo=freqRowNo, values=values)
           freqRowNo <- freqRowNo + 1
           
+          #        tabt <- as.matrix(self$data[[self$options$counts]])
+          #        tab <- as.table(rbind(c(tabt[1],tabt[2]),c(tabt[3],tabt[4])))
           tab <- mat
           
           a <- tab[1] #top left
@@ -388,6 +395,13 @@ mcnemClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           xmin <- xmin1x$minimum/(ospT-xmin1x$minimum)
           xmax <- xmin2x$minimum/(ospT-xmin2x$minimum)
           
+          
+          #        # to determine x axis space for plot
+          #        dif <- odds-begL
+          #        lolim <- odds - 3*dif; hilim <- odds + 4*dif
+          #        if (odds < 1 ) { hilim <- odds + 6*dif}
+          #        if (lolim < 0) {lolim <- 0}
+          
           # to determine height of self$options$alt on likelihood function
           goal <- self$options$alt
           g <- function(x,ospT,goal) {
@@ -412,6 +426,8 @@ mcnemClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           }
           
           Smc <- log(nullh) + Ac(self$options$correction,1,2)
+          
+          #         Smc <- -(osp[1]*log(osp[1]/Exos) + osp[2]*log(osp[2]/Exos)) #this for null=1
           
           # variance analysis and chi-square
           wocor <- try(stats::mcnemar.test(result, correct=FALSE), silent=TRUE)
@@ -528,38 +544,24 @@ mcnemClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         if (is.null(rowVarName) || is.null(colVarName))
           return()
         
-        data <- private$.cleanData()
-        data <- na.omit(data)
-        
-        if (! is.null(countsName)){
-          untable <- function (df, counts) df[rep(1:nrow(df), counts), ]
-          data <- untable(data[, c(rowVarName, colVarName)], counts=data[, countsName])
-        }
-        
-        formula <- jmvcore::composeFormula(NULL, c(rowVarName, colVarName))
-        counts <- xtabs(formula, data)
-        d <- dim(counts)
-        
-        expand <- list()
-        for (i in c(rowVarName, colVarName))
-          expand[[i]] <- base::levels(data[[i]])
-        tab <- expand.grid(expand)
-        tab$Counts <- as.numeric(counts)
+        tab <- image$state
         
         if (self$options$yaxis == "ypc") { # percentages
-          props <- counts
           
           if (self$options$yaxisPc == "column_pc") {
             pctVarName <- colVarName
+            pctTotals <- tapply(tab$Counts, tab[colVarName], sum)
+            props <- tab$Counts / pctTotals[tab[[colVarName]]]
           } else if (self$options$yaxisPc == "row_pc") {
             pctVarName <- rowVarName
+            pctTotals <- tapply(tab$Counts, tab[rowVarName], sum)
+            props <- tab$Counts / pctTotals[tab[[rowVarName]]]
           } else { # total
             pctVarName <- NULL
+            props <- tab$Counts / sum(tab$Counts)
           }
           
-          props <- proportions(counts, pctVarName)
-          
-          tab$Percentages <- as.numeric(props) * 100
+          tab$Percentages <- props * 100
         }
         
         if (self$options$xaxis == "xcols") {
@@ -605,6 +607,13 @@ mcnemClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           xs[i] <- dv/(g$ospT-dv)
         }
         
+        #        # to determine x axis space for plot
+        
+        #        dif <- g$odds-g$begL
+        #        lolim <- g$odds - 2*dif; hilim <- g$odds + 4*dif
+        #        if (g$odds < 1 ) { hilim <- g$odds + 3*dif}
+        #        if (lolim < 0) {lolim <- 0}
+        
         # do the plot with lines
         if(self$options$plotype=="lplot") {
           plot <- plot(xs, ys, xlim=c(g$xmin,g$xmax),type="l", lwd = 1, xlab = "Odds", ylab = "Likelihood")
@@ -638,14 +647,21 @@ mcnemClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         layerNames <- NULL
         countsName <- self$options$counts
         
+        weights <- attr(data, 'jmv-weights')
+        
         if ( ! is.null(rowVarName))
           data[[rowVarName]] <- as.factor(data[[rowVarName]])
         if ( ! is.null(colVarName))
           data[[colVarName]] <- as.factor(data[[colVarName]])
         for (layerName in layerNames)
           data[[layerName]] <- as.factor(data[[layerName]])
-        if ( ! is.null(countsName))
-          data[[countsName]] <- jmvcore::toNumeric(data[[countsName]])
+        if ( ! is.null(countsName)) {
+          data$.COUNTS <- jmvcore::toNumeric(data[[countsName]])
+        } else if ( ! is.null(weights)) {
+          data$.COUNTS <- weights
+        } else {
+          data$.COUNTS <- rep(1, nrow(data))
+        }
         
         data
       },
@@ -660,13 +676,7 @@ mcnemClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         
         if (length(layerNames) == 0) {
           
-          subData <- jmvcore::select(data, c(rowVarName, colVarName))
-          
-          if (is.null(countsName))
-            .COUNTS <- rep(1, nrow(subData))
-          else
-            .COUNTS <- jmvcore::toNumeric(data[[countsName]])
-          
+          subData <- jmvcore::select(data, c('.COUNTS', rowVarName, colVarName))
           matrices <- list(ftable(xtabs(.COUNTS ~ ., data=subData)))
           
         } else {
@@ -677,12 +687,6 @@ mcnemClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           tables <- lapply(dataList, function(x) {
             
             xTemp <- jmvcore::select(x, c(rowVarName, colVarName))
-            
-            if (is.null(countsName))
-              .COUNTS <- rep(1, nrow(xTemp))
-            else
-              .COUNTS <- jmvcore::toNumeric(x[[countsName]])
-            
             ftable(xtabs(.COUNTS ~ ., data=xTemp))
           })
           

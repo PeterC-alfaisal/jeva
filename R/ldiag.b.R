@@ -1,6 +1,3 @@
-
-# This file is a generated template, your changes will not be overwritten
-
 ldiagClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     "ldiagClass",
     inherit = ldiagBase,
@@ -254,13 +251,10 @@ ldiagClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         if (nlevels(data[[colVarName]]) > 2)
           jmvcore::reject(.("Column variable '{var}' contains more than 2 levels"), code='', var=colVarName)
         
-        if ( ! is.null(countsName)) {
-          countCol <- data[[countsName]]
-          if (any(countCol < 0, na.rm=TRUE))
-            jmvcore::reject(.('Counts may not be negative'))
-          if (any(is.infinite(countCol)))
-            jmvcore::reject(.('Counts may not be infinite'))
-        }
+        if (any(data$.COUNTS < 0, na.rm=TRUE))
+          jmvcore::reject(.('Counts may not be negative'))
+        if (any(is.infinite(data$.COUNTS)))
+          jmvcore::reject(.('Counts may not be infinite'))
         
         freqs <- self$results$freqs
         
@@ -273,6 +267,17 @@ ldiagClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         nRows  <- base::nlevels(data[[rowVarName]])
         nCols  <- base::nlevels(data[[colVarName]])
         nCells <- nRows * nCols
+        
+        # set state for plot
+        if (self$options$barplot) {
+          countsDF <- as.data.frame(mats[[1]])
+          expand <- list()
+          for (v in c(rowVarName, colVarName))
+            expand[[v]] <- base::levels(data[[v]])
+          tab <- expand.grid(expand)
+          tab$Counts <- countsDF$Freq
+          self$results$barplot$setState(tab)
+        }
         
         ciWidth <- self$options$ciWidth / 100
         
@@ -640,8 +645,14 @@ ldiagClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           return()
         
         rowVarName <- self$options$rows
+        
         colVarName <- self$options$cols
+        
         countsName <- self$options$counts
+        
+        if (! is.null(countsName))
+          countsName <- jmvcore::toB64(countsName)
+        
         layerNames <- NULL
         if (length(layerNames) > 2)
           layerNames <- layerNames[1:2] # max 2
@@ -649,51 +660,38 @@ ldiagClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         if (is.null(rowVarName) || is.null(colVarName))
           return()
         
-        #        data <- private$.cleanData()
-        data <- private$.cleanData(B64 = TRUE)
-        data <- na.omit(data)
-        
-        if (! is.null(countsName)){
-          untable <- function (df, counts) df[rep(1:nrow(df), counts), ]
-          data <- untable(data[, c(rowVarName, colVarName, layerNames)], counts=data[, countsName])
-        }
-        
-        formula <- jmvcore::composeFormula(NULL, c(rowVarName, colVarName, layerNames))
-        counts <- xtabs(formula, data)
-        d <- dim(counts)
-        
-        expand <- list()
-        for (i in c(rowVarName, colVarName, layerNames))
-          expand[[i]] <- base::levels(data[[i]])
-        tab <- expand.grid(expand)
-        tab$Counts <- as.numeric(counts)
+        tab <- image$state
         
         if (self$options$yaxis == "ypc") { # percentages
-          props <- counts
           
           if (self$options$yaxisPc == "column_pc") {
             pctVarName <- colVarName
+            pctTotals <- tapply(tab$Counts, tab[colVarName], sum)
+            props <- tab$Counts / pctTotals[tab[[colVarName]]]
           } else if (self$options$yaxisPc == "row_pc") {
             pctVarName <- rowVarName
+            pctTotals <- tapply(tab$Counts, tab[rowVarName], sum)
+            props <- tab$Counts / pctTotals[tab[[rowVarName]]]
           } else { # total
             pctVarName <- NULL
+            props <- tab$Counts / sum(tab$Counts)
           }
           
-          if (length(layerNames) == 0) {
-            props <- proportions(counts, pctVarName)
-          } else if (length(layerNames) == 1) {
-            for (i in seq.int(1, d[3], 1)) {
-              props[,,i] <- proportions(counts[,,i], pctVarName)
-            }
-          } else { # 2 layers
-            for (i in seq.int(1, d[3], 1)) {
-              for (j in seq.int(1, d[4], 1)) {
-                props[,,i,j] <- proportions(counts[,,i,j], pctVarName)
-              }
-            }
-          }
+          #          if (length(layerNames) == 0) {
+          #            props <- proportions(counts, pctVarName)
+          #          } else if (length(layerNames) == 1) {
+          #            for (i in seq.int(1, d[3], 1)) {
+          #              props[,,i] <- proportions(counts[,,i], pctVarName)
+          #            }
+          #          } else { # 2 layers
+          #            for (i in seq.int(1, d[3], 1)) {
+          #              for (j in seq.int(1, d[4], 1)) {
+          #                props[,,i,j] <- proportions(counts[,,i,j], pctVarName)
+          #              }
+          #            }
+          #          }
           
-          tab$Percentages <- as.numeric(props) * 100
+          tab$Percentages <- props * 100
         }
         
         if (self$options$xaxis == "xcols") {
@@ -820,32 +818,21 @@ ldiagClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         layerNames <- NULL
         countsName <- self$options$counts
         
-        #        if ( ! is.null(rowVarName))
-        #          data[[rowVarName]] <- as.factor(data[[rowVarName]])
-        #        if ( ! is.null(colVarName))
-        #          data[[colVarName]] <- as.factor(data[[colVarName]])
-        #        for (layerName in layerNames)
-        #          data[[layerName]] <- as.factor(data[[layerName]])
-        #        if ( ! is.null(countsName))
-        #          data[[countsName]] <- toNumeric(data[[countsName]])
-        if ( ! is.null(rowVarName)) {
-          rowVarNameNew <- ifelse(B64, jmvcore::toB64(rowVarName), rowVarName)
-          data[[rowVarNameNew]] <- as.factor(data[[rowVarName]])
-        }
-        if ( ! is.null(colVarName)) {
-          colVarNameNew <- ifelse(B64, jmvcore::toB64(colVarName), colVarName)
-          data[[colVarNameNew]] <- as.factor(data[[colVarName]])
-        }
-        for (layerName in layerNames) {
-          layerNameNew <- ifelse(B64, jmvcore::toB64(layerName), layerName)
-          data[[layerNameNew]] <- as.factor(data[[layerName]])
-        }
+        weights <- attr(data, 'jmv-weights')
+        
+        if ( ! is.null(rowVarName))
+          data[[rowVarName]] <- as.factor(data[[rowVarName]])
+        if ( ! is.null(colVarName))
+          data[[colVarName]] <- as.factor(data[[colVarName]])
+        for (layerName in layerNames)
+          data[[layerName]] <- as.factor(data[[layerName]])
+        
         if ( ! is.null(countsName)) {
-          countsNameNew <- ifelse(B64, jmvcore::toB64(countsName), countsName)
-          data[[countsNameNew]] <- jmvcore::toNumeric(data[[countsName]])
-        } else if ( ! is.null(attr(data, "jmv-weights"))) {
-          countsNameNew <- ifelse(B64, jmvcore::toB64(".COUNTS"), ".COUNTS")
-          data[[countsNameNew]] = jmvcore::toNumeric(attr(data, "jmv-weights"))
+          data$.COUNTS <- jmvcore::toNumeric(data[[countsName]])
+        } else if ( ! is.null(weights)) {
+          data$.COUNTS <- weights
+        } else {
+          data$.COUNTS <- rep(1, nrow(data))
         }
         
         
@@ -862,12 +849,7 @@ ldiagClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         
         if (length(layerNames) == 0) {
           
-          subData <- jmvcore::select(data, c(rowVarName, colVarName))
-          
-          if (is.null(countsName))
-            .COUNTS <- rep(1, nrow(subData))
-          else
-            .COUNTS <- jmvcore::toNumeric(data[[countsName]])
+          subData <- jmvcore::select(data, c('.COUNTS', rowVarName, colVarName))
           
           matrices <- list(ftable(xtabs(.COUNTS ~ ., data=subData)))
           
@@ -879,11 +861,6 @@ ldiagClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           tables <- lapply(dataList, function(x) {
             
             xTemp <- jmvcore::select(x, c(rowVarName, colVarName))
-            
-            if (is.null(countsName))
-              .COUNTS <- rep(1, nrow(xTemp))
-            else
-              .COUNTS <- jmvcore::toNumeric(x[[countsName]])
             
             ftable(xtabs(.COUNTS ~ ., data=xTemp))
           })
