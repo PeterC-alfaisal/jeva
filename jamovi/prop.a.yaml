@@ -182,6 +182,18 @@ options:
           R: >
             a vector of numbers: the expected proportions
 
+    - name: ratio2
+      title: Expected Proportions for H2
+      type: Array
+      template:
+          type: Number
+          min: 0
+          default: 1
+      default:
+      description:
+          R: >
+            a vector of numbers: the expected proportions
+
     - name: varA
       title: Variance analysis
       type: Bool
