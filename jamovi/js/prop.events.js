@@ -2,16 +2,23 @@
 const events = {
     update: function(ui) {
         this._updatingRatios = 0;
+        this._updatingRatios2 = 0;
         this._refreshing = true;
         updateRatios(ui, this);
+        updateRatios2(ui, this);
     },
 
     onChange_var: function(ui) {
         updateRatios(ui, this);
+        updateRatios2(ui, this);
     },
 
     onChange_ratio: function(ui) {
         updateRatios(ui, this);
+    },
+
+    onChange_ratio2: function (ui) {
+        updateRatios2(ui, this);
     },
 
     onRemoteDataChanged: function(ui, data) {
@@ -19,6 +26,7 @@ const events = {
             return;
 
         updateRatios(ui, this);
+        updateRatios2(ui, this);
     }
 };
 
@@ -53,6 +61,40 @@ const updateRatios = function(ui, context) {
 
         ui.ratio.setValue(data);
         context._updatingRatios -= 1;
+    });
+};
+
+const updateRatios2 = function (ui, context) {
+
+    if (context._updatingRatios2 > 0)
+        return;
+
+    context._updatingRatios2 += 1;
+    let columnName = ui.var.value();
+    let oldRatios = context.cloneArray(ui.ratio2.value(), []);
+    let promise = context.requestData("column", { columnName: columnName, properties: ["levels"] })
+    promise.then(rData => {
+        let data = [];
+        if (rData.columnFound) {
+            let levels = rData.levels;
+
+            let totalRatio = levels.length;
+            for (let i = 0; i < oldRatios.length; i++)
+                totalRatio += oldRatios[i].ratio - 1;
+
+            for (let i = 0; i < levels.length; i++) {
+                let ratio = 1;
+                if (i < oldRatios.length)
+                    ratio = oldRatios[i].ratio;
+
+                let prop = parseFloat(Math.round((ratio / totalRatio) * 1000) / 1000).toFixed(3);
+
+                data.push({ level: levels[i].label, ratio: ratio, proportion: prop });
+            }
+        }
+
+        ui.ratio2.setValue(data);
+        context._updatingRatios2 -= 1;
     });
 };
 
