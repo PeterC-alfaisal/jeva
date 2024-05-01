@@ -1,12 +1,12 @@
 ---
 title: Evidential Analyses for Common Statistical Analyses
 name: jeva
-version: 0.1.1
+version: 0.1.2
 jms: '1.0'
 authors:
   - Peter Cahusac
 maintainer: Peter Cahusac <peteqsac@gmail.com>
-date: '2024-02-03'
+date: '2024-01-05'
 type: R
 description: >-
   Analyses that calculate the log likelihood ratio (support) for a  range of
@@ -179,7 +179,7 @@ analyses:
 datasets:
   - name: Independent Samples t
     path: independent_samples_t.csv
-    description: 'Additional hours sleep in M & F, given either drug A'
+    description: Additional hours sleep in M & F, given either drug A
     tags:
       - Independent Samples T-Test
   - name: Paired Samples t
@@ -206,7 +206,7 @@ datasets:
       - Two-Way Factorial ANOVA
   - name: Repeated Measures ANOVA
     path: repeated_measures.csv
-    description: 'Additional hours sleep in M & F, given nothing and drugs A, B, C'
+    description: Additional hours sleep in M & F, given nothing and drugs A, B, C
     tags:
       - Repeated measures ANOVA
   - name: Regression

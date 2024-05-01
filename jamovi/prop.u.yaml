@@ -114,7 +114,7 @@ children:
         verticalAlignment: bottom
 
   - type: CollapseBox
-    label: Expected Proportions for Hₐ
+    label: 'Expected Proportions for <i>H</i>₀'
     collapsed: true
     stretchFactor: 1
     children:
@@ -156,7 +156,7 @@ children:
               horizontalAlignment: right
 
   - type: CollapseBox
-    label: Expected Proportions for H2
+    label: 'Expected Proportions for <i>H</i>ₐ'
     collapsed: true
     stretchFactor: 1
     children:

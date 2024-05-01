@@ -40,7 +40,7 @@ description:
             # ─────────────────────────────────────────────────────────────────────────────────────────────────────── 
             #   H₀ vs observed proportions    50 | 50            -1.5135514     1, 2    4.027103     1    0.0447748   
             #   Hₐ vs observed proportion     50 | 50            -2.0135514     2, 2    4.027103     1    0.0447748   
-            #   Hₐ vs H₀                                         -0.5000000     2, 1    0.000000     1    1.0000000   
+            #   Hₐ vs H₀                                         -0.5000000     2, 1      
             # ─────────────────────────────────────────────────────────────────────────────────────────────────────── 
             #   Note. S uses Occam's Bonus correction for parameters (Param).
             #
@@ -171,7 +171,7 @@ options:
             correction for parameters, none, Occam's bonus (default) or AIC
 
     - name: ratio
-      title: Expected Proportions for Hₐ
+      title: 'Expected Proportions for <i>H</i>₀'
       type: Array
       template:
           type: Number
@@ -183,7 +183,7 @@ options:
             a vector of numbers: the expected proportions
 
     - name: ratio2
-      title: Expected Proportions for H2
+      title: 'Expected Proportions for <i>H</i>ₐ'
       type: Array
       template:
           type: Number

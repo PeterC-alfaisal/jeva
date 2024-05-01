@@ -12,6 +12,7 @@ items:
       clearWith:
           - var
           - ratio
+          - ratio2
           - counts
           - data
       refs:
@@ -41,7 +42,7 @@ items:
           - name: name[exp]
             title: ''
             type: text
-            content: Expected
+            content: H₀ Expected
             visible: (expected)
 
           - name: count[exp]
@@ -66,6 +67,7 @@ items:
       clearWith:
           - var
           - ratio
+          - ratio2
           - counts
           - data
           - correction
@@ -103,6 +105,7 @@ items:
       clearWith:
           - var
           - ratio
+          - ratio2
           - counts
           - lint
           - ciWidth
@@ -124,6 +127,7 @@ items:
           refs:
               - Pritikin
 
+
     - name:  ctt3
       title: Variance analyses
       type: Table
@@ -132,6 +136,7 @@ items:
       clearWith:
           - var
           - ratio
+          - ratio2
           - counts
       columns:
         - name: var
@@ -168,6 +173,7 @@ items:
         - data
         - var
         - ratio
+        - ratio2
         - counts
         - lint
         - logplot
@@ -182,6 +188,7 @@ items:
       clearWith:
         - var
         - ratio
+        - ratio2
         - counts
         - correction
 
