@@ -46,10 +46,10 @@ propClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       len <- length(counts)
       
       ratio <- self$options$ratio
-      if (is.null(ratio))
-        expProps <- rep(1/len, len)
-      else
-        expProps <- ratio / sum(ratio)
+      ratio2 <- self$options$ratio2
+      
+      expProps <- ratio / sum(ratio)
+      expProps2 <- ratio2 / sum(ratio2)
       
       total <- sum(counts)
       
@@ -78,15 +78,14 @@ propClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       n <- sum(counts)
       
       tests <- self$results$tests
-      exp.p <- rep(1/len,each=len)   # null expected values
-      result <- try(chisq.test(counts, p=exp.p))   # versus null
+      result <- try(chisq.test(counts, p=expProps))   # versus null
       if ( ! base::inherits(result, 'try-error')) {
         chi_n=result$statistic
         p_n=result$p.value
       } else {
         chi_n=NaN; df=''; p_n=''
       }
-      result1 <- try(chisq.test(counts, p=expProps))   # versus specified expected
+      result1 <- try(chisq.test(counts, p=expProps2))   # versus specified expected
       if ( ! base::inherits(result1, 'try-error')) {
         chi_a=result1$statistic
         p_a=result1$p.value
@@ -95,9 +94,9 @@ propClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       }
       
       df <- (len-1)
-      exp_n <- exp.p*n
+      exp_n <- expProps*n
       exp_ntext <- paste(round(exp_n,2),collapse=" | ")
-      ratio_ntext <- paste(round(exp_n/exp_n,2),collapse=" : ")
+      ratio_ntext <- paste(round(ratio,2),collapse=" : ")
       count1 <- counts               # removing zero counts for support calculations
       for (i in 1:length(count1)) {
         count1[i] <- counts[i]
@@ -112,17 +111,34 @@ propClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         } 
       }
       
+      len_null0 <- 1
+      eq_val <- sum(expProps)/length(count1)   # check for equal expected values
+      for (i in 1:length(count1)) {
+        if(expProps[i] != eq_val) {
+          len_null0 <- 2
+          break
+        }
+      }
       Sup_n <- -sum(counts*(log(count1)-log(exp_n)))
-      Supc_n <- Sup_n + Ac(self$options$correction,1,len) # corrected for params
+      Supc_n <- Sup_n + Ac(self$options$correction,len_null0,len) # corrected for params
+      Param0=paste0(c(len_null0,len), collapse = ', ')
       
-      exp <- expProps*n
+      exp <- expProps2*n
       exp_text <- paste(round(exp,2),collapse=" | ")
-      ratio_atext <- paste(round(ratio,2),collapse=" : ")
+      ratio_atext <- paste(round(ratio2,2),collapse=" : ")
+      len_null1 <- 1
+      eq_val <- sum(expProps2)/length(count1)   # check for equal expected values
+      for (i in 1:length(count1)) {
+        if(expProps2[i] != eq_val) {
+          len_null1 <- 2
+          break
+        }
+      }
       Sup <- -sum(counts*(log(count1)-log(exp)))
-      Supc <- Sup + Ac(self$options$correction,2,len) # corrected for df
-      
+      Supc <- Sup + Ac(self$options$correction,len_null1,len) # corrected for df
+      Param1=paste0(c(len_null1,len), collapse = ', ')
       Sup_an <- Sup - Sup_n
-      Supc_an <- Sup_an + Ac(self$options$correction,2,1)
+      Supc_an <- Sup_an + Ac(self$options$correction,len_null1,len_null0)
       
       lrt_n <- abs(2*Sup_n)  # likelihood ratio statistic
       LRt_p_n <- 1-pchisq(lrt_n,df)
@@ -136,11 +152,11 @@ propClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       
       table <- self$results$tests
       table$setRow(rowNo=1, values=list(rat=ratio_ntext, Values=exp_ntext, S=Supc_n, 
-                                        Param=paste0(c(1,len), collapse = ', '), G=lrt_n, df=df, p=LRt_p_n))
+                                        Param=Param0, G=lrt_n, df=df, p=LRt_p_n))
       table$setRow(rowNo=2, values=list(rat=ratio_atext, Values=exp_text, S=Supc, 
-                                        Param=paste0(c(2,len), collapse = ', '), G=lrt, df=df, p=LRt_p))
+                                        Param=Param1, G=lrt, df=df, p=LRt_p))
       table$setRow(rowNo=3, values=list(rat="", Values="", S=Supc_an, 
-                                        Param=paste0(c(2,1), collapse = ', '), G=lrt_an, df=df, p=LRt_p_an))
+                                        Param=paste0(c(len_null1,len_null0), collapse = ', '), G="", df="", p=""))
       
       table <- self$results$ctt3
       table$setNote('Note', "Unlike the \u03C7\u00B2 statistic, a large S value indicates 
@@ -194,8 +210,6 @@ propClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         if(a==0) xmin1 <- 0
         xmin1a <- xmin1
         xmin2 <- xmin2$minimum
-        # if(r==0) xmin2 <- 1
-        # likelihood interval
         goal <- -self$options$lint
         xmin1L <- optimize(f, c(0, p1), tol = toler, a, r, p, goal)
         xmin2L <- optimize(f, c(p, 1.01), tol = toler, a, r, p, goal)
@@ -203,7 +217,6 @@ propClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         if(a==0) xmin1L <- 0
         xmin1La <- xmin1L
         xmin2L <- xmin2L$minimum
-        #  if(r==0) xmin2L <- 1
         
         # x axis limits
         goalx <- self$options$supplot   # with e^-10 we get x values for when curve is down to 0.00004539
@@ -242,7 +255,7 @@ propClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         table <- self$results$ctt2
         table$setVisible(TRUE)
         
-        g <- data.frame(p=p, p1=p1, a=a, r=r, n=n, expprop=expProps[1], switch=switch,
+        g <- data.frame(p=p, p1=p1, a=a, r=r, n=n, expprop=expProps[1], expprop2=expProps2[1], switch=switch,
                         xmin1L=xmin1L, xmin2L=xmin2L, xmin=xmin, xmax=xmax, goal=goal)
         imagec <- self$results$plotc
         imagec$setState(g)
@@ -270,6 +283,8 @@ propClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         lines(c(g$p,g$p),c(0,1),lty=2) # add MLE as dashed line
         lines(c(g$expprop,g$expprop),c(0,(g$expprop^g$a*(1-g$expprop)^g$r)/(g$p^g$a*(1-g$p)^g$r)),
               lty=1, col = "blue") # add H prob as blue line
+        lines(c(g$expprop2,g$expprop2),c(0,(g$expprop2^g$a*(1-g$expprop2)^g$r)/(g$p^g$a*(1-g$p)^g$r)),
+              lty=1, col = "green") # add H1 prob as green line
         segments(g$xmin1L, exp(g$goal), g$xmin2L, exp(g$goal), lwd = 1, col = "red")
         lines(c(0.5,0.5), c(0,(0.5^g$a*(0.5)^g$r)/(g$p^g$a*(1-g$p)^g$r)), lty=1) # add Null as black line
       } else {
@@ -278,11 +293,11 @@ propClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         lines(c(g$p,g$p),c(self$options$supplot,0),lty=2) # add MLE as dashed line
         lines(c(g$expprop,g$expprop),c(self$options$supplot, g$a*log(g$expprop)+g$r*log(1-g$expprop)-(g$a*log(g$p)+g$r*log(1-g$p))),
               lty=1, col = "blue") # add H prob as blue line
+        lines(c(g$expprop2,g$expprop2),c(self$options$supplot, g$a*log(g$expprop2)+g$r*log(1-g$expprop2)-(g$a*log(g$p)+g$r*log(1-g$p))),
+              lty=1, col = "green") # add H1 prob as green line
         segments(g$xmin1L, g$goal, g$xmin2L, g$goal, lwd = 1, col = "red")
         lines(c(0.5,0.5), c(self$options$supplot,g$a*log(0.5)+g$r*log(1-0.5)-(g$a*log(g$p)+g$r*log(1-g$p))), lty=1) # add Null as black line
       }
-      #        a*log(x)+r*log(1-x)-(a*log(p)+r*log(1-p))
-      #        print(plot)
       TRUE
     },
     
@@ -438,16 +453,11 @@ propClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           for or against the null hypothesis. "
       str2 <- "Another advantage is that we can select hypothesis values that reflect our research interests. "
       str3 <- "For example, we could choose meaningful <i>H</i>\u2090 proportions to compare with the <i>H</i>\u2080 
-          (equal frequencies). This is shown by the last line of the main Support table. "
+          (with other specified frequencies). This is shown by the last line of the main Support table. "
       str = paste0(str1, str2, str3, "As data accumulates the strength of evidence for one hypothesis over another will tend 
                        to increase.")
       
       html$setContent(str)
-      
-      str2 <- "Another advantage is that we can select hypothesis values that reflect our research interests. "
-      str3 <- "For example, we could choose a meaningful effect size <i>H</i>\u2090 to compare with any <i>H</i>\u2080. 
-        This is shown by the last line of the main Support table, where the <i>p</i> value cannot be calculated. "
-      str = paste0(str1, str2, str3, "As data accumulates the strength of evidence for one hypothesis over another will tend to increase.")
       
     }
     
