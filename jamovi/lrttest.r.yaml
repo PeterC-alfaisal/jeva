@@ -42,7 +42,7 @@ items:
           type: number
         - name: df
           title: df
-          type: number
+          type: integer
         - name: p
           title: p
           type: number
