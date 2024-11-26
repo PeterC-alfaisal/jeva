@@ -33,13 +33,13 @@ lsampszClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           
           f <- function(n, MW, nul, d,  S) {
             tmw <- qt(MW,df=n-1, lower.tail =TRUE)
-            Xu <- nul+(d*(1-sqrt((exp(-(2*S/n))-(1-exp(-(2*S/n)))^2*(n-1)/
-                                    (n*d^2))))/((1-exp(-(2*S/n)))))
+            suppressWarnings(Xu <- nul+(d*(1-sqrt((exp(-(2*S/n))-(1-exp(-(2*S/n)))^2*(n-1)/
+                                    (n*d^2))))/((1-exp(-(2*S/n))))))
             to <- (Xu-d)*sqrt(n)
             td <- (to-tmw)^2
           }
-          xmin1 <- optimize(f, c(3, 10000000), tol = toler, MW, nul, d,  S)
-          ns <- round(xmin1$minimum,0)
+          suppressWarnings(xmin1 <- optimize(f, c(3, 10000000), tol = toler, MW, nul, d,  S))
+          ns <- ceiling(xmin1$minimum)
           
           table <- self$results$tab
           table$setRow(rowNo=1, values=list(MW=MW, S=S, d=d, N=ns))
@@ -48,13 +48,13 @@ lsampszClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           
           g <- function(n, MW, nul, d,  S) {
             tmw <- qt(MW,df=n-2, lower.tail =TRUE)
-            Xu <- nul+(d*(1-sqrt((exp(-(2*S/n))-(1-exp(-(2*S/n)))^2*(n-2)/
-                                    (n*d^2))))/((1-exp(-(2*S/n)))))
+            suppressWarnings(Xu <- nul+(d*(1-sqrt((exp(-(2*S/n))-(1-exp(-(2*S/n)))^2*(n-2)/
+                                    (n*d^2))))/((1-exp(-(2*S/n))))))
             to <- (Xu-d)*sqrt(n)/(2)
             td <- (to-tmw)^2
           }
-          xmin1 <- optimize(g, c(3, 10000000), tol = toler, MW, nul, d,  S)
-          ns <- round(xmin1$minimum,0)
+          suppressWarnings(xmin1 <- optimize(g, c(3, 10000000), tol = toler, MW, nul, d,  S))
+          ns <- ceiling(xmin1$minimum)   # use ceiling rather than round, to get to nearest N
           if((ns %% 2) != 0)  ns <- ns + 1         # make number even for division by 2
           ns <- as.integer(ns)
           
@@ -98,7 +98,7 @@ lsampszClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         d <- g$d
         S10 <- g$S
         null <- 0
-        maxsample <- g$ns + g$ns/1.5
+        maxsample <- 2*g$ns + g$ns/1.5
         
         if(self$options$tail1 == "onet") { alp <- self$options$alpha
         } else { alp <- self$options$alpha/2}
@@ -152,7 +152,7 @@ lsampszClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         Sexp <- bquote(~italic(S) == .(S10))
         dexp <- bquote(~italic(d) == .(d))
         alexp <- bquote(alpha == .(self$options$alpha))
-        
+
         if (self$options$tail1 == "onet") { tailtx <- "One-tailed test"
         } else { betex <- tailtx <- "Two-tailed test" 
         }
@@ -162,7 +162,8 @@ lsampszClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         lines(ns, Beta, lty = 2)
         lines(ns, MWl, lty = 1, lwd = 2)
         
-        lines(c(0,maxsample),c(self$options$alpha,self$options$alpha),lty=5) # add alpha
+        lines(c(0,maxsample),c(self$options$alpha,self$options$alpha),lty=5, col="green") # add alpha
+        text(x=0,y=self$options$alpha,pos=3,label = bquote(alpha),cex=1.5)
         text(x=maxsample/1.5,y=0.185,pos=4,label = Sexp,cex=1.5)
         text(x=maxsample/1.5,y=0.17,pos=4,label = dexp,cex=1.5)
         text(x=maxsample/1.5,y=0.155,pos=4,label = alexp,cex=1.5)
@@ -190,7 +191,7 @@ lsampszClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
   Type I error rate (\u03B1). The top of its curve near probability of .2 (power of .8) is near to the usual value selected 
   for frequentist sample size estimation. The sample size estimated using \u03B2 will typically be less than the evidential 
   analysis estimate (e.g. using M + W probability of .05). The Type I error probability (\u03B1) is represented by the long 
-  dashed horizontal line. Probabilities are undefined below certain sample sizes."
+  green dashed horizontal line. Probabilities are undefined below certain sample sizes."
         
         html$setContent(str)
       },
@@ -221,24 +222,25 @@ lsampszClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
   data is tested for statistical significance.
   
   <br> <h2>Examples</h2>
-  <b>One sample test:</b> with a large effect size <i>d</i> = 1 and <i>S</i> = 3, a sample size of at least 24 is 
+  <b>One sample test:</b> with a large effect size <i>d</i> = 1, M + W = 0.05 and <i>S</i> = 3, a sample size of at least 25 is 
   required if the probability is to fall below .05. By comparison, a frequentist analysis using a two-tailed test with 
   \u03B2 = .05 and \u03B1 = .05 would calculate a sample size of 16.
-  <br> <b>Independent samples test:</b> using the same criteria as the previous example, a sample size of least 58 (29 
+  <br> <b>Independent samples test:</b> using the same criteria as the previous example, a sample size of least 60 (30 
   in each group) would be needed. The corresponding sample size using the frequentist approach would be 54 (27 in each group). 
   <br>For some calculations the estimated samples using the two methods will coincide. For example, with an independent samples 
   test, using <i>d</i> = 1.2, <i>S</i> = 2, M + W = .05 versus \u03B2 = .05 and \u03B1 = .05 two-tailed test, both give a 
-  sample size of 40.
+  total sample size of 40.
   
   
   <br> <h2>Final Comment</h2>
-  While the evidential approach generally demands about 20% larger sample sizes, this can be relaxed since the data 
-  can be continuously monitored for strong evidence. Monitoring can involve updating calculations of the strength and 
-  direction of the evidence, as well as the calculation of the likelihood function with a suitable log likelihood interval 
-  (Cahusac, 2020). The study can be discontinued once sufficiently strong evidence is obtained (Royall, 1997). This may 
-  even occur before the recommended sample size is reached. If strong evidence fails to be obtained using the allocated 
-  sample size, then it is still statistically legitimate to add further observations using the evidential approach 
-  (Royall, 2004)."
+  For paired or one sample tests, the evidential approach can demand up to 60% larger sample sizes. The opposite is true
+  for independent samples tests, which generally require smaller sample sizes (even up to 50% smaller). These are ballpark
+  estimates, which in practice can be modified while data is gathered. Continous monitoring can be done during data 
+  collection. Monitoring can involve updating calculations of the strength and direction of the evidence, as well as 
+  the calculation of the likelihood function with a suitable log likelihood interval (Cahusac, 2020). Data collection can be 
+  stopped once sufficiently strong evidence is obtained, e.g. <i>S</i> = 3 (Royall, 1997). This may even occur before 
+  the recommended sample size is reached. If strong evidence fails to be obtained using the allocated sample size, 
+  then it is still statistically legitimate to add further observations using the evidential approach (Royall, 2004)."
         
         
         

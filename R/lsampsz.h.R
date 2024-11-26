@@ -7,11 +7,11 @@ lsampszOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     public = list(
         initialize = function(
             ttype = "is",
-            MW = 0.05,
-            S = 3,
-            d = 1.2,
+            MW = 0.2,
+            S = 2,
+            d = 0.5,
             plwm = FALSE,
-            tail1 = "onet",
+            tail1 = "twot",
             alpha = 0.05,
             text = TRUE, ...) {
 
@@ -33,19 +33,19 @@ lsampszOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 MW,
                 min=0,
                 max=1,
-                default=0.05)
+                default=0.2)
             private$..S <- jmvcore::OptionNumber$new(
                 "S",
                 S,
                 min=0,
                 max=100,
-                default=3)
+                default=2)
             private$..d <- jmvcore::OptionNumber$new(
                 "d",
                 d,
                 min=0.05,
                 max=10,
-                default=1.2)
+                default=0.5)
             private$..plwm <- jmvcore::OptionBool$new(
                 "plwm",
                 plwm,
@@ -56,7 +56,7 @@ lsampszOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=list(
                     "onet",
                     "twot"),
-                default="onet")
+                default="twot")
             private$..alpha <- jmvcore::OptionNumber$new(
                 "alpha",
                 alpha,
@@ -239,7 +239,7 @@ lsampszBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param ttype type of t-test, independent (default) or paired/one sample
 #' @param MW probability of misleading + weak evidence, default = 0.05
 #' @param S strength of evidence required LLR, default = 3
-#' @param d Cohen's d effect size, default = 1.2
+#' @param d Cohen's d effect size, default = 0.5
 #' @param plwm \code{TRUE} or \code{FALSE} (default), show the probability
 #'   plots for weak  and misleading evidence
 #' @param tail1 whether one- (default) or two-tailed for beta calculations
@@ -266,11 +266,11 @@ lsampszBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @export
 lsampsz <- function(
     ttype = "is",
-    MW = 0.05,
-    S = 3,
-    d = 1.2,
+    MW = 0.2,
+    S = 2,
+    d = 0.5,
     plwm = FALSE,
-    tail1 = "onet",
+    tail1 = "twot",
     alpha = 0.05,
     text = TRUE) {
 

@@ -207,7 +207,7 @@ lrttestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     list(
                         `name`="df", 
                         `title`="df", 
-                        `type`="number"),
+                        `type`="integer"),
                     list(
                         `name`="p", 
                         `title`="p", 
