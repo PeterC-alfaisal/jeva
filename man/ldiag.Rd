@@ -9,6 +9,7 @@ ldiag(
   rows,
   cols,
   counts = NULL,
+  comp,
   nulsens = 0.5,
   nulspec = 0.5,
   pprob = FALSE,
@@ -17,6 +18,9 @@ ldiag(
   ciWidth = 95,
   correction = "ob",
   fagan = FALSE,
+  comp2 = FALSE,
+  compcd,
+  compch,
   pll = FALSE,
   plotype = "lplot",
   supplot = -10,
@@ -49,6 +53,8 @@ necessary when providing a formula, see the examples)}
 \item{counts}{the variable to use as the counts in the contingency table
 (not necessary when providing a formula, see the examples)}
 
+\item{comp}{the variable to use for comparison with Test Results}
+
 \item{nulsens}{value for the null hypothesis, default = 0.5}
 
 \item{nulspec}{value for the alternative hypothesis, default = 0.5}
@@ -68,6 +74,12 @@ confidence intervals to provide}
 or AIC}
 
 \item{fagan}{.}
+
+\item{comp2}{.}
+
+\item{compcd}{.}
+
+\item{compch}{.}
 
 \item{pll}{\code{TRUE} or \code{FALSE} (default), give the likelihood
 function showing null hypothesis (black line),  alternative hypothesis
@@ -123,7 +135,7 @@ for the bar plot y-axis.}
 \value{
 A results object containing:
 \tabular{llllll}{
-  \code{results$freqs} \tab \tab \tab \tab \tab a table of proportions \cr
+  \code{results$freqs} \tab \tab \tab \tab \tab a table of counts \cr
   \code{results$stats} \tab \tab \tab \tab \tab a table \cr
   \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
   \code{results$ctt} \tab \tab \tab \tab \tab a table \cr
@@ -133,6 +145,14 @@ A results object containing:
   \code{results$plotc} \tab \tab \tab \tab \tab an image \cr
   \code{results$plot1} \tab \tab \tab \tab \tab an image \cr
   \code{results$barplot} \tab \tab \tab \tab \tab an image \cr
+  \code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
+  \code{results$ct_comp} \tab \tab \tab \tab \tab a table \cr
+  \code{results$cttsens2} \tab \tab \tab \tab \tab a table \cr
+  \code{results$cttspec2} \tab \tab \tab \tab \tab a table \cr
+  \code{results$text2} \tab \tab \tab \tab \tab a preformatted \cr
+  \code{results$ct_comp1} \tab \tab \tab \tab \tab a table \cr
+  \code{results$ct_comp2} \tab \tab \tab \tab \tab a table \cr
+  \code{results$cttcompt} \tab \tab \tab \tab \tab a table \cr
   \code{results$tabText} \tab \tab \tab \tab \tab a html \cr
   \code{results$SupportTab} \tab \tab \tab \tab \tab a table \cr
   \code{results$MoretabText} \tab \tab \tab \tab \tab a html \cr

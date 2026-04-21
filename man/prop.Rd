@@ -17,6 +17,7 @@ prop(
   supplot = -10,
   correction = "ob",
   ratio = NULL,
+  ratio2 = NULL,
   varA = FALSE,
   text = TRUE,
   formula
@@ -54,6 +55,8 @@ units (default = -10)  affects the x-axis range}
 or AIC}
 
 \item{ratio}{a vector of numbers: the expected proportions}
+
+\item{ratio2}{a vector of numbers: the expected proportions}
 
 \item{varA}{\code{TRUE} or \code{FALSE} (default), perform variance
 analysis for null and alternative hypotheses}
@@ -110,7 +113,7 @@ jeva::prop(formula = Students ~ Sex, data = dat, ratio = c(1, 1), text = FALSE)
 # -------------------------------------------------------------------------------------------------------
 #   H₀ vs observed proportions    50 | 50            -1.5135514     1, 2    4.027103     1    0.0447748
 #   Ha vs observed proportion     50 | 50            -2.0135514     2, 2    4.027103     1    0.0447748
-#   Ha vs H₀                                         -0.5000000     2, 1    0.000000     1    1.0000000
+#   Ha vs H₀                                         -0.5000000     2, 1
 # -------------------------------------------------------------------------------------------------------
 #   Note. S uses Occam's Bonus correction for parameters (Param).
 #

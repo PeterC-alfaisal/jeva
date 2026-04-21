@@ -6,11 +6,11 @@
 \usage{
 lsampsz(
   ttype = "is",
-  MW = 0.05,
-  S = 3,
-  d = 1.2,
+  MW = 0.2,
+  S = 2,
+  d = 0.5,
   plwm = FALSE,
-  tail1 = "onet",
+  tail1 = "twot",
   alpha = 0.05,
   text = TRUE
 )
@@ -22,7 +22,7 @@ lsampsz(
 
 \item{S}{strength of evidence required LLR, default = 3}
 
-\item{d}{Cohen's d effect size, default = 1.2}
+\item{d}{Cohen's d effect size, default = 0.5}
 
 \item{plwm}{\code{TRUE} or \code{FALSE} (default), show the probability
 plots for weak  and misleading evidence}
