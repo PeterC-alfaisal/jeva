@@ -145,7 +145,7 @@ options:
               value for the null hypothesis, default = 1
       
     - name: alt
-      title: '<i>H</i>ₐ <i>OR</i'
+      title: '<i>H</i>ₐ <i>OR</i>'
       type: Number
       min: 0
       max: 10e+10

@@ -5,9 +5,9 @@ jrs:   '1.1'
 
 items:
     - name: freqs
-      title: Contingency Tables
+      title: '`Contingency Table for {counts}`'
       type: Table
-      description: a table of proportions
+      description: a table of counts
       columns: [ ]
       clearWith:
         - rows
@@ -240,15 +240,195 @@ items:
         - rows
         - cols
         - counts
-        - barplot
         - yaxis
         - yaxisPc
         - xaxis
         - bartype
-        - pcTot
-        - pcCol
-        - pcRow
 
+    - name:  text1
+      title: 2nd diagnostic procedure
+      type:  Preformatted
+      visible: (comp2)
+
+    - name:  ct_comp
+      title: '`${comp} vs {cols}`'
+      type: Table
+      visible: (comp2)
+      rows:  3
+      clearWith:
+        - rows
+        - cols
+        - comp
+        - counts
+        - data
+        - cc
+        - lint
+        - ciWidth
+        - compcd
+        - compch
+      columns:
+        - name: var
+          title: ''
+          type: text
+        - name: c_v1
+          title: ' + '
+          type: number
+        - name: c_v2
+          title: ' - '
+          type: number
+        - name: c_v3
+          title: ' Total '
+          type: number
+
+    - name:  cttsens2
+      title: Intervals for Sensitivity
+      type: Table
+      visible: (comp2)
+      rows:  2
+      clearWith:
+        - rows
+        - cols
+        - counts
+        - data
+        - cc
+        - lint
+        - ciWidth
+        - compcd
+        - compch
+      columns:
+        - name: Interval
+          title: Type of interval
+          type: text
+        - name: Level
+          type: text
+        - name: sens
+          title: Value
+          type: number
+        - name: Lower
+          type: number
+        - name: Upper
+          type: number
+
+    - name:  cttspec2
+      title: Intervals for Specificity
+      type: Table
+      visible: (comp2)
+      rows:  2
+      clearWith:
+        - rows
+        - cols
+        - counts
+        - data
+        - lint
+        - ciWidth
+        - compcd
+        - compch
+      columns:
+        - name: Interval
+          title: Type of interval
+          type: text
+        - name: Level
+          type: text
+        - name: spec
+          title: Value
+          type: number
+        - name: Lower
+          type: number
+        - name: Upper
+          type: number
+          refs:
+              - Pritikin
+
+    - name:  text2
+      title: Comparison between the 2 diagnostic procedures
+      type:  Preformatted
+      visible: (comp2)
+
+    - name:  ct_comp1
+      title: "Positive Final Diagnosis:"
+      type: Table
+      visible: (comp2)
+      rows:  3
+      clearWith:
+        - rows
+        - cols
+        - comp
+        - counts
+        - data
+        - cc
+        - lint
+        - ciWidth
+        - compcd
+        - compch
+      columns:
+        - name: var
+          title: ''
+          type: text
+        - name: ' Total '
+          type: number
+
+    - name:  ct_comp2
+      title: "Negative Final Diagnosis:"
+      type: Table
+      visible: (comp2)
+      rows:  3
+      clearWith:
+        - rows
+        - cols
+        - comp
+        - counts
+        - data
+        - cc
+        - lint
+        - ciWidth
+        - compcd
+        - compch
+      columns:
+        - name: var
+          title: ''
+          type: text
+        - name: ' Total '
+          type: number
+
+    - name:  cttcompt
+      title: ''
+      type: Table
+      visible: (comp2)
+      rows:  2
+      columns:
+        - name: var
+          title: ''
+          type: text
+        - name: ''
+          type: number
+        - name: S
+          type: number
+        - name: Param
+          type: number
+        - name: G
+          type: number
+        - name: df
+          type: number
+        - name: p
+          type: number
+          format: zto,pvalue
+      refs:
+        - Book
+        - Hawass
+        - Edwards_OR
+      clearWith:
+        - rows
+        - cols
+        - counts
+        - data
+        - nulsens
+        - nulspec
+        - cc
+        - comp
+        - lint
+        - ciWidth
+        - compcd
+        - compch
 
     - name: tabText
       title: 'Summarizing an evidential analysis'

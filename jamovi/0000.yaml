@@ -1,14 +1,14 @@
 ---
 title: Evidential Analyses for Common Statistical Analyses
 name: jeva
-version: 0.1.3
+version: 2.1.1
 jms: '1.0'
 authors:
   - Peter Cahusac
 maintainer: Peter Cahusac <peteqsac@gmail.com>
-date: '2024-11-26'
+date: '2026-04-21'
 type: R
-description: >-
+description: >
   Analyses that calculate the log likelihood ratio (support) for a  range of
   statistical tests. Where possible the likelihood function and support interval
   for the observed data are displayed. Intended as a companion to the book <a
@@ -26,6 +26,7 @@ analyses:
       specified. Likelihood interval support level can be specified and plotted
       with the means. A likelihood function for the difference in means can be
       plotted. 
+    category: analyses
   - title: Paired Samples T-Test
     name: lrttest
     ns: jeva
@@ -37,6 +38,7 @@ analyses:
       specified. Likelihood interval support level can be specified and plotted
       with the mean difference. A likelihood function for the mean difference
       can be plotted. 
+    category: analyses
   - title: One Sample T-Test
     name: lttest
     ns: jeva
@@ -47,6 +49,7 @@ analyses:
       One sample analysis where null and alternative hypotheses can be
       specified. Likelihood interval support level can be specified and plotted
       with the mean. A likelihood function for the mean can be plotted.
+    category: analyses
   - title: Sample Size Calculator
     name: lsampsz
     ns: jeva
@@ -57,6 +60,7 @@ analyses:
       Sample size calculation for all t-tests, specifying strength of evidence
       required, the probability of misleading and weak evidence, and the effect
       size. Shows a probability plot of types of error against sample size. 
+    category: analyses
   - title: One-Way ANOVA
     name: laov1w
     ns: jeva
@@ -73,6 +77,7 @@ analyses:
       S, represent log likelihood ratio. They are given for each model 
       comparison. Sc represent Akaike corrected values according to the 
       number of parameters
+    category: analyses
   - title: Two-Way Factorial ANOVA
     name: l2waov
     ns: jeva
@@ -84,6 +89,7 @@ analyses:
       between a continuous dependent variable and two categorical explanatory
       variables. Contrasts can be specified. Support values can be corrected
       according to the number of parameters in the models being compared.
+    category: analyses
   - title: Repeated Measures ANOVA
     name: lrm1waov
     ns: jeva
@@ -96,6 +102,7 @@ analyses:
       explanatory variables, where one or more of the explanatory variables
       are 'within subjects' (where multiple measurements are from the same
       subject). 
+    category: analyses
   - title: Polynomial Regression
     name: lreg
     ns: jeva
@@ -110,6 +117,7 @@ analyses:
       the model, but these are not comparable with the support values. Model
       coefficients are given with their specified likelihood support level.
       Plots for different polynomial orders can be plotted. 
+    category: analyses
   - title: Correlation
     name: lcorr
     ns: jeva
@@ -120,6 +128,7 @@ analyses:
       Bivariate correlation analysis where an alternative hypothesis correlation
       can be specified. Likelihood support and likelihood based confidence
       intervals can be specified. 
+    category: analyses
   - title: N Outcomes
     name: prop
     ns: jeva
@@ -130,6 +139,7 @@ analyses:
       The one-way analysis examines how well the observed proportions match
       those expected according to a null hypothesis or a specified hypothesis. 
     menuSubtitle: One-way including binomial test
+    category: analyses
   - title: Independent Samples
     name: contab
     ns: jeva
@@ -140,6 +150,7 @@ analyses:
       Two-way analysis of a contingency table where main effects and interaction
       can be assessed.
     menuSubtitle: Two-way association
+    category: analyses
   - title: Odds Ratio
     name: ctt
     ns: jeva
@@ -149,6 +160,7 @@ analyses:
     description: >
       Analysis of a 2 x 2 contingency table using the odds ratio, choose null
       and alternative values
+    category: analyses
   - title: Relative Risk
     name: llr
     ns: jeva
@@ -158,6 +170,7 @@ analyses:
     description: >
       Analysis of a 2 x 2 contingency table using relative risk, choose null and
       alternative values
+    category: analyses
   - title: Paired Samples
     name: mcnem
     ns: jeva
@@ -168,6 +181,7 @@ analyses:
       Paired samples analysis (McNemar test) where null and alternative odds can
       be specified.
     menuSubtitle: McNemar test
+    category: analyses
   - title: Diagnostic Test
     name: ldiag
     ns: jeva
@@ -176,77 +190,92 @@ analyses:
     menuTitle: Diagnostic Test
     description: |
       Analysis of a 2 x 2 contingency table using diagnostic test
+    category: analyses
 datasets:
   - name: Independent Samples t
     path: independent_samples_t.csv
-    description: Additional hours sleep in M & F, given either drug A
+    description: |
+      Additional hours sleep in M & F, given either drug A
     tags:
       - Independent Samples T-Test
   - name: Paired Samples t
     path: paired_samples_t.csv
-    description: Additional hours sleep given drugs A and B
+    description: |
+      Additional hours sleep given drugs A and B
     tags:
       - Paired Samples T-Test
   - name: One Sample t
     path: one_sample_t.csv
-    description: Additional hours sleep given drug A
+    description: |
+      Additional hours sleep given drug A
     tags:
       - One Sample T-Test
   - name: One-Way ANOVA
     path: 1_way_anova.csv
-    description: Fitness levels for different types of training
+    description: |
+      Fitness levels for different types of training
     tags:
       - One-Way ANOVA
   - name: Two-Way Factorial ANOVA
     path: 2_way_factorial_anova.csv
-    description: >-
+    description: >
       Blood clotting times in haemophiliac patients and healthy patients given 3
       treatments
     tags:
       - Two-Way Factorial ANOVA
   - name: Repeated Measures ANOVA
     path: repeated_measures.csv
-    description: Additional hours sleep in M & F, given nothing and drugs A, B, C
+    description: |
+      Additional hours sleep in M & F, given nothing and drugs A, B, C
     tags:
       - Repeated measures ANOVA
   - name: Regression
     path: regression.csv
-    description: Womens world record times for 1500m event
+    description: |
+      Womens world record times for 1500m event
     tags:
       - Polynomial Regression
   - name: Correlation
     path: correlation.csv
-    description: Heptathlon running times in 200m and 800m events
+    description: |
+      Heptathlon running times in 200m and 800m events
     tags:
       - Correlation
   - name: N Outcomes
     path: n_outcomes.csv
-    description: Disease outcomes in 10 patients
+    description: |
+      Disease outcomes in 10 patients
     tags:
       - N Outcomes for categorical analysis
   - name: 2-Way Association
     path: 2_way_association.csv
-    description: Presence of S. mansoni eggs in stools according to age group
+    description: |
+      Presence of S. mansoni eggs in stools according to age group
     tags:
       - Independent Samples association for categorical analysis
   - name: Odds Ratio
     path: odds_ratio.csv
-    description: Folic acid vs placebo and neural tube defects
+    description: |
+      Folic acid vs placebo and neural tube defects
     tags:
       - Odds Ratio
   - name: Relative Risk
     path: relative_risk.csv
-    description: Relative risk for treatment effectiveness and sex
+    description: |
+      Relative risk for treatment effectiveness and sex
     tags:
       - Relative Risk
   - name: McNemar Test
     path: mcnemar.csv
-    description: Allergic reaction to two handcreams
+    description: |
+      Allergic reaction to two handcreams
     tags:
       - McNemar Test
   - name: Diagnostic Test
     path: CT_scan_diagnosis.csv
-    description: Detection of disease by CT scan versus final diagnosis
+    description: >
+      Detection of disease by CT scan versus final diagnosis, and comparison
+      with ultrascan
     tags:
       - Diagnostic Test
 usesNative: true

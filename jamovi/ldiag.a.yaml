@@ -72,11 +72,17 @@ description:
           #   accurate and are parameterization-invariant compared to
           #   conventional confidence intervalsompleteWhenFilled: true
 
+completeWhenFilled: true
+
 formula:
     counts:
         from: lhs
         type: vars
         subset: 1
+    comp:
+        from: lhs
+        type: vars
+        subset: 2
     rows:
         from: rhs
         type: vars
@@ -119,7 +125,7 @@ options:
               necessary when providing a formula, see the examples)
 
     - name: counts
-      title: Counts (optional)
+      title: Counts (optional for 1 procedure)
       type: Variable
       suggested:
         - continuous
@@ -131,6 +137,16 @@ options:
               the variable to use as the counts in the contingency table (not
               necessary when providing a formula, see the examples)
 
+    - name: comp
+      title: Comparison counts (required)
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      description:
+          R: >
+              the variable to use for comparison with Test Results
 
     - name: nulsens
       title: '<i>H</i>₀ Sensitivity'
@@ -206,9 +222,24 @@ options:
             correction for parameters, none, Occam's bonus (default) or AIC
 
     - name: fagan
-      title: ''
+      title: 'Plot'
       type: Bool
       default: false
+
+    - name: comp2
+      title: 'For comparison'
+      type: Bool
+      default: false
+      
+    - name: compcd
+      title: "Positive Final: both tests +ve"
+      type: Number
+      min: 0
+      
+    - name: compch
+      title: "Negative Final: both tests +ve"
+      type: Number
+      min: 0
       
     - name: pll
       title: Likelihood function

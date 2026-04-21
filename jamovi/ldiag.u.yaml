@@ -27,6 +27,12 @@ children:
             name: counts
             isTarget: true
             maxItemCount: 1
+      - type: TargetLayoutBox
+        children:
+          - type: VariablesListBox
+            name: comp
+            isTarget: true
+            maxItemCount: 1
   - type: LayoutBox
     margin: large
     children:
@@ -91,6 +97,20 @@ children:
     stretchFactor: 1
     horizontalAlignment: center
     children:
+      - type: Label
+        label: Two diagnostic procedures
+        fitToGrid: true
+        children:
+          - type: CheckBox
+            name: comp2
+          - type: TextBox
+            name: compcd
+            format: number
+            enable: (comp2)
+          - type: TextBox
+            name: compch
+            format: number
+            enable: (comp2)
       - type: Label
         label: Likelihood Curve
         children:
