@@ -9,6 +9,7 @@ ldiagOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             rows = NULL,
             cols = NULL,
             counts = NULL,
+            comp = NULL,
             nulsens = 0.5,
             nulspec = 0.5,
             pprob = FALSE,
@@ -17,6 +18,9 @@ ldiagOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             ciWidth = 95,
             correction = "ob",
             fagan = FALSE,
+            comp2 = FALSE,
+            compcd = NULL,
+            compch = NULL,
             pll = FALSE,
             plotype = "lplot",
             supplot = -10,
@@ -65,6 +69,13 @@ ldiagOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 permitted=list(
                     "numeric"),
                 default=NULL)
+            private$..comp <- jmvcore::OptionVariable$new(
+                "comp",
+                comp,
+                suggested=list(
+                    "continuous"),
+                permitted=list(
+                    "numeric"))
             private$..nulsens <- jmvcore::OptionNumber$new(
                 "nulsens",
                 nulsens,
@@ -111,6 +122,18 @@ ldiagOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "fagan",
                 fagan,
                 default=FALSE)
+            private$..comp2 <- jmvcore::OptionBool$new(
+                "comp2",
+                comp2,
+                default=FALSE)
+            private$..compcd <- jmvcore::OptionNumber$new(
+                "compcd",
+                compcd,
+                min=0)
+            private$..compch <- jmvcore::OptionNumber$new(
+                "compch",
+                compch,
+                min=0)
             private$..pll <- jmvcore::OptionBool$new(
                 "pll",
                 pll,
@@ -204,6 +227,7 @@ ldiagOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..rows)
             self$.addOption(private$..cols)
             self$.addOption(private$..counts)
+            self$.addOption(private$..comp)
             self$.addOption(private$..nulsens)
             self$.addOption(private$..nulspec)
             self$.addOption(private$..pprob)
@@ -212,6 +236,9 @@ ldiagOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..ciWidth)
             self$.addOption(private$..correction)
             self$.addOption(private$..fagan)
+            self$.addOption(private$..comp2)
+            self$.addOption(private$..compcd)
+            self$.addOption(private$..compch)
             self$.addOption(private$..pll)
             self$.addOption(private$..plotype)
             self$.addOption(private$..supplot)
@@ -234,6 +261,7 @@ ldiagOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         rows = function() private$..rows$value,
         cols = function() private$..cols$value,
         counts = function() private$..counts$value,
+        comp = function() private$..comp$value,
         nulsens = function() private$..nulsens$value,
         nulspec = function() private$..nulspec$value,
         pprob = function() private$..pprob$value,
@@ -242,6 +270,9 @@ ldiagOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ciWidth = function() private$..ciWidth$value,
         correction = function() private$..correction$value,
         fagan = function() private$..fagan$value,
+        comp2 = function() private$..comp2$value,
+        compcd = function() private$..compcd$value,
+        compch = function() private$..compch$value,
         pll = function() private$..pll$value,
         plotype = function() private$..plotype$value,
         supplot = function() private$..supplot$value,
@@ -263,6 +294,7 @@ ldiagOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..rows = NA,
         ..cols = NA,
         ..counts = NA,
+        ..comp = NA,
         ..nulsens = NA,
         ..nulspec = NA,
         ..pprob = NA,
@@ -271,6 +303,9 @@ ldiagOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..ciWidth = NA,
         ..correction = NA,
         ..fagan = NA,
+        ..comp2 = NA,
+        ..compcd = NA,
+        ..compch = NA,
         ..pll = NA,
         ..plotype = NA,
         ..supplot = NA,
@@ -304,6 +339,14 @@ ldiagResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         plotc = function() private$.items[["plotc"]],
         plot1 = function() private$.items[["plot1"]],
         barplot = function() private$.items[["barplot"]],
+        text1 = function() private$.items[["text1"]],
+        ct_comp = function() private$.items[["ct_comp"]],
+        cttsens2 = function() private$.items[["cttsens2"]],
+        cttspec2 = function() private$.items[["cttspec2"]],
+        text2 = function() private$.items[["text2"]],
+        ct_comp1 = function() private$.items[["ct_comp1"]],
+        ct_comp2 = function() private$.items[["ct_comp2"]],
+        cttcompt = function() private$.items[["cttcompt"]],
         tabText = function() private$.items[["tabText"]],
         SupportTab = function() private$.items[["SupportTab"]],
         MoretabText = function() private$.items[["MoretabText"]]),
@@ -317,7 +360,7 @@ ldiagResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Table$new(
                 options=options,
                 name="freqs",
-                title="Contingency Tables",
+                title="`Contingency Table for {counts}`",
                 columns=list(),
                 clearWith=list(
                     "rows",
@@ -578,14 +621,220 @@ ldiagResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "rows",
                     "cols",
                     "counts",
-                    "barplot",
                     "yaxis",
                     "yaxisPc",
                     "xaxis",
-                    "bartype",
-                    "pcTot",
-                    "pcCol",
-                    "pcRow")))
+                    "bartype")))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="text1",
+                title="2nd diagnostic procedure",
+                visible="(comp2)"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="ct_comp",
+                title="`${comp} vs {cols}`",
+                visible="(comp2)",
+                rows=3,
+                clearWith=list(
+                    "rows",
+                    "cols",
+                    "comp",
+                    "counts",
+                    "data",
+                    "cc",
+                    "lint",
+                    "ciWidth",
+                    "compcd",
+                    "compch"),
+                columns=list(
+                    list(
+                        `name`="var", 
+                        `title`="", 
+                        `type`="text"),
+                    list(
+                        `name`="c_v1", 
+                        `title`=" + ", 
+                        `type`="number"),
+                    list(
+                        `name`="c_v2", 
+                        `title`=" - ", 
+                        `type`="number"),
+                    list(
+                        `name`="c_v3", 
+                        `title`=" Total ", 
+                        `type`="number"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="cttsens2",
+                title="Intervals for Sensitivity",
+                visible="(comp2)",
+                rows=2,
+                clearWith=list(
+                    "rows",
+                    "cols",
+                    "counts",
+                    "data",
+                    "cc",
+                    "lint",
+                    "ciWidth",
+                    "compcd",
+                    "compch"),
+                columns=list(
+                    list(
+                        `name`="Interval", 
+                        `title`="Type of interval", 
+                        `type`="text"),
+                    list(
+                        `name`="Level", 
+                        `type`="text"),
+                    list(
+                        `name`="sens", 
+                        `title`="Value", 
+                        `type`="number"),
+                    list(
+                        `name`="Lower", 
+                        `type`="number"),
+                    list(
+                        `name`="Upper", 
+                        `type`="number"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="cttspec2",
+                title="Intervals for Specificity",
+                visible="(comp2)",
+                rows=2,
+                clearWith=list(
+                    "rows",
+                    "cols",
+                    "counts",
+                    "data",
+                    "lint",
+                    "ciWidth",
+                    "compcd",
+                    "compch"),
+                columns=list(
+                    list(
+                        `name`="Interval", 
+                        `title`="Type of interval", 
+                        `type`="text"),
+                    list(
+                        `name`="Level", 
+                        `type`="text"),
+                    list(
+                        `name`="spec", 
+                        `title`="Value", 
+                        `type`="number"),
+                    list(
+                        `name`="Lower", 
+                        `type`="number"),
+                    list(
+                        `name`="Upper", 
+                        `type`="number", 
+                        `refs`=list(
+                            "Pritikin")))))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="text2",
+                title="Comparison between the 2 diagnostic procedures",
+                visible="(comp2)"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="ct_comp1",
+                title="Positive Final Diagnosis:",
+                visible="(comp2)",
+                rows=3,
+                clearWith=list(
+                    "rows",
+                    "cols",
+                    "comp",
+                    "counts",
+                    "data",
+                    "cc",
+                    "lint",
+                    "ciWidth",
+                    "compcd",
+                    "compch"),
+                columns=list(
+                    list(
+                        `name`="var", 
+                        `title`="", 
+                        `type`="text"),
+                    list(
+                        `name`=" Total ", 
+                        `type`="number"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="ct_comp2",
+                title="Negative Final Diagnosis:",
+                visible="(comp2)",
+                rows=3,
+                clearWith=list(
+                    "rows",
+                    "cols",
+                    "comp",
+                    "counts",
+                    "data",
+                    "cc",
+                    "lint",
+                    "ciWidth",
+                    "compcd",
+                    "compch"),
+                columns=list(
+                    list(
+                        `name`="var", 
+                        `title`="", 
+                        `type`="text"),
+                    list(
+                        `name`=" Total ", 
+                        `type`="number"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="cttcompt",
+                title="",
+                visible="(comp2)",
+                rows=2,
+                columns=list(
+                    list(
+                        `name`="var", 
+                        `title`="", 
+                        `type`="text"),
+                    list(
+                        `name`="", 
+                        `type`="number"),
+                    list(
+                        `name`="S", 
+                        `type`="number"),
+                    list(
+                        `name`="Param", 
+                        `type`="number"),
+                    list(
+                        `name`="G", 
+                        `type`="number"),
+                    list(
+                        `name`="df", 
+                        `type`="number"),
+                    list(
+                        `name`="p", 
+                        `type`="number", 
+                        `format`="zto,pvalue")),
+                refs=list(
+                    "Book",
+                    "Hawass",
+                    "Edwards_OR"),
+                clearWith=list(
+                    "rows",
+                    "cols",
+                    "counts",
+                    "data",
+                    "nulsens",
+                    "nulspec",
+                    "cc",
+                    "comp",
+                    "lint",
+                    "ciWidth",
+                    "compcd",
+                    "compch")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="tabText",
@@ -645,7 +894,7 @@ ldiagBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 analysisId = analysisId,
                 revision = revision,
                 pause = NULL,
-                completeWhenFilled = FALSE,
+                completeWhenFilled = TRUE,
                 requiresMissings = FALSE,
                 weightsSupport = 'integerOnly')
         }))
@@ -671,6 +920,7 @@ ldiagBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   (not necessary when providing a formula, see the examples)
 #' @param counts the variable to use as the counts in the contingency table
 #'   (not necessary when providing a formula, see the examples)
+#' @param comp the variable to use for comparison with Test Results
 #' @param nulsens value for the null hypothesis, default = 0.5
 #' @param nulspec value for the alternative hypothesis, default = 0.5
 #' @param pprob \code{TRUE} or \code{FALSE} (default), select the prior
@@ -683,6 +933,9 @@ ldiagBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param correction correction for parameters, none, Occam's bonus (default)
 #'   or AIC
 #' @param fagan .
+#' @param comp2 .
+#' @param compcd .
+#' @param compch .
 #' @param pll \code{TRUE} or \code{FALSE} (default), give the likelihood
 #'   function showing null hypothesis (black line),  alternative hypothesis
 #'   (blue line), mean (dashed line), and specified support interval
@@ -718,7 +971,7 @@ ldiagBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param formula (optional) the formula to use, see the examples
 #' @return A results object containing:
 #' \tabular{llllll}{
-#'   \code{results$freqs} \tab \tab \tab \tab \tab a table of proportions \cr
+#'   \code{results$freqs} \tab \tab \tab \tab \tab a table of counts \cr
 #'   \code{results$stats} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$ctt} \tab \tab \tab \tab \tab a table \cr
@@ -728,6 +981,14 @@ ldiagBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$plotc} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot1} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$barplot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$ct_comp} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$cttsens2} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$cttspec2} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$text2} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$ct_comp1} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$ct_comp2} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$cttcompt} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$tabText} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$SupportTab} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$MoretabText} \tab \tab \tab \tab \tab a html \cr
@@ -745,6 +1006,7 @@ ldiag <- function(
     rows,
     cols,
     counts = NULL,
+    comp,
     nulsens = 0.5,
     nulspec = 0.5,
     pprob = FALSE,
@@ -753,6 +1015,9 @@ ldiag <- function(
     ciWidth = 95,
     correction = "ob",
     fagan = FALSE,
+    comp2 = FALSE,
+    compcd,
+    compch,
     pll = FALSE,
     plotype = "lplot",
     supplot = -10,
@@ -783,6 +1048,13 @@ ldiag <- function(
                 from="lhs",
                 type="vars",
                 subset="1")
+        if (missing(comp))
+            comp <- jmvcore::marshalFormula(
+                formula=formula,
+                data=`if`( ! missing(data), data, NULL),
+                from="lhs",
+                type="vars",
+                subset="2")
         if (missing(rows))
             rows <- jmvcore::marshalFormula(
                 formula=formula,
@@ -802,12 +1074,14 @@ ldiag <- function(
     if ( ! missing(rows)) rows <- jmvcore::resolveQuo(jmvcore::enquo(rows))
     if ( ! missing(cols)) cols <- jmvcore::resolveQuo(jmvcore::enquo(cols))
     if ( ! missing(counts)) counts <- jmvcore::resolveQuo(jmvcore::enquo(counts))
+    if ( ! missing(comp)) comp <- jmvcore::resolveQuo(jmvcore::enquo(comp))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
             `if`( ! missing(rows), rows, NULL),
             `if`( ! missing(cols), cols, NULL),
-            `if`( ! missing(counts), counts, NULL))
+            `if`( ! missing(counts), counts, NULL),
+            `if`( ! missing(comp), comp, NULL))
 
     for (v in rows) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
     for (v in cols) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
@@ -816,6 +1090,7 @@ ldiag <- function(
         rows = rows,
         cols = cols,
         counts = counts,
+        comp = comp,
         nulsens = nulsens,
         nulspec = nulspec,
         pprob = pprob,
@@ -824,6 +1099,9 @@ ldiag <- function(
         ciWidth = ciWidth,
         correction = correction,
         fagan = fagan,
+        comp2 = comp2,
+        compcd = compcd,
+        compch = compch,
         pll = pll,
         plotype = plotype,
         supplot = supplot,

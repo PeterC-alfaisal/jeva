@@ -19,6 +19,7 @@ ldiagClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     private=list(
       #### Member variables ----
       .countsName = NULL,
+      #          .comcntName = NULL,
       #### Init + run functions ----
       .init=function() {
         
@@ -28,6 +29,7 @@ ldiagClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         colVarName <- self$options$cols
         layerNames <- NULL
         countsName <- self$options$counts
+        comcntName <- self$options$comp
         
         freqs <- self$results$freqs
         
@@ -43,7 +45,7 @@ ldiagClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         # fill in dots, if no row variable specified
         
         if ( ! is.null(rowVarName))
-          title <- rowVarName
+          title <-  rowVarName
         else
           title <- '.'
         
@@ -228,6 +230,51 @@ ldiagClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                           are more accurate and are parameterization-invariant compared to conventional 
                           confidence intervals")
         
+        table <- self$results$cttsens2
+        table$setRow(rowNo=1, values=list(Interval="Support"))
+        table$setRow(rowNo=2, values=list(Interval="Likelihood-based"))
+        
+        table <- self$results$cttspec2
+        table$setRow(rowNo=1, values=list(Interval="Support"))
+        table$setRow(rowNo=2, values=list(Interval="Likelihood-based"))
+        table$addFootnote(rowNo=2, col="Interval", "See reference Pritikin et al (2017), such intervals 
+                            are more accurate and are parameterization-invariant compared to conventional 
+                            confidence intervals")
+        
+        
+        if(length(self$options$comp) != 0) {
+          
+          clevels <- base::levels(data[[colVarName]])
+          
+          table <- self$results$ct_comp
+          table$setRow(rowNo=1, values=list(var=clevels[1]))
+          table$setRow(rowNo=2, values=list(var=clevels[2]))
+          table$setRow(rowNo=3, values=list(var="Total"))
+          
+          table <- self$results$ct_comp1
+          table$addColumn(name='var', title=comcntName, index=2, type='text') # need index=2, even though col 1
+          table$addColumn(name='p1', title=clevels[1], superTitle=countsName, index=2, type='number')
+          table$addColumn(name='p2', title=clevels[2], superTitle=countsName, index=3, type='number')
+          table$setRow(rowNo=1, values=list(var=clevels[1]))
+          table$setRow(rowNo=2, values=list(var=clevels[2]))
+          table$setRow(rowNo=3, values=list(var="Total"))
+          
+          table <- self$results$ct_comp2
+          table$addColumn(name='var', title=comcntName, index=2, type='text') # need index=2, even though col 1
+          table$addColumn(name='p1', title=clevels[1], superTitle=countsName, index=2, type='number')
+          table$addColumn(name='p2', title=clevels[2], superTitle=countsName, index=3, type='number')
+          table$setRow(rowNo=1, values=list(var=clevels[1]))
+          table$setRow(rowNo=2, values=list(var=clevels[2]))
+          table$setRow(rowNo=3, values=list(var="Total"))
+          
+          table <- self$results$cttcompt
+          table$setNote('Note', notext)
+          table$setTitle(.(paste0("Support: Comparison of Diagnostic Statistics")))
+          table$setRow(rowNo=1, values=list(var= "Sensitivity"))
+          table$setRow(rowNo=2, values=list(var="Specificity"))
+          #        table$setRow(rowNo=3, values=list(var="Total"))
+        }
+        
         private$.initBarPlot()
         
       },
@@ -236,6 +283,7 @@ ldiagClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         rowVarName <- self$options$rows
         colVarName <- self$options$cols
         countsName <- self$options$counts
+        comcntName <- self$options$comp
         
         if (is.null(rowVarName) || is.null(colVarName))
           return()
@@ -255,6 +303,7 @@ ldiagClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           jmvcore::reject(.('Counts may not be negative'))
         if (any(is.infinite(data$.COUNTS)))
           jmvcore::reject(.('Counts may not be infinite'))
+        
         
         freqs <- self$results$freqs
         
@@ -391,12 +440,17 @@ ldiagClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           suppressWarnings(lt <- chisq.test(tab,correct=self$options$cc)) # ignore warning message
           chi.s <- unname(lt$statistic)
           df <- unname(lt$parameter)
+          
           # correct if 0 cells
           tabt1=lt$observed
           for (i in 1:length(tab)) {
             tabt1[i] <- lt$observed[i]
             if (lt$observed[i] < 1) tabt1[i]=1   # turn 0s into 1s for one table used for log
           }
+          a1 <- tabt1[1]
+          b1 <- tabt1[2]
+          c1 <- tabt1[3]
+          d1 <- tabt1[4]
           
           # Correction
           Ac <- function(c,k1,k2) { 
@@ -445,24 +499,21 @@ ldiagClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           table$setRow(rowNo=1, values=list(LR=lr, NLR=nlr, Acc=acc, OR=or, Prev=prev, PPV=ppv, NPV=npv, Youd=Youd))
           
           
-          f1 <- function(x,a,b,c1tot,goal) {                  # for sensitivity
+          f1 <- function(x,a,b,c1tot,goal) {                  # for sensitivity & specificity
             (-sum(a*log(a/x), b*log(b/(c1tot-x)))-goal)^2
-          }
-          f2 <- function(x,d,c,c2tot,goal) {                  # for specificity
-            (-sum(d*log(d/x), c*log(c/(c2tot-x)))-goal)^2
           }
           
           # likelihood-based % confidence interval
           
-          arry <- numeric(maxmarg)   # finding endpoints for S values
-          for(x in 1:maxmarg) {
-            arry[x] <- x*(r2tot-c1tot+x)/((c1tot-x)*(r1tot-x))
-          }
-          arry[!is.finite(arry)] <- 0
-          ind <- which(arry > 0)
-          aa <- split(ind, cumsum(c(0, diff(ind) > 1)))
-          dvs <- min(aa$'0')-1
-          dve <- max(aa$'0')+1
+          #          arry <- numeric(maxmarg)   # finding endpoints for S values
+          #          for(x in 1:maxmarg) {
+          #            arry[x] <- x*(r2tot-c1tot+x)/((c1tot-x)*(r1tot-x))
+          #          }
+          #          arry[!is.finite(arry)] <- 0
+          #          ind <- which(arry > 0)
+          #          aa <- split(ind, cumsum(c(0, diff(ind) > 1)))
+          #          dvs <- min(aa$'0')-1
+          #          dve <- max(aa$'0')+1
           
           # Intervals for sensitivity
           # likelihood interval
@@ -481,14 +532,14 @@ ldiagClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           # Intervals for specificity
           # likelihood interval
           goalL <- -self$options$lint
-          suppressWarnings(xmin1L <- optimize(f2, c(0, d), tol = toler,  d, c, c2tot, goalL))
-          suppressWarnings(xmin2L <- optimize(f2, c(d, c2tot), tol = toler,  d, c, c2tot, goalL))
+          suppressWarnings(xmin1L <- optimize(f1, c(0, d), tol = toler,  d, c, c2tot, goalL))
+          suppressWarnings(xmin2L <- optimize(f1, c(d, c2tot), tol = toler,  d, c, c2tot, goalL))
           begL2 <- xmin1L$minimum/c2tot
           endL2 <- xmin2L$minimum/c2tot
           # Support interval
           goal = -qchisq(self$options$ciWidth/100,1)/2
-          suppressWarnings(xmin1 <- optimize(f2, c(0, d), tol = toler, d, c, c2tot, goal))
-          suppressWarnings(xmin2 <- optimize(f2, c(d, c2tot), tol = toler, d, c, c2tot, goal))
+          suppressWarnings(xmin1 <- optimize(f1, c(0, d), tol = toler, d, c, c2tot, goal))
+          suppressWarnings(xmin2 <- optimize(f1, c(d, c2tot), tol = toler, d, c, c2tot, goal))
           beg2 <- xmin1$minimum/c2tot
           end2 <- xmin2$minimum/c2tot
           
@@ -503,8 +554,8 @@ ldiagClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           
           # for specificity
           goalx <- self$options$supplot   # with e^-10 we get x values for when curve is down to 0.00004539
-          suppressWarnings(xmin1x <- optimize(f2, c(0, d), tol = toler, d, c, c2tot, goalx))
-          suppressWarnings(xmin2x <- optimize(f2, c(d, c2tot), tol = toler, d, c, c2tot, goalx))
+          suppressWarnings(xmin1x <- optimize(f1, c(0, d), tol = toler, d, c, c2tot, goalx))
+          suppressWarnings(xmin2x <- optimize(f1, c(d, c2tot), tol = toler, d, c, c2tot, goalx))
           xmin2 <- xmin1x$minimum/c2tot
           xmax2 <- xmin2x$minimum/c2tot
           
@@ -515,9 +566,9 @@ ldiagClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           h1 <- function(x,c1tot,goal) {
             ((x/c1tot)-goal)^2
           }
-          suppressWarnings(exa2 <- optimize(h1, c(0, c1tot), tol = toler, c1tot, goal))
+          suppressWarnings(exa2 <- optimize(h1, c(0, col_sum[1]), tol = toler, col_sum[1], goal))
           xa <- unname(unlist(exa2[1]))
-          nul_sens_h <- exp(-sum(a*log(a/xa), b*log(b/(c1tot-xa))))
+          nul_sens_h <- exp(-sum(a1*log(a1/xa), b1*log(b1/(col_sum[1]-xa))))
           
           Ssens <- log(nul_sens_h)
           if(self$options$nulsens == sens) Ssens <- 0
@@ -528,9 +579,9 @@ ldiagClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           h2 <- function(x,c2tot,goal) {
             ((x/c2tot)-goal)^2
           }
-          suppressWarnings(exa2 <- optimize(h2, c(0, c2tot), tol = toler, c2tot, goal))
+          suppressWarnings(exa2 <- optimize(h2, c(0, col_sum[2]), tol = toler, col_sum[2], goal))
           xa <- unname(unlist(exa2[1]))
-          nul_spec_h <- exp(-sum(d*log(d/xa), c*log(c/(c2tot-xa))))
+          nul_spec_h <- exp(-sum(d1*log(d1/xa), c1*log(c1/(col_sum[2]-xa))))
           
           Sspec <- log(nul_spec_h)
           if(self$options$nulspec == spec) Sspec <- 0
@@ -574,12 +625,162 @@ ldiagClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           table$setRow(rowNo=1, values=list(var= "For LR = 1", Sv=toogood, X2=chi.s, dfv=df, 
                                             pv=lt$p.value, pv1=1-lt$p.value))
           
+          sensc <- 0
+          specc <- 0
+          begLc <- 0
+          endLc <- 0
+          begL2c <- 0
+          endL2c <- 0
+          Ssens_comp <- 0
+          Sspec_comp <- 0
+          ######################################## for 2nd procedure & comparison between procedures
+          
+          if(length(self$options$comp) != 0) {
+            
+            matc <- private$.matricesc(data)
+            tabc <- matc
+            
+            HAc <- FALSE
+            a_c <- tabc[1]
+            b_c <- tabc[2]
+            c_c <- tabc[3]
+            d_c <- tabc[4]
+            
+            atot <- a_c+b_c
+            dtot <- c_c+d_c
+            sensc <- a_c/atot
+            specc <- d_c/dtot
+            
+            table <- self$results$ct_comp
+            table$setRow(rowNo=1, values=list(c_v1=a_c, c_v2=c_c, c_v3=a_c+c_c))
+            table$setRow(rowNo=2, values=list(c_v1=b_c, c_v2=d_c, c_v3=b_c+d_c))
+            table$setRow(rowNo=3, values=list(c_v1=atot, c_v2=dtot, c_v3=atot+dtot))
+            
+            # Intervals for sensitivity
+            # likelihood interval
+            goalL <- -self$options$lint
+            suppressWarnings(xmin1L <- optimize(f1, c(0, a_c), tol = toler,  a_c, b_c, atot, goalL))
+            suppressWarnings(xmin2L <- optimize(f1, c(a_c, atot), tol = toler,  a_c, b_c, atot, goalL))
+            begLc <- xmin1L$minimum/atot
+            endLc <- xmin2L$minimum/atot
+            # Support interval
+            goal = -qchisq(self$options$ciWidth/100,1)/2
+            suppressWarnings(xmin1 <- optimize(f1, c(0, a_c), tol = toler, a_c, b_c, atot, goal))
+            suppressWarnings(xmin2 <- optimize(f1, c(a_c, atot), tol = toler, a_c, b_c, atot, goal))
+            begc <- xmin1$minimum/atot
+            endc <- xmin2$minimum/atot
+            
+            # Intervals for specificity
+            # likelihood interval
+            goalL <- -self$options$lint
+            suppressWarnings(xmin1L <- optimize(f1, c(0, d_c), tol = toler,  d_c, c_c, dtot, goalL))
+            suppressWarnings(xmin2L <- optimize(f1, c(d_c, dtot), tol = toler,  d_c, c_c, dtot, goalL))
+            begL2c <- xmin1L$minimum/dtot
+            endL2c <- xmin2L$minimum/dtot
+            # Support interval
+            goal = -qchisq(self$options$ciWidth/100,1)/2
+            suppressWarnings(xmin1 <- optimize(f1, c(0, d_c), tol = toler, d_c, c_c, dtot, goal))
+            suppressWarnings(xmin2 <- optimize(f1, c(d_c, dtot), tol = toler, d_c, c_c, dtot, goal))
+            beg2c <- xmin1$minimum/dtot
+            end2c <- xmin2$minimum/dtot
+            
+            table <- self$results$cttsens2
+            table$setRow(rowNo=1, values=list(Level=lintlev, sens = sensc, Lower=begLc, Upper=endLc))
+            table$setRow(rowNo=2, values=list(Level=conflev, sens = sensc, Lower=begc, Upper=endc))
+            if (HAc)
+              table$addFootnote(rowNo=1, col="sens", "Haldane-Anscombe correction applied")      
+            
+            table <- self$results$cttspec2
+            table$setRow(rowNo=1, values=list(Level=lintlev, spec = specc, Lower=begL2c, Upper=endL2c))
+            table$setRow(rowNo=2, values=list(Level=conflev, spec = specc, Lower=beg2c, Upper=end2c))
+            if (HAc)
+              table$addFootnote(rowNo=1, col="spec", "Haldane-Anscombe correction applied")      
+            
+            a_cd <- self$options$compcd
+            b_cd <- mat[1] - self$options$compcd   # 1st # for comparison
+            c_cd <- a_c - self$options$compcd      # 2nd # for comparison
+            d_cd <- mat[2]-c_cd
+            ardtot <-  a_cd + c_cd
+            brdtot <- b_cd + d_cd
+            
+            Ssens_comp <- b_cd*log(b_cd) + c_cd*log(c_cd) - (b_cd + c_cd)*log((b_cd + c_cd)/2)
+            
+            clevels <- base::levels(data[[rowVarName]])
+            
+            table <- self$results$ct_comp1
+            table$setCell(rowNo=1, col=2, value=a_cd)
+            table$setCell(rowNo=2, col=2, value=b_cd)
+            table$setCell(rowNo=3, col=2, value=a_cd+b_cd)
+            table$setCell(rowNo=1, col=3, value=c_cd)
+            table$setCell(rowNo=2, col=3, value=d_cd)
+            table$setCell(rowNo=3, col=3, value=c_cd+d_cd)
+            table$setCell(rowNo=1, col=4, value=ardtot)
+            table$setCell(rowNo=2, col=4, value=brdtot)
+            table$setCell(rowNo=3, col=4, value=ardtot+brdtot)
+            
+            a_ch <- self$options$compch
+            b_ch <- mat[3] - self$options$compch  # 1st # for comparison
+            c_ch <- c_c - self$options$compch     # 2nd # for comparison
+            d_ch <- mat[4]-c_ch
+            arhtot <-  a_ch + c_ch
+            brhtot <- b_ch + d_ch
+            
+            Sspec_comp <- b_ch*log(b_ch) + c_ch*log(c_ch) - (b_ch + c_ch)*log((b_ch + c_ch)/2)
+            
+            table <- self$results$ct_comp2
+            table$setCell(rowNo=1, col=2, value=a_ch)
+            table$setCell(rowNo=2, col=2, value=b_ch)
+            table$setCell(rowNo=3, col=2, value=a_ch+b_ch)
+            table$setCell(rowNo=1, col=3, value=c_ch)
+            table$setCell(rowNo=2, col=3, value=d_ch)
+            table$setCell(rowNo=3, col=3, value=c_ch+d_ch)
+            table$setCell(rowNo=1, col=4, value=arhtot)
+            table$setCell(rowNo=2, col=4, value=brhtot)
+            table$setCell(rowNo=3, col=4, value=arhtot+brhtot)
+            
+            gsn_comp <- 2*abs(Ssens_comp) # sensitivity
+            gsn_comp_p <- 1-pchisq(gsn_comp,1)
+            gsp_comp <- 2*abs(Sspec_comp) # specificity
+            gsp_comp_p <- 1-pchisq(gsp_comp,1)
+            
+            table <- self$results$cttcompt
+            table$addColumn(name='p1', title=countsName, index=2, type='number')
+            table$addColumn(name='p2', title=comcntName, index=3, type='number')
+            table$setCell(rowNo=1, col=2, value=sens)
+            table$setCell(rowNo=2, col=2, value=spec)
+            table$setCell(rowNo=1, col=3, value=sensc)
+            table$setCell(rowNo=2, col=3, value=specc)
+            table$setCell(rowNo=1, col=4, value=Ssens_comp + Ac(self$options$correction,1,2))
+            table$setCell(rowNo=2, col=4, value=Sspec_comp + Ac(self$options$correction,1,2))
+            table$setCell(rowNo=1, col=5, value=paste0(c(1,2), collapse = ', '))
+            table$setCell(rowNo=2, col=5, value=paste0(c(1,2), collapse = ', '))
+            table$setCell(rowNo=1, col=6, value=gsn_comp)
+            table$setCell(rowNo=2, col=6, value=gsp_comp)
+            table$setCell(rowNo=1, col=7, value=df)
+            table$setCell(rowNo=2, col=7, value=df)
+            table$setCell(rowNo=1, col=8, value=gsn_comp_p)
+            table$setCell(rowNo=2, col=8, value=gsp_comp_p)
+            #            table$addFormat(rowNo=3, col='S', format=Cell.BEGIN_END_GROUP)
+            #            table$setCell(rowNo=3, col=4, value=Ssens_comp + Sspec_comp + Ac(self$options$correction,1,2))
+            #            table$addFormat(rowNo=3, col='S', format=Cell.NEGATIVE)
+          }
+          ###################          
+          
           # stats for summary        
           stats <- list(S1 = lr,
                         S2 = Ssens,
                         S3 = Sspec,
                         tg = toogood,
-                        chi = chi.s)
+                        chi = chi.s,
+                        sens = sensc, 
+                        low_sens = begLc,
+                        hi_sens = endLc,
+                        spec = specc,
+                        low_spec = begL2c,
+                        hi_spec = endL2c,
+                        Ssens_comp = Ssens_comp + Ac(self$options$correction,1,2),
+                        Sspec_comp = Sspec_comp + Ac(self$options$correction,1,2)
+          )
           
           # Populate Explanation & table
           private$.populateSupportText(stats)
@@ -817,6 +1018,7 @@ ldiagClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         colVarName <- self$options$cols
         layerNames <- NULL
         countsName <- self$options$counts
+        comcntName <- self$options$comp
         
         weights <- attr(data, 'jmv-weights')
         
@@ -845,54 +1047,30 @@ ldiagClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         rowVarName <- self$options$rows
         colVarName <- self$options$cols
         layerNames <- NULL
-        countsName <- self$options$counts
         
-        if (length(layerNames) == 0) {
-          
-          subData <- jmvcore::select(data, c('.COUNTS', rowVarName, colVarName))
-          
-          matrices <- list(ftable(xtabs(.COUNTS ~ ., data=subData)))
-          
-        } else {
-          
-          layerData <- jmvcore::select(data, layerNames)
-          dataList <- do.call(split, list(data, layerData))
-          
-          tables <- lapply(dataList, function(x) {
-            
-            xTemp <- jmvcore::select(x, c(rowVarName, colVarName))
-            
-            ftable(xtabs(.COUNTS ~ ., data=xTemp))
-          })
-          
-          rows <- private$.grid(data=data, incRows=FALSE)
-          
-          expand <- list()
-          
-          for (layerName in layerNames)
-            expand[[layerName]] <- base::levels(data[[layerName]])
-          
-          tableNames <- rev(expand.grid(expand))
-          
-          matrices <- list()
-          for (i in seq_along(rows[,1])) {
-            
-            indices <- c()
-            for (j in seq_along(tableNames[,1])) {
-              
-              row <- as.character(unlist((rows[i,])))
-              tableName <- as.character(unlist(tableNames[j,]))
-              
-              if (all(row == tableName | row == '.total'))
-                indices <- c(indices, j)
-            }
-            
-            matrices[[i]] <- Reduce("+", tables[indices])
-          }
-          
-        }
+        subData <- jmvcore::select(data, c('.COUNTS', rowVarName, colVarName))
+        
+        matrices <- list(ftable(xtabs(.COUNTS ~ ., data=subData)))
         
         matrices
+        
+      },
+      .matricesc=function(data) {
+        
+        matricesc <- list()
+        
+        rowVarName <- self$options$rows
+        colVarName <- self$options$cols
+        comcntName <- self$options$comp
+        comp <- jmvcore::toNumeric(data[[comcntName]])
+        
+        
+        #        subData <- jmvcore::select(data, c('.COUNTS', comcntName, colVarName))
+        #        matricesc <- list(ftable(xtabs(.COUNTS ~ ., data=subData)))
+        
+        matricesc <- comp
+        matricesc
+        
       },
       .grid=function(data, incRows=FALSE) {
         
@@ -980,16 +1158,11 @@ ldiagClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         }
         stg1 <- paste0("The diagnostic <i>likelihood ratio</i> was ", round(st$S1,2), ", see Berkman et al (2015) reference for interpretation.")
         str = paste0("<br> <h2>Summarizing the evidential analysis</h2>", "<br>",
-                     stg0, "<br>", stg2, "<br>", stg3, "<br>", stg1, 
-                     "<p>
-                       <i>The variance analysis shows that:</i><br>", 
-                     stg8,
-                     "<p>Give the <i>LR</i> and the observed <i>sensitivity</i> and <i>specificity</i>. The support intervals for the <i>sensitivity</i> 
+                     stg0, "<br>", stg2, "<br>", stg3, "<br>", stg1,"<p>Give the <i>LR</i> and the observed <i>sensitivity</i> and <i>specificity</i>. The support intervals for the <i>sensitivity</i> 
                        and <i>specificity</i> can be given, along with their likelihood-based % confidence intervals (see Pritikin et al, 2017).
                        <br>The available <i>p</i> values for the <i>G</i> test (likelihood ratio test) may also be supplied 
                        to allow comparison with a conventional analysis.
-                       </p><br>
-                       <br>There are no thresholds for <i>S</i> values, just guidelines on 
+                       </p>There are no thresholds for <i>S</i> values, just guidelines on 
                        the strength of evidence for one hypothesis versus the other. They range from 
                        \u2212\u221E to +\u221E, with zero representing no evidence either way. 
                        Positive values are evidence for, while negative values are evidence against. 
@@ -998,7 +1171,25 @@ ldiagClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                        moderate evidence and 8.6 as strong evidence! 
                        <i>S</i> values represent the weight of evidence, and are additive 
                        across independent data.")
-        
+        if(isTRUE(self$options$varA)) { 
+          str = paste0(str,"<p>
+                       <i>The variance analysis shows that:</i><br>",stg8)
+        }
+        if(isTRUE(self$options$comp2)) {
+          Sxl = list(s=st$Ssens_comp) 
+          stg9 <- private$.strength2(Sxl)
+          Sxl = list(s=st$Sspec_comp) 
+          stg10 <- private$.strength2(Sxl)
+          str = paste0(str,"<p>
+                       <i>The comparison of two diagnostic procedures shows that:</i><br>
+                       For the 2nd diagnostic procedure, the sensitivity was ", round(st$sens,3), ", with S", 
+                       self$options$lint," interval from ", round(st$low_sens,3), " to ", round(st$hi_sens,3),
+                       "; and specificity was ", round(st$spec,3), " and interval from ", round(st$low_spec,3), 
+                       " to ", round(st$hi_spec,3), ". Comparing the two procedures, ", stg9, 
+                       ", for a difference in their sensitivities, and ", stg10, 
+                       ", for a difference in their specificities."
+          )
+        }
         html$setContent(str)
       },
       

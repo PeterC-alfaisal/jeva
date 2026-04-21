@@ -463,13 +463,10 @@ cttClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           toogood <- df/2*(log(df/chi.s)) - (df - chi.s)/2
           
           # marginal main effects analysis
-          # main marginal totals
-          row_sum <- rowSums(tab)
-          col_sum <- colSums(tab)
-          grandtot <- sum(tab)
-          Srow <- sum(row_sum*log(row_sum))-grandtot*log(grandtot) + grandtot*log(length(row_sum))
+          grand_tot <- sum(tab)     # check this and mods to next few lines to line 479
+          Srow <- sum(row_sum*log(row_sum))-grand_tot*log(grand_tot) + grand_tot*log(length(row_sum))
           if(r1tot == r2tot) Srow <- 0
-          Scol <- sum(col_sum*log(col_sum))-grandtot*log(grandtot) + grandtot*log(length(col_sum))
+          Scol <- sum(col_sum*log(col_sum))-grand_tot*log(grand_tot) + grand_tot*log(length(col_sum))
           if(c1tot == c2tot) Scol <- 0
           # interaction
           Sint <- sum(lt$observed * log(tabt1/lt$expected)) 
@@ -477,9 +474,9 @@ cttClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           Sgt <- sum(lt$observed*log(tabt1))-sum(lt$observed)*log(sum(lt$observed)/4)
           
           # Sums
-          exp_row <- (r1tot+r2tot)/2
-          exp_col <- (c1tot+c2tot)/2
-          exp_int <- grandtot/4
+          exp_row <- (grand_tot)/2
+          exp_col <- (grand_tot)/2
+          exp_int <- grand_tot/4
           
           # support for alt. H
           Salt <- log(xah)

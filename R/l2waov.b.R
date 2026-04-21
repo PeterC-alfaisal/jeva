@@ -160,24 +160,24 @@ l2waovClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         S_12 <- -0.5 * N * (LSS_null - LSS_full)
         S_12c <- S_12 + Ac(self$options$correction,np,fp,N)
         
-        # First main effect vs null model
+        # Null model vs first main effect vs 
         S_F1N <- -0.5 * N * (LSS_null - LSS_F1)
-        S_F1Nc <- S_F1N + Ac(self$options$correction,mp1,np,N)
+        S_F1Nc <- S_F1N + Ac(self$options$correction,np,mp1,N)
         
-        # Second main effect vs null model
+        # Null model vs second main effect
         S_F2N <- -0.5 * N * (LSS_null - LSS_F2)
-        S_F2Nc <- S_F2N + Ac(self$options$correction,mp2,np,N)
+        S_F2Nc <- S_F2N + Ac(self$options$correction,np,mp2,N)
         
-        # Both main effects vs null model
+        # Null model vs both main effects
         S_FMN <- -0.5 * N * (LSS_null - log(sum(r$m1$`Sum of Sq`[4],r$m1$RSS[1])))
-        S_FMNc <- S_FMN + Ac(self$options$correction,mp,np,N)
+        S_FMNc <- S_FMN + Ac(self$options$correction,np,mp,N)
         Fval_MN <- (sum(r$m1$`Sum of Sq`[2:3])/sum(r$m1$Df[2:3]))/(r$m1$RSS[1]/(N-sum(r$m1$Df[2:4])-1))
         DFval_FMN <- paste0(c(sum(r$m1$Df[2:3]),r$m2$Df[4]), collapse = ', ')
         Pval_FMN <- pf(Fval_MN, sum(r$m1$Df[2:3]), dfres, lower.tail = FALSE)
         
-        # Interaction versus vs null model
+        # Null model vs interaction
         S_IN <- -0.5 * N * (LSS_null - LSS_I)
-        S_INc <- S_IN + Ac(self$options$correction,ip,np,N)
+        S_INc <- S_IN + Ac(self$options$correction,np,ip,N)
         
         # full model versus both main effects
         S_FM <- -0.5 * N * (LSS_full - LSS_main)
@@ -342,13 +342,13 @@ l2waovClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           table$setNote('Note', paste0("Contrast weights do not sum to zero. ", notext))
         table$setRow(rowNo=1, values=list(S=S_12c, Param=paste0(c(np,fp), collapse = ', '), 
                                           F=overF, df=paste0(c(sum(r$m2$Df[1:3]),r$m2$Df[4]), collapse = ', '), p = overP))
-        table$setRow(rowNo=2, values=list(S=S_F1Nc, Param=paste0(c(mp1,np), collapse = ', '),
+        table$setRow(rowNo=2, values=list(S=S_F1Nc, Param=paste0(c(np,mp1), collapse = ', '),
                                           F=Fval[1], df=paste0(c(r$m2$Df[1],r$m2$Df[4]), collapse = ', '), p=Pval[1]))
-        table$setRow(rowNo=3, values=list(S=S_F2Nc, Param=paste0(c(mp2,np), collapse = ', '),
+        table$setRow(rowNo=3, values=list(S=S_F2Nc, Param=paste0(c(np,mp2), collapse = ', '),
                                           F=Fval[2], df=paste0(c(r$m2$Df[2],r$m2$Df[4]), collapse = ', '), p=Pval[2]))
-        table$setRow(rowNo=4, values=list(S=S_FMNc, Param=paste0(c(mp,np), collapse = ', '),
+        table$setRow(rowNo=4, values=list(S=S_FMNc, Param=paste0(c(np,mp), collapse = ', '),
                                           F=Fval_MN, df=DFval_FMN, p=Pval_FMN))
-        table$setRow(rowNo=5, values=list(S=S_INc, Param=paste0(c(ip,np), collapse = ', '),
+        table$setRow(rowNo=5, values=list(S=S_INc, Param=paste0(c(np,ip), collapse = ', '),
                                           F=Fval[3], df=paste0(c(r$m2$Df[3],r$m2$Df[4]), collapse = ', '), p=Pval[3]))
         table$setRow(rowNo=6, values=list(S=S_FMc, Param=paste0(c(fp,mp), collapse = ', '),
                                           F="", df="", p=""))
