@@ -1,5 +1,5 @@
-CT scan,Final diagnosis,count
-+,+,52
--,+,37
-+,-,11
--,-,100
+Result,Final diagnosis,CT scan,Ultrascan
++,+,52,64
+-,+,37,25
++,-,11,14
+-,-,100,97
