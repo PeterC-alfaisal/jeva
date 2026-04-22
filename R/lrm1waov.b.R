@@ -963,17 +963,17 @@ lrm1waovClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       if (self$options$emmPlotData)
         p <- p + geom_point(data=data, aes_string(y=jmvcore::toB64('.DEPENDENT')), alpha=0.3, position=jitterdodge)
       
-      p <- p + geom_line(size=.8, position=dodge)
+      p <- p + geom_line(linewidth=.8, position=dodge)
       
       if (self$options$emmPlotError == 'ci') {
         p <- p + geom_errorbar(
           aes_string(x=names$x, ymin=names$lower, ymax=names$upper, linetype=NULL),
-          width=.1, size=.8, position=dodge
+          width=.1, linewidth=.8, position=dodge
         )
       } else if (self$options$emmPlotError == 'se') {
         p <- p + geom_errorbar(
           aes_string(x=names$x, ymin='lowerSE', ymax='upperSE', linetype=NULL),
-          width=.1, size=.8, position=dodge
+          width=.1, linewidth=.8, position=dodge
         )
       }
       

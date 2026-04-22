@@ -238,7 +238,7 @@ rescale_x_breaks  <- ticks_logodds + abs(adj_min) - adj_diff/2
 
 
 p <- ggplot(df) +
-        geom_line(aes(x = x, y = lo_y, color = line), size = 1) +
+        geom_line(aes(x = x, y = lo_y, color = line), linewidth = 1) +
         geom_vline(xintercept = middle) +
         annotate(geom = "text",
                  x = rep(middle+.075, length(ticks_log_lrs)),

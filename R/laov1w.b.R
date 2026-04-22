@@ -423,7 +423,7 @@ laov1wClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         errorType <- jmvcore::format(ciLegendTitle, ciWidth=95)
         
         p <- ggplot2::ggplot(data=image$state$df, ggplot2::aes(x=levels, y=mean)) +
-          ggplot2::geom_errorbar(ggplot2::aes(ymin=mean-si, ymax=mean+si, width=.1), size=.8, color=theme$color[2]) +
+          ggplot2::geom_errorbar(ggplot2::aes(ymin=mean-si, ymax=mean+si, width=.1), linewidth=.8, color=theme$color[2]) +
           ggplot2::geom_point(ggplot2::aes(color=errorType), fill=theme$fill[1], size=3, shape=21) +
           ggplot2::labs(x=groupName, y=image$state$dep) +
           ggtheme + ggplot2::theme(legend.title = ggplot2::element_blank(),
