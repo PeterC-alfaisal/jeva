@@ -9,8 +9,8 @@ mcnem(
   rows,
   cols,
   counts = NULL,
-  nul = 1,
-  alt = 1,
+  nul = 0.5,
+  alt = 0.5,
   lint = 2,
   ciWidth = 95,
   correction = "ob",
@@ -42,9 +42,9 @@ mcnem(
 \item{counts}{the variable to use as the counts in the contingency table
 (not necessary when providing a formula, see the examples)}
 
-\item{nul}{value for the null hypothesis, default = 1}
+\item{nul}{value for the null hypothesis, default = 0.5}
 
-\item{alt}{value for the alternative hypothesis, default = 1}
+\item{alt}{value for the alternative hypothesis, default = 0.5}
 
 \item{lint}{likelihood interval given as support value, e.g. 2 or 3,
 default = 2}
