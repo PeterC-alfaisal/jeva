@@ -188,17 +188,16 @@ mcnemClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         
         table <- self$results$ctt
         table$setNote('Note', notext)
-        table$setRow(rowNo=1, values=list(var= "H\u2080 vs observed Odds"))
-        table$setRow(rowNo=2, values=list(var="H\u2090 vs observed Odds"))
+        table$setRow(rowNo=1, values=list(var= "H\u2080 vs observed"))
+        table$setRow(rowNo=2, values=list(var="H\u2090 vs observed"))
         table$setRow(rowNo=3, values=list(var="H\u2090 vs H\u2080"))
         
         table <- self$results$ctt2
         siWidthTitle <- jmvcore::format(.('Interval'))
         table$getColumn('Lower')$setSuperTitle(siWidthTitle)
         table$getColumn('Upper')$setSuperTitle(siWidthTitle)
-        table$setRow(rowNo=1, values=list(Interval="Support for Odds"))
-        table$setRow(rowNo=2, values=list(Interval="Likelihood-based for Odds"))
-        table$setRow(rowNo=3, values=list(Interval="Likelihood-based for Logodds"))
+        table$setRow(rowNo=1, values=list(Interval="Support"))
+        table$setRow(rowNo=2, values=list(Interval="Likelihood-based"))
         table$addFootnote(rowNo=2, col="Interval", "See reference Pritikin et al (2017) likelihood-based intervals 
                           are more accurate and are parameterization-invariant compared to conventional 
                           confidence intervals")
@@ -357,65 +356,67 @@ mcnemClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           
           osp <- c(b,c)
           
-          ospT <- osp[1] + osp[2]
-          Exos <- ospT/2
-          odds <- osp[1]/osp[2]
-          lodds <- log(odds)
-          
           toler=0.0001
           
-          ao = osp[1]; bo = osp[2]
+          ao <- osp[1]; bo <- osp[2]; n <- ao + bo
+          po <- ao/n
           
-          f <- function(x, ao, bo, ospT, goal) {
-            (-sum(ao*log(ao/x), bo*log(bo/(ospT-x)))-goal)^2
+          # to correct when po is either 0 or 1
+          p1 <- po
+          p2 <- po
+          if(po == 0) p1 <- 1
+          if(po == 1) p2 <- 0
+          
+          x=0
+          
+          f <- function(x, ao, bo, po, p1, p2, goal) {
+            
+            (ao*log(x)+bo*log(1-x)-(ao*log(p1)+bo*log(1-p2))-goal)^2
           }
           
           # likelihood-based % confidence intervals
           goal = -qchisq(self$options$ciWidth/100,1)/2
-          xmin1 <- optimize(f, c(0, ao), tol = toler, ao, bo, ospT, goal)
-          xmin2 <- optimize(f, c(ao, ospT), tol = toler, ao, bo, ospT, goal)
-          beg <- xmin1$minimum/(ospT-xmin1$minimum)
-          end <- xmin2$minimum/(ospT-xmin2$minimum)
-          begLo <- log(beg)
-          endLo <- log(end)
-          
-          # likelihood interval
-          goalL <- -self$options$lint
-          xmin1L <- optimize(f, c(0, ao), tol = toler, ao, bo, ospT, goalL)
-          xmin2L <- optimize(f, c(ao, ospT), tol = toler, ao, bo, ospT, goalL)
-          begL <- xmin1L$minimum/(ospT-xmin1L$minimum)
-          endL <- xmin2L$minimum/(ospT-xmin2L$minimum)
-          
+          if(po == 0) {beg <- 0} else {
+            xmin1 <- optimize(f, c(0, po), tol = toler, ao, bo, po, p1, p2, goal)
+            beg <- xmin1$minimum
+          }
+          if(po == 1) {end <- 1} else {
+            xmin2 <- optimize(f, c(po, 1), tol = toler, ao, bo, po, p1, p2, goal)
+            end <- xmin2$minimum
+          }
+
+          # support interval
+          goalL = -self$options$lint
+          if(po == 0) {begL <- 0} else {
+          xmin1L <- optimize(f, c(0, p1), tol = toler, ao, bo, po, p1, p2, goalL)
+          begL <- xmin1L$minimum
+          }
+          if(po == 1) {endL <- 1} else {
+            xmin2L <- optimize(f, c(po, 1), tol = toler, ao, bo, po, p1, p2, goalL)
+            endL <- xmin2L$minimum
+          }
+
           lintlev <- toString(self$options$lint); conflev <- paste0(self$options$ciWidth,"%")
           
           # x axis limits
           goalx <- self$options$supplot   # with e^-10 we get x values for when curve is down to 0.00004539
-          suppressWarnings(xmin1x <- optimize(f, c(0, ao), tol = toler, ao, bo, ospT, goalx))
-          suppressWarnings(xmin2x <- optimize(f, c(ao, ospT), tol = toler, ao, bo, ospT, goalx))
-          xmin <- xmin1x$minimum/(ospT-xmin1x$minimum)
-          xmax <- xmin2x$minimum/(ospT-xmin2x$minimum)
-          
-          
-          #        # to determine x axis space for plot
-          #        dif <- odds-begL
-          #        lolim <- odds - 3*dif; hilim <- odds + 4*dif
-          #        if (odds < 1 ) { hilim <- odds + 6*dif}
-          #        if (lolim < 0) {lolim <- 0}
-          
-          # to determine height of self$options$alt on likelihood function
-          goal <- self$options$alt
-          g <- function(x,ospT,goal) {
-            (x/(ospT-x)-goal)^2
+          if(po == 0) {xmin <- 0} else {
+            suppressWarnings(xmin1x <- optimize(f, c(0, po), tol = toler, ao, bo, po, p1, p2, goalx))
+            xmin <- xmin1x$minimum
           }
-          exa <- optimize(g, c(0, ospT), tol = toler, ospT, goal)
-          xa <- unname(unlist(exa[1]))
-          xah <- exp(-sum(osp[1]*log(osp[1]/xa), osp[2]*log(osp[2]/(ospT-xa))))
+          if(po == 1) {xmax <- 1} else {
+            suppressWarnings(xmin2x <- optimize(f, c(po, 1), tol = toler, ao, bo, po, p1, p2, goalx))
+            xmax <- xmin2x$minimum
+          }
+
+          # likelihood for 0.5 (null value)
+          nullp <- self$options$nul
+          nullh <- exp(ao*log(nullp)+bo*log(1-nullp)-(ao*log(p1)+bo*log(1-p2)))
+
+          # likelihood for alternative value
+          palt <- self$options$alt
+          xah <- exp(ao*log(palt)+bo*log(1-palt)-(ao*log(p1)+bo*log(1-p2)))
           
-          # and likelihood for 1 (null value)
-          goal <- self$options$nul
-          exan <- optimize(g, c(0, ospT), tol = toler, ospT, goal)
-          xa <- unname(unlist(exan[1]))
-          nullh <- exp(-sum(osp[1]*log(osp[1]/xa), osp[2]*log(osp[2]/(ospT-xa))))
           
           # Correction
           Ac <- function(c,k1,k2) { 
@@ -427,21 +428,29 @@ mcnemClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           
           Smc <- log(nullh) + Ac(self$options$correction,1,2)
           
-          #         Smc <- -(osp[1]*log(osp[1]/Exos) + osp[2]*log(osp[2]/Exos)) #this for null=1
-          
+
           # variance analysis and chi-square
-          wocor <- try(stats::mcnemar.test(result, correct=FALSE), silent=TRUE)
-          wcor  <- try(stats::mcnemar.test(result, correct=TRUE), silent=TRUE)
           df=1
-          toogood <- df/2*(log(df/wocor$statistic)) - (df - wocor$statistic)/2
-          toogoodc <- df/2*(log(df/wcor$statistic)) - (df - wcor$statistic)/2
-          mvp <- wocor$p.value; mvpc <- wcor$p.value
-          
-          xwocor <- try(stats::chisq.test(tab, correct=FALSE), silent=TRUE) # for cross-tabulation
-          xwcor  <- try(stats::chisq.test(tab, correct=TRUE), silent=TRUE)
-          xtoogood <- df/2*(log(df/xwocor$statistic)) - (df - xwocor$statistic)/2
-          xtoogoodc <- df/2*(log(df/xwcor$statistic)) - (df - xwcor$statistic)/2
-          xmvp <- xwocor$p.value; xmvpc <- xwcor$p.value
+
+          probn <- c(nullp, 1-nullp)
+          result <- try(chisq.test(osp, p=probn))   # versus null
+          if ( ! base::inherits(result, 'try-error')) {
+            chi_n=result$statistic
+            p_n=result$p.value
+          } else {
+            chi_n=NaN; df=''; p_n=''
+          }
+          toogoodn <- df/2*(log(df/chi_n)) - (df - chi_n)/2
+
+          proba <- c(palt, 1-palt)
+          result1 <- try(chisq.test(osp, p=proba))   # versus specified expected
+          if ( ! base::inherits(result1, 'try-error')) {
+            chi_a=result1$statistic
+            p_a=result1$p.value
+          } else {
+            chi_a=NaN; df=''; p_a=''
+          }
+          toogooda <- df/2*(log(df/chi_a)) - (df - chi_a)/2
           
           # support for alt. H
           Salt <- log(xah) + Ac(self$options$correction,1,1)
@@ -456,9 +465,9 @@ mcnemClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           
           
           table <- self$results$ctt
-          table$setRow(rowNo=1, values=list(Value=self$options$nul, ordiff= self$options$nul-odds, 
+          table$setRow(rowNo=1, values=list(Value=self$options$nul, ordiff= self$options$nul-po, 
                                             S=Smc, Param=paste0(c(1,2), collapse = ', '), G=gn, df=1, p=gn_p))
-          table$setRow(rowNo=2, values=list(Value=self$options$alt, ordiff= self$options$alt-odds, 
+          table$setRow(rowNo=2, values=list(Value=self$options$alt, ordiff= self$options$alt-po, 
                                             S=Salt, Param=paste0(c(2,2), collapse = ', '), G=ga, df=1, p=ga_p))
           table$setRow(rowNo=3, values=list(Value="", ordiff= self$options$alt-self$options$nul, 
                                             S=SexOR_null, Param=paste0(c(2,1), collapse = ', '), G=gan, df=1, p=gan_p))
@@ -467,33 +476,32 @@ mcnemClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           siWidthTitle <- jmvcore::format(.('Interval'))
           table$getColumn('Lower')$setSuperTitle(siWidthTitle)
           table$getColumn('Upper')$setSuperTitle(siWidthTitle)
-          table$setRow(rowNo=1, values=list(Level=lintlev, Odds = odds, 
+          table$setRow(rowNo=1, values=list(Level=lintlev, Prob = po, 
                                             Lower=begL, Upper=endL))
-          table$setRow(rowNo=2, values=list(Level=conflev, Odds = odds, 
+          table$setRow(rowNo=2, values=list(Level=conflev, Prob = po, 
                                             Lower=beg, Upper=end))
-          table$setRow(rowNo=3, values=list(Level=conflev, Odds = lodds, 
-                                            Lower=begLo, Upper=endLo))
-          
+
           table <- self$results$ctt3
           table$setNote('Note', "Unlike the \u03C7\u00B2 statistic, a large \U1D446 value indicates 
           that the proportions are either more different or too similar compared with those expected") 
-          table$setRow(rowNo=1, values=list(var= "For Odds = 1", Sv=toogood, X2=wocor$statistic, dfv=df, 
-                                            pv=mvp, pv1=1-mvp))
-          table$setRow(rowNo=2, values=list(var= "For Odds with continuity correction", Sv=toogoodc, X2=wcor$statistic, dfv=df, 
-                                            pv=mvpc, pv1=1-mvpc))
-          table$setRow(rowNo=3, values=list(var= "For Odds Ratio = 1", Sv=xtoogood, X2=xwocor$statistic, dfv=df, 
-                                            pv=xmvp, pv1=1-xmvp))
-          table$setRow(rowNo=4, values=list(var= "For OR with continuity correction", Sv=xtoogoodc, X2=xwcor$statistic, dfv=df, 
-                                            pv=xmvpc, pv1=1-xmvpc))
-          
+          table$setRow(rowNo=1, values=list(var= "H\u2080", Sv=toogoodn, X2=chi_n, dfv=df, 
+                                            pv=p_n, pv1=1-p_n))
+          table$setRow(rowNo=2, values=list(var= "H\u2090", Sv=toogooda, X2=chi_a, dfv=df, 
+                                            pv=p_a, pv1=1-p_a))
+
           # stats for summary        
           stats <- list(S1 = Smc,
                         S2 = Salt,
                         S3 = SexOR_null,
-                        S4 = toogoodc,
-                        S5 = xtoogoodc,
-                        chi1 = wcor$statistic,
-                        chi2 = xwcor$statistic)
+                        S4 = toogoodn,
+                        S5 = toogooda,
+                        chi1 = chi_n,
+                        chi2 = chi_a,
+                        nullp = nullp,
+                        palt = palt,
+                        po = po,
+                        ao = ao,
+                        bo = bo)
           
           # Populate Explanation & table
           private$.populateSupportText(stats)
@@ -508,8 +516,8 @@ mcnemClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
           }
           
-          g <- data.frame(odds=odds, ao, bo, ospT, goalL=goalL, nullh=nullh, 
-                          xmin=xmin, xmax=xmax, xah=xah, begL=begL,endL=endL)
+          g <- data.frame(po=po, p1=p1, p2=p2, ao=ao, bo=bo, n=n, goalL=goalL, nullh=nullh,
+                    nullp=nullp, palt=palt, xmin=xmin, xmax=xmax, xah=xah, xmin1L=begL,xmin2L=endL)
           imagec <- self$results$plotc
           imagec$setState(g)
           
@@ -598,44 +606,32 @@ mcnemClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         
         g <- imagec$state
         
-        res <- 100            # resolution, increase for greater resolution
-        arrlen <- res*g$ospT-1
-        xs <- 0; ys <- 0
-        for (i in 1:arrlen) {     # arrays to plot likelihood vs OR
-          dv <- i/res
-          ys[i] <- exp(-sum(g$ao*log(g$ao/dv), g$bo*log(g$bo/(g$ospT-dv))))
-          xs[i] <- dv/(g$ospT-dv)
-        }
-        
-        #        # to determine x axis space for plot
-        
-        #        dif <- g$odds-g$begL
-        #        lolim <- g$odds - 2*dif; hilim <- g$odds + 4*dif
-        #        if (g$odds < 1 ) { hilim <- g$odds + 3*dif}
-        #        if (lolim < 0) {lolim <- 0}
-        
+        minLL <- self$options$supplot
+
         # do the plot with lines
+
         if(self$options$plotype=="lplot") {
-          plot <- plot(xs, ys, xlim=c(g$xmin,g$xmax),type="l", lwd = 1, xlab = "Odds", ylab = "Likelihood")
-          lines(c(g$odds,g$odds),c(0,1),lty=2) # add MLE as dashed line
-          segments(g$begL, exp(g$goalL), g$endL, exp(g$goalL), lwd = 1, col = "red")
-          lines(c(self$options$nul,self$options$nul),c(0,g$nullh), lty=1, col = "black") # add H prob as black line
-          if (!is.null(self$options$alt)) {
-            lines(c(self$options$alt,self$options$alt), c(0,g$xah), lty=1, col = "blue") # add H prob as blue line
-          }
+          plot <- curve(exp(g$ao*log(x)+g$bo*log(1-x)-(g$ao*log(g$p1)+g$bo*log(1-g$p2))), xlim = c(g$xmin,g$xmax), 
+                        ylim = c(0,1), xlab = "Proportion", ylab = "Likelihood")
+          lines(c(g$po,g$po),c(0,1),lty=2) # add MLE as dashed line
+          lines(c(g$nullp,g$nullp),c(0,(g$nullp^g$ao*(1-g$nullp)^g$bo)/(g$po^g$ao*(1-g$po)^g$bo)),
+                lty=1, col = "blue") # add H prob as blue line
+          lines(c(g$palt,g$palt),c(0,(g$palt^g$ao*(1-g$palt)^g$bo)/(g$po^g$ao*(1-g$po)^g$bo)),
+                lty=1, col = "green") # add H1 prob as green line
+          segments(g$xmin1L, exp(g$goalL), g$xmin2L, exp(g$goalL), lwd = 1, col = "red")
+          lines(c(0.5,0.5), c(0,(0.5^g$ao*(0.5)^g$bo)/(g$po^g$ao*(1-g$po)^g$bo)), lty=1) # add Null as black line
         } else {
-          plot <- plot(xs, log(ys), xlim=c(g$xmin,g$xmax),type="l", lwd = 1, xlab = "Odds", 
-                       ylim=c(self$options$supplot,0), ylab = "Log Likelihood")
-          lines(c(g$odds,g$odds),c(self$options$supplot,0),lty=2) # add MLE as dashed line
-          segments(g$begL, g$goalL, g$endL, g$goalL, lwd = 1, col = "red")
-          lines(c(self$options$nul,self$options$nul),c(self$options$supplot, log(g$nullh)), lty=1, col = "black") # add H prob as black line
-          if (!is.null(self$options$alt)) {
-            lines(c(self$options$alt,self$options$alt), c(self$options$supplot,log(g$xah)), lty=1, col = "blue") # add H prob as blue line
-          }
+          plot <- curve(g$ao*log(x)+g$bo*log(1-x)-(g$ao*log(g$p1)+g$bo*log(1-g$p2)), xlim = c(g$xmin,g$xmax), 
+                        ylim = c(minLL,0), xlab = "Proportion", ylab = "Log Likelihood")
+          lines(c(g$po,g$po),c(minLL,0),lty=2) # add MLE as dashed line
+          lines(c(g$nullp,g$nullp),c(minLL, g$ao*log(g$nullp)+g$bo*log(1-g$nullp)-(g$ao*log(g$p1)+g$bo*log(1-g$p2))),
+                lty=1, col = "blue") # add H prob as blue line
+          lines(c(g$palt,g$palt),c(minLL, g$ao*log(g$palt)+g$bo*log(1-g$palt)-(g$ao*log(g$p1)+g$bo*log(1-g$p2))),
+                lty=1, col = "green") # add H1 prob as green line
+          segments(g$xmin1L, g$goalL, g$xmin2L, g$goalL, lwd = 1, col = "red")
+          lines(c(0.5,0.5), c(minLL,g$ao*log(0.5)+g$bo*log(1-0.5)-(g$ao*log(g$po)+g$bo*log(1-g$po))), lty=1) # add Null as black line
         }
-        TRUE
-        
-        
+          TRUE
       },
       #### Helper functions ----
       .cleanData = function() {
@@ -788,39 +784,36 @@ mcnemClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         colVarName <- self$options$cols
         int_text <- paste(rowVarName," \u2A2F ", colVarName)
         
-        Sxl = list(s=st$S1, "<i>H</i>\u2080", "the observed Odds")                       
+        Sxl = list(s=st$S1, "<i>H</i>\u2080", "the observed Proportion")                       
         stg1 <- private$.strength(Sxl)
-        Sxl = list(s=st$S2, "<i>H</i>\u2090", "the observed Odds")                       
+        Sxl = list(s=st$S2, "<i>H</i>\u2090", "the observed Proportion")                       
         stg2 <- private$.strength(Sxl)
         Sxl = list(s=st$S3, "<i>H</i>\u2090", "<i>H</i>\u2080")  
         stg3 <- private$.strength(Sxl)
         
         Sxl = list(s=st$S4)                       
         sv <- private$.strength2(Sxl)
-        stg4 <- paste0("For the observed Odds", sv, ", that it was more different from the <i>H</i>\u2080 = 1 
-                         than expected")
+        stg4 <- paste0("For the observed Proportion", sv, ", that it was more different from the <i>H</i>\u2080 = ", st$nullp,
+        " than expected")
         if (2*st$S4 > st$chi1) {
-          stg8 <- paste0("For the observed Odds", sv, ", that it was closer to the <i>H</i>\u2080 = 1 than expected")
+          stg4 <- paste0("For the observed Proportion", sv, ", that it was closer to the <i>H</i>\u2080 = ", st$nullp, 
+                         " than expected")
         }
         
         Sxl = list(s=st$S5)                       
         sv <- private$.strength2(Sxl)
-        stg5 <- paste0("For the observed <i>OR</i>", sv, ", that it was more different from the <i>H</i>\u2080 = 1 
-                         than expected")
-        if (2*st$S5 > st$chi2) {
-          stg5 <- paste0("For the observed <i>OR</i>", sv, ", that it was closer to the <i>H</i>\u2080 = 1 than expected")
-        }
         
-        if(self$options$correction=="ob") { stg0 <- "<i>Using Occam's Bonus correction, the main Odds analysis shows that:</i>"
-        } else if(self$options$correction=="aic") { stg0 <- "<i>Using AIC correction, the main Odds analysis shows that:</i>"
+        stg0b <- paste0("This analysis only uses the 2 values in the diagonal: ",st$ao, " & ",st$bo)
+        if(self$options$correction=="ob") { stg0 <- "<i>Using Occam's Bonus correction, the main Proportion analysis shows that:</i>"
+        } else if(self$options$correction=="aic") { stg0 <- "<i>Using AIC correction, the main Proportion analysis shows that:</i>"
         } else {
-          stg0 <- "<i>Using no correction, the main Odds analysis shows that:</i>"
+          stg0 <- "<i>Using no correction, the main Proportion analysis shows that:</i>"
         }
         str = paste0("<br> <h2>Summarizing the evidential analysis</h2> <br>", 
-                     stg0, "<br>", stg1, "<br>", stg2, "<br>", stg3, "<br>
-                       <i>The variance analysis, using continuity corrected values, shows that:</i> <br>",
-                     stg4, "<br>", stg5,"<br>",
-                     "<p>Give the Odds and the observed frequencies. The available <i>p</i> values 
+                     stg0b, "<br>", "<br>",stg0, "<br>", stg1, "<br>", stg2, "<br>", stg3, "<br> <br>
+                       <i>The variance analysis, without continuity correction, shows that:</i> <br>",
+                     stg4, "<br>", 
+                     "<p>Give the observed frequencies and the Proportion ", round(st$po,4), ". The available <i>p</i> values 
                                for the <i>G</i> test (likelihood ratio test) may also be supplied to allow 
                                comparison with a conventional analysis.</p> 
                                <p>There are no thresholds for <i>S</i> values, just guidelines on 
@@ -896,8 +889,8 @@ mcnemClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           <br> <i>Advantages of the Evidential Approach</i> 
           <br> The advantage of the evidential approach is that we 
                 can select hypothesis values that reflect our research interests. For example, we could 
-                choose a meaningful <i>H</i>\u2090 Odds to compare with a specified <i>H</i>\u2080 Odds (default = 1). 
-                This is shown by the last line of the main Support table for Odds analyses. As data accumulates 
+                choose a meaningful <i>H</i>\u2090 Proportion to compare with a specified <i>H</i>\u2080 Proportion (default = 0.5). 
+                This is shown by the last line of the main Support table for Proportion analyses. As data accumulates 
                 the strength of evidence for one hypothesis over the other will tend to increase.")
         
         html$setContent(str)

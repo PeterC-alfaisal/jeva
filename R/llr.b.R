@@ -664,8 +664,8 @@ llrClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         }
         
         # to determine x axis space for plot
-        seor <- sqrt(1/g$a+1/g$b+1/g$c+1/g$d)
-        lolim <- exp(log(g$rr)-3*seor); hilim <- exp(log(g$rr)+3*seor)
+        serr <- sqrt(1/g$a - 1/g$r1tot + 1/g$b - 1/g$r2tot)
+        lolim <- exp(log(g$rr)-3*serr); hilim <- exp(log(g$rr)+3*serr)
         if (lolim < 0) {lolim <- 0}
         
         #-sum(a*log(a/x), b*log(b/(c1tot-x)), c*log(c/(r1tot-x)),

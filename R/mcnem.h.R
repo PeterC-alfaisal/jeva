@@ -9,8 +9,8 @@ mcnemOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             rows = NULL,
             cols = NULL,
             counts = NULL,
-            nul = 1,
-            alt = 1,
+            nul = 0.5,
+            alt = 0.5,
             lint = 2,
             ciWidth = 95,
             correction = "ob",
@@ -63,15 +63,15 @@ mcnemOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..nul <- jmvcore::OptionNumber$new(
                 "nul",
                 nul,
-                min=0,
-                max=100000000000,
-                default=1)
+                min=0.0001,
+                max=0.9999,
+                default=0.5)
             private$..alt <- jmvcore::OptionNumber$new(
                 "alt",
                 alt,
-                min=0,
-                max=100000000000,
-                default=1)
+                min=0.0001,
+                max=0.9999,
+                default=0.5)
             private$..lint <- jmvcore::OptionNumber$new(
                 "lint",
                 lint,
@@ -282,7 +282,7 @@ mcnemResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Table$new(
                 options=options,
                 name="ctt",
-                title="Support",
+                title="Support for Diagonal Proportion",
                 refs=list(
                     "Glover_Tut",
                     "Edwards_OR"),
@@ -302,7 +302,7 @@ mcnemResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="text"),
                     list(
                         `name`="Value", 
-                        `title`="Odds Value", 
+                        `title`="Proportion", 
                         `type`="number"),
                     list(
                         `name`="ordiff", 
@@ -333,7 +333,7 @@ mcnemResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="ctt2",
                 title="Intervals",
-                rows=3,
+                rows=2,
                 clearWith=list(
                     "rows",
                     "cols",
@@ -350,8 +350,8 @@ mcnemResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `name`="Level", 
                         `type`="text"),
                     list(
-                        `name`="Odds", 
-                        `title`="Statistic", 
+                        `name`="Prob", 
+                        `title`="Proportion", 
                         `type`="number"),
                     list(
                         `name`="Lower", 
@@ -364,9 +364,9 @@ mcnemResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Table$new(
                 options=options,
                 name="ctt3",
-                title="Variance analyses for Odds and Cross tabulation (Odds Ratio)",
+                title="Variance analyses for Proportion",
                 visible="(varA)",
-                rows=4,
+                rows=2,
                 clearWith=list(
                     "rows",
                     "cols",
@@ -375,7 +375,7 @@ mcnemResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 columns=list(
                     list(
                         `name`="var", 
-                        `title`="", 
+                        `title`="Hypothesis", 
                         `type`="text"),
                     list(
                         `name`="Sv", 
@@ -404,7 +404,7 @@ mcnemResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plotc",
-                title="`Likelihood curve for Odds with S-{lint} support interval`",
+                title="`Likelihood curve for Proportion with S-{lint} support interval`",
                 width=500,
                 height=400,
                 renderFun=".plotc",
@@ -555,8 +555,8 @@ mcnemBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param cols the variable to use as the columns in the contingency table
 #' @param counts the variable to use as the counts in the contingency table
 #'   (not necessary when providing a formula, see the examples)
-#' @param nul value for the null hypothesis, default = 1
-#' @param alt value for the alternative hypothesis, default = 1
+#' @param nul value for the null hypothesis, default = 0.5
+#' @param alt value for the alternative hypothesis, default = 0.5
 #' @param lint likelihood interval given as support value, e.g. 2 or 3,
 #'   default = 2
 #' @param ciWidth a number between 50 and 99.9 (default: 95), width of the
@@ -619,8 +619,8 @@ mcnem <- function(
     rows,
     cols,
     counts = NULL,
-    nul = 1,
-    alt = 1,
+    nul = 0.5,
+    alt = 0.5,
     lint = 2,
     ciWidth = 95,
     correction = "ob",

@@ -210,6 +210,8 @@ propClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         if(a==0) xmin1 <- 0
         xmin1a <- xmin1
         xmin2 <- xmin2$minimum
+
+        # support interval
         goal <- -self$options$lint
         xmin1L <- optimize(f, c(0, p1), tol = toler, a, r, p, goal)
         xmin2L <- optimize(f, c(p, 1.01), tol = toler, a, r, p, goal)

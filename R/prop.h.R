@@ -252,7 +252,7 @@ propResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 columns=list(
                     list(
                         `name`="var", 
-                        `title`="Hypotheses", 
+                        `title`="Hypothesis", 
                         `type`="text"),
                     list(
                         `name`="rat", 
@@ -260,7 +260,7 @@ propResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="text"),
                     list(
                         `name`="Values", 
-                        `title`="Expected values", 
+                        `title`="Expected value", 
                         `type`="text"),
                     list(
                         `name`="S", 
@@ -307,7 +307,7 @@ propResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `name`="Level", 
                         `type`="text"),
                     list(
-                        `name`="P", 
+                        `name`="Proportion", 
                         `type`="number"),
                     list(
                         `name`="Lower", 
@@ -331,7 +331,7 @@ propResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 columns=list(
                     list(
                         `name`="var", 
-                        `title`="Hypotheses", 
+                        `title`="Hypothesis", 
                         `type`="text"),
                     list(
                         `name`="Sv", 
