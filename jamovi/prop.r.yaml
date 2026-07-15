@@ -73,13 +73,13 @@ items:
           - correction
       columns:
         - name: var
-          title: Hypotheses
+          title: Hypothesis
           type: text
         - name: rat
           title: Ratio
           type: text
         - name: Values
-          title: Expected values
+          title: Expected value
           type: text
         - name: S
           title: S
@@ -118,7 +118,7 @@ items:
           type: text
         - name: Level
           type: text
-        - name: P
+        - name: Proportion
           type: number
         - name: Lower
           type: number
@@ -140,7 +140,7 @@ items:
           - counts
       columns:
         - name: var
-          title: Hypotheses
+          title: Hypothesis
           type: text
         - name: Sv
           title: S

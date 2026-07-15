@@ -121,24 +121,24 @@ options:
               necessary when providing a formula, see the examples)
 
     - name: nul
-      title: <i>H</i>₀  Odds
+      title: <i>H</i>₀ Proportion
       type: Number
-      min: 0
-      max: 10e+10
-      default: 1
+      min: 0.0001
+      max: 0.9999
+      default: 0.5
       description:
           R: >
-              value for the null hypothesis, default = 1
+              value for the null hypothesis, default = 0.5
       
     - name: alt
-      title: <i>H</i>ₐ Odds
+      title: <i>H</i>ₐ Proportion
       type: Number
-      min: 0
-      max: 10e+10
-      default: 1
+      min: 0.0001
+      max: 0.9999
+      default: 0.5
       description:
           R: >
-              value for the alternative hypothesis, default = 1
+              value for the alternative hypothesis, default = 0.5
 
     - name: lint
       type: Number

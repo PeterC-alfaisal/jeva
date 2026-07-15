@@ -19,7 +19,7 @@ items:
       type:  Preformatted
 
     - name:  ctt
-      title: Support
+      title: Support for Diagonal Proportion
       type: Table
       refs:
         - Glover_Tut
@@ -38,7 +38,7 @@ items:
           title: ''
           type: text
         - name: Value
-          title: Odds Value
+          title: Proportion
           type: number
         - name: ordiff
           title: Difference
@@ -63,7 +63,7 @@ items:
     - name:  ctt2
       title: 'Intervals'
       type: Table
-      rows:  3
+      rows:  2
       clearWith:
         - rows
         - cols
@@ -77,8 +77,8 @@ items:
           type: text
         - name: Level
           type: text
-        - name: Odds
-          title: Statistic
+        - name: Prob
+          title: Proportion
           type: number
         - name: Lower
           type: number
@@ -88,10 +88,10 @@ items:
               - Pritikin
 
     - name:  ctt3
-      title: Variance analyses for Odds and Cross tabulation (Odds Ratio)
+      title: Variance analyses for Proportion
       type: Table
       visible: (varA)
-      rows:  4
+      rows:  2
       clearWith:
         - rows
         - cols
@@ -99,7 +99,7 @@ items:
         - data
       columns:
         - name: var
-          title: ''
+          title: Hypothesis
           type: text
         - name: Sv
           title: S
@@ -122,7 +122,7 @@ items:
               - EdwardsVA
 
     - name: plotc
-      title: '`Likelihood curve for Odds with S-{lint} support interval`'
+      title: '`Likelihood curve for Proportion with S-{lint} support interval`'
       type: Image
       width:  500
       height: 400
