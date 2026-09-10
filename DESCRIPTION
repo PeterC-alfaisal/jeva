@@ -12,5 +12,6 @@ Description: Jamovi analyses that calculate the log likelihood (support) for a
 License: GPL-2
 Encoding: UTF-8
 LazyData: true
-Imports: jmvcore (>= 0.8.5), R6, ggplot2, graphics, stats, knitr, car, scales
+Imports: jmvcore (>= 0.8.5), R6, ggplot2, graphics, stats, knitr, car, scales, 
+    afex, emmeans, reshape2
 Config/roxygen2/version: 8.0.0
