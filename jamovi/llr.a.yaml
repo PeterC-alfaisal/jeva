@@ -222,6 +222,14 @@ options:
             To set the minimum likelihood display value in plot, in log units (default = -10) 
             affects the x-axis range
 
+    - name: log_x
+      title: Log horizontal axis
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), give the plotted x-axis as log
+
     - name: varA
       title: Variance analysis
       type: Bool

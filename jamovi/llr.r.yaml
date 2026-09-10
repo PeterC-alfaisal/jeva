@@ -128,6 +128,7 @@ items:
       type: Table
       visible: (varA)
       rows:  1
+      clearWith:
         - rows
         - cols
         - counts
@@ -173,6 +174,7 @@ items:
         - alt
         - plotype
         - supplot
+        - log_x
       visible: (pll)
 
     - name: barplot

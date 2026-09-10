@@ -159,7 +159,8 @@ items:
       title: Variance analysis
       type: Table
       visible: (varA)
-      rows:  1
+      rows: 1
+      clearWith:
         - rows
         - cols
         - counts
