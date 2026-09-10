@@ -348,42 +348,285 @@ llrClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           
           ##########################################################
           tab <- mat
-          
-          HAc <- FALSE
-          a <- tab[1]
-          b <- tab[2]
-          c <- tab[3]
-          d <- tab[4]
-          if (a == 0 | b == 0 | c == 0 | d == 0) {
-            a=a+0.5;b=b+0.5;c=c+0.5;d=d+0.5;HAc=TRUE       # Haldane-Anscombe correction
-          }                   
-          r1tot <- sum(a,c) #sum of 1st row
-          r2tot <- sum(b,d) #sum of 2nd row
-          c1tot <- sum(a,b)
-          c2tot <- sum(c,d)
-          grandtot <- c1tot+c2tot
-          minmarg <- min(r1tot,r2tot,c1tot,c2tot)
-          maxmarg <- max(r1tot,r2tot,c1tot,c2tot)
-          
-          toler=0.0001
-          
-          # chi-square
-          suppressWarnings(lt <- chisq.test(tab,correct=self$options$cc)) # ignore warning message
-          chi.s <- unname(lt$statistic)
-          df <- unname(lt$parameter)
-          # correct if 0 cells
-          tabt1=lt$observed
-          for (i in 1:length(tab)) {
-            tabt1[i] <- lt$observed[i]
-            if (lt$observed[i] < 1) tabt1[i]=1   # turn 0s into 1s for one table used for log
+          likelihood_2x2_rr <- function(tab,
+                                        conf.level = self$options$ciWidth/100,
+                                        likelihood.drop = self$options$lint,
+                                        theta = self$options$alt,
+                                        nul = self$options$nul,
+                                        plot.drop = -self$options$supplot,
+                                        continuity = 0.5,
+                                        root.tol = 1e-12,
+                                        n.plot = 1001L) {
+            
+            stopifnot(is.matrix(tab), identical(dim(tab), c(2L, 2L)))
+            
+            if (any(!is.finite(tab)) || any(tab < 0))
+              stop("All cell counts must be finite and non-negative.")
+            if (any(rowSums(tab) == 0) || any(colSums(tab) == 0))
+              stop("Neither a row nor a column may have a zero total.")
+            if (!is.numeric(conf.level) || length(conf.level) != 1L ||
+                !is.finite(conf.level) || conf.level <= 0 || conf.level >= 1)
+              stop("conf.level must be a finite value strictly between 0 and 1.")
+            if (length(likelihood.drop) != 1L || length(plot.drop) != 1L ||
+                !is.finite(likelihood.drop) || !is.finite(plot.drop) ||
+                likelihood.drop <= 0 || plot.drop <= 0)
+              stop("likelihood.drop and plot.drop must be finite positive numbers.")
+            if (length(continuity) != 1L || !is.finite(continuity) || continuity <= 0)
+              stop("continuity must be a finite positive number.")
+            if (length(n.plot) != 1L || !is.finite(n.plot) || n.plot < 2)
+              stop("n.plot must be at least 2.")
+            if (length(theta) != 1L || length(nul) != 1L ||
+                !is.finite(theta) || !is.finite(nul) || theta <= 0 || nul <= 0)
+              stop("theta and nul must be finite positive risk ratios.")
+            
+            observed <- tab
+            haldane_anscombe_applied <- any(tab == 0)
+            if (haldane_anscombe_applied)
+              tab <- tab + continuity
+            
+            # Use cc rather than c so base::c() is never masked.
+            a <- tab[1, 1]
+            b <- tab[1, 2]
+            cc <- tab[2, 1]
+            d <- tab[2, 2]
+            
+            r1 <- a + b
+            r2 <- cc + d
+            c1 <- a + cc
+            c2 <- b + d
+            n <- r1 + r2
+            
+            p1_hat <- a / r1
+            p2_hat <- cc / r2
+            risk_ratio <- p1_hat / p2_hat
+            log_risk_ratio <- log(risk_ratio)
+            
+            # Constant-free unconditional binomial log likelihood. Its limiting values
+            # at p = 0 or p = 1 are handled explicitly: 0 * log(0) is defined as 0.
+            xlogy <- function(x, y) {
+              ifelse(x == 0, 0, x * log(y))
+            }
+            
+            loglik_probabilities <- function(p1, p2) {
+              if (!is.finite(p1) || !is.finite(p2) || p1 < 0 || p1 > 1 ||
+                  p2 < 0 || p2 > 1)
+                return(-Inf)
+              
+              xlogy(a, p1) + xlogy(b, 1 - p1) +
+                xlogy(cc, p2) + xlogy(d, 1 - p2)
+            }
+            
+            ll_max <- loglik_probabilities(p1_hat, p2_hat)
+            
+            # Under RR = rr, set p1 = rr * p2 and maximise over p2.  Optimise on the
+            # logit scale for a numerically stable interior representation:
+            # p2 = upper_p2 * plogis(eta), where upper_p2 = min(1, 1/rr).
+            # This prevents a fixed absolute tolerance from collapsing the parameter
+            # interval for very large RR values, which arises with zero-event tables.
+            profile_at_rr <- function(rr) {
+              if (!is.finite(rr) || rr <= 0)
+                stop("rr must be a finite positive risk ratio.")
+              
+              upper_p2 <- min(1, 1 / rr)
+              if (!is.finite(upper_p2) || upper_p2 <= 0)
+                stop("Could not form a valid parameter range for this risk ratio.")
+              
+              neg_loglik_eta <- function(eta) {
+                p2 <- upper_p2 * stats::plogis(eta)
+                -loglik_probabilities(rr * p2, p2)
+              }
+              
+              # A finite, broad logit interval is adequate even when upper_p2 is tiny.
+              # At +/- 40, plogis() is sufficiently close to 0/1 for profiling here.
+              opt <- optimize(
+                neg_loglik_eta,
+                interval = base::c(-40, 40),
+                tol = root.tol
+              )
+              
+              eta <- opt$minimum
+              p2 <- upper_p2 * stats::plogis(eta)
+              p1 <- rr * p2
+              fitted <- matrix(
+                base::c(r1 * p1, r1 * (1 - p1), r2 * p2, r2 * (1 - p2)),
+                nrow = 2,
+                byrow = TRUE
+              )
+              
+              list(
+                risk_ratio = rr,
+                p1 = p1,
+                p2 = p2,
+                fitted = fitted,
+                loglik = -opt$objective,
+                relative_loglik = -opt$objective - ll_max
+              )
+            }
+            
+            rel_loglik_at_rr <- function(rr) profile_at_rr(rr)$relative_loglik
+            
+            # Equivalent of the original like_function_height(). It returns the log of
+            # the likelihood ratio relative to the unconstrained RR MLE, at RR = rr.
+            like_function_height_rr <- function(rr) {
+              profile_at_rr(rr)$relative_loglik
+            }
+            
+            # Retain the original output names: xah is the likelihood height at theta,
+            # and nullh is the likelihood height at nul. The log_ versions are the
+            # corresponding relative log likelihoods.
+            log_xah <- like_function_height_rr(theta)
+            log_nullh <- like_function_height_rr(nul)
+            xah <- exp(max(log_xah, log(.Machine$double.xmin)))
+            nullh <- exp(max(log_nullh, log(.Machine$double.xmin)))
+            
+            chi <- suppressWarnings(stats::chisq.test(observed, correct = FALSE))
+            
+            tabt1=observed
+            for (i in 1:length(tab)) {
+              tabt1[i] <- observed[i]
+              if (observed[i] < 1) tabt1[i]=1   # turn 0s into 1s for one table used for log
+            }
+            
+            Sint <- sum(observed * log(tabt1/chi$expected)) 
+            Sgt <- sum(observed*log(tabt1))-sum(observed)*log(sum(observed)/4)
+            
+            # Find a RR endpoint at which profile log likelihood has dropped by `drop`.
+            # Work on the log(RR) scale, so ranges are symmetric multiplicatively.
+            root_for_drop <- function(drop, side = c("lower", "upper")) {
+              side <- match.arg(side)
+              eta_hat <- log_risk_ratio
+              target <- function(eta) rel_loglik_at_rr(exp(eta)) + drop
+              
+              step <- 1
+              eta_probe <- if (side == "lower") eta_hat - step else eta_hat + step
+              f_probe <- target(eta_probe)
+              
+              for (k in seq_len(100L)) {
+                if (is.finite(f_probe) && f_probe <= 0)
+                  break
+                step <- step * 2
+                eta_probe <- if (side == "lower") eta_hat - step else eta_hat + step
+                f_probe <- target(eta_probe)
+              }
+              
+              if (!is.finite(f_probe) || f_probe > 0)
+                stop(sprintf("Could not bracket the profile-likelihood root for drop = %.8g on the %s side.",
+                             drop, side))
+              
+              interval <- if (side == "lower") {
+                base::c(eta_probe, eta_hat)
+              } else {
+                base::c(eta_hat, eta_probe)
+              }
+              
+              stats::uniroot(target, interval = interval, tol = root.tol)$root
+            }
+            
+            interval_for_drop <- function(drop) {
+              log_rr_limits <- base::c(
+                root_for_drop(drop, "lower"),
+                root_for_drop(drop, "upper")
+              )
+              
+              list(
+                log_risk_ratio = log_rr_limits,
+                risk_ratio = exp(log_rr_limits)
+              )
+            }
+            
+            ci_drop <- stats::qchisq(conf.level, df = 1) / 2
+            confidence_interval <- interval_for_drop(ci_drop)
+            support_interval <- interval_for_drop(likelihood.drop)
+            plot_limits <- interval_for_drop(plot.drop)
+            
+            rr1_profile <- profile_at_rr(1)
+            null_relative_loglik <- rr1_profile$relative_loglik
+            likelihood_at_rr1 <- exp(max(null_relative_loglik, log(.Machine$double.xmin)))
+            likelihood_ratio_statistic <- -2 * null_relative_loglik
+            likelihood_ratio_p_value <- stats::pchisq(
+              likelihood_ratio_statistic, df = 1, lower.tail = FALSE
+            )
+            
+            # Plot on the log(RR) scale; equally spaced values therefore have equal
+            # multiplicative spacing on the displayed x-axis.
+            log_rr_grid <- seq(
+              plot_limits$log_risk_ratio[1],
+              plot_limits$log_risk_ratio[2],
+              length.out = as.integer(n.plot)
+            )
+            rr_grid <- exp(log_rr_grid)
+            profile_grid <- lapply(rr_grid, profile_at_rr)
+            relative_loglik_grid <- vapply(profile_grid, `[[`, numeric(1), "relative_loglik")
+            likelihood_grid <- exp(pmax(relative_loglik_grid, log(.Machine$double.xmin)))
+            
+            list(
+              table = observed,
+              corrected_table = tab,
+              HAc = haldane_anscombe_applied,
+              counts = base::c(a = a, b = b, c = cc, d = d),
+              margins = base::c(row1 = r1, row2 = r2, col1 = c1, col2 = c2, total = n),
+              risks = base::c(row1 = p1_hat, row2 = p2_hat),
+              risk_ratio = risk_ratio,
+              log_risk_ratio = log_risk_ratio,
+              log_likelihood_maximum = ll_max,
+              relative_log_likelihood_at_rr1 = null_relative_loglik,
+              Sint = Sint,
+              Sgt = Sgt,
+              likelihood_at_rr1 = likelihood_at_rr1,
+              likelihood_ratio_statistic = likelihood_ratio_statistic,
+              likelihood_ratio_p_value = likelihood_ratio_p_value,
+              lint = likelihood.drop,
+              confidence_interval = c(list(level = conf.level, drop = ci_drop), confidence_interval),
+              support_interval = c(list(drop = likelihood.drop), support_interval),
+              plot_limits = c(list(drop = plot.drop), plot_limits),
+              log_xah = log_xah,
+              log_nullh = log_nullh,
+              xah = xah,
+              nullh = nullh,
+              theta = theta,
+              nul = nul,
+              theta_profile = profile_at_rr(theta),
+              nul_profile = profile_at_rr(nul),
+              plot_data = data.frame(
+                risk_ratio = rr_grid,
+                log_risk_ratio = log_rr_grid,
+                p1_profiled = vapply(profile_grid, `[[`, numeric(1), "p1"),
+                p2_profiled = vapply(profile_grid, `[[`, numeric(1), "p2"),
+                relative_log_likelihood = relative_loglik_grid,
+                likelihood = likelihood_grid
+              ),
+              chi.s = unname(chi$statistic),
+              expected = chi$expected,
+              observed = chi$observed,
+              g_df = chi$parameter,
+              pearson_p_value = chi$p.value
+              )
           }
           
+          res <- likelihood_2x2_rr(mat)
+          
+
           # Correction
           Ac <- function(c,k1,k2) { 
             if(c=="nc") { 0
             } else if(c=="ob") { 0.5*(k2-k1) 
             } else { 1*(k2-k1)
             } 
+          }
+          
+          # don't know why, but get NaN when value for nul or alt is 1, so use the interaction value
+          if(self$options$nul==1) {
+            S2way <- -res$Sint
+          } else {
+            S2way <- res$log_nullh # check that this should be negative but same abs value as S for observed OR
+          }
+
+          # support for alt. H
+          # don't know why, but get NaN when value for nul or alt is 1, so use the interaction value
+          if(self$options$alt==1) {
+            Salt <- -res$Sint
+          } else {
+            Salt <- res$log_xah # check that this should be negative but same abs value as S for observed OR
           }
           
           # main marginal totals
@@ -398,94 +641,31 @@ llrClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             if (col_sum[i] < 1) jmvcore::reject(.("Margin '{var}' has 0 total"), code='', var=colVarName)
           }
           
-          rr <- (a*(b+d))/(b*(a+c)) # RR from the contingency table
-          
-          #          orv <- (a*d)/(b*c) # actual odds ratio from the contingency table
-          f <- function(x,a,b,c,d,c1tot,r1tot,r2tot,goal) {
-            (-sum(a*log(a/x), b*log(b/(c1tot-x)), c*log(c/(r1tot-x)),
-                  d*log(d/(r2tot-c1tot+x)))-goal)^2
-          }
-          
-          # likelihood-based % confidence interval
-          
-          arry <- numeric(maxmarg)   # finding endpoints for S and OR values
-          for(x in 1:maxmarg) {
-            arry[x] <- x*(r2tot-c1tot+x)/((c1tot-x)*(r1tot-x))
-          }
-          arry[!is.finite(arry)] <- 0
-          ind <- which(arry > 0)
-          aa <- split(ind, cumsum(c(0, diff(ind) > 1)))
-          dvs <- min(aa$'0')-1
-          dve <- max(aa$'0')+1
-          
-          goal = -qchisq(self$options$ciWidth/100,1)/2
-          suppressWarnings(xmin1 <- optimize(f, c(0, a), tol = toler, a, b, c, d, c1tot, r1tot,
-                                             r2tot, goal))
-          suppressWarnings(xmin2 <- optimize(f, c(a, dve), tol = toler, a, b, c, d, c1tot, r1tot,
-                                             r2tot, goal))
-          beg <- xmin1$minimum*r2tot/((c1tot-xmin1$minimum)*r1tot)
-          end <- xmin2$minimum*r2tot/((c1tot-xmin2$minimum)*r1tot)
-          
-          # likelihood interval
-          goalL <- -self$options$lint
-          suppressWarnings(xmin1L <- optimize(f, c(0, a), tol = toler, a, b, c, d, c1tot, r1tot, r2tot, goalL))
-          suppressWarnings(xmin2L <- optimize(f, c(a, dve), tol = toler, a, b, c, d, c1tot, r1tot, r2tot, goalL))
-          begL <- xmin1L$minimum*r2tot/((c1tot-xmin1L$minimum)*r1tot)
-          endL <- xmin2L$minimum*r2tot/((c1tot-xmin2L$minimum)*r1tot)
-          
-          lintlev <- toString(self$options$lint); conflev <- paste0(self$options$ciWidth,"%")
-          
-          # x axis limits
-          goalx <- self$options$supplot   # with e^-10 we get x values for when curve is down to 0.00004539
-          suppressWarnings(xmin1x <- optimize(f, c(0, a), tol = toler, a, b, c, d, c1tot, r1tot, r2tot, goalx))
-          suppressWarnings(xmin2x <- optimize(f, c(a, dve), tol = toler, a, b, c, d, c1tot, r1tot, r2tot, goalx))
-          #          xmin <- xmin1x$minimum*(r2tot-c1tot+xmin1x$minimum)/((c1tot-xmin1x$minimum)*(r1tot-xmin1x$minimum))
-          #          xmax <- xmin2x$minimum*(r2tot-c1tot+xmin2x$minimum)/((c1tot-xmin2x$minimum)*(r1tot-xmin2x$minimum))
-          xmin <- xmin1x$minimum*r2tot/((c1tot-xmin1x$minimum)*r1tot)
-          xmax <- xmin2x$minimum*r2tot/((c1tot-xmin2x$minimum)*r1tot)
-          
-          # to determine height of self$options$alt and nul on likelihood function
-          goal <- self$options$alt
-          
-          h <- function(x,c1tot,r1tot,r2tot,goal) {
-            (x*(r2tot)/((c1tot-x)*(r1tot))-goal)^2
-          }
-          suppressWarnings(exa2 <- optimize(h, c(dvs, dve), tol = toler, c1tot, r1tot, r2tot, goal))
-          xa <- unname(unlist(exa2[1]))
-          xah <- exp(-sum(a*log(a/xa), b*log(b/(c1tot-xa)), c*log(c/(r1tot-xa)), d*log(d/(r2tot-c1tot+xa))))
-          
-          goal <- self$options$nul
-          suppressWarnings(exa2 <- optimize(h, c(dvs, dve), tol = toler, c1tot, r1tot, r2tot, goal))
-          xa <- unname(unlist(exa2[1]))
-          nullh <- exp(-sum(a*log(a/xa), b*log(b/(c1tot-xa)), c*log(c/(r1tot-xa)), d*log(d/(r2tot-c1tot+xa))))
-          
-          S2way <- log(nullh) # check that this should be negative but same abs value as S for observed OR
-          if(rr == 1) S2way <- 0
-          
           # variance analysis
-          toogood <- df/2*(log(df/chi.s)) - (df - chi.s)/2
+          toogood <- 1/2*(log(1/res$chi.s)) - (1 - res$chi.s)/2
           
           # marginal main effects analysis
           # main marginal totals
           row_sum <- rowSums(tab)
           col_sum <- colSums(tab)
           grandtot <- sum(tab)
+          r1tot <- unname(res$margins[1])
+          r2tot <- unname(res$margins[2])
+          c1tot <- unname(res$margins[3])
+          c2tot <- unname(res$margins[4])
+          
           Srow <- sum(row_sum*log(row_sum))-grandtot*log(grandtot) + grandtot*log(length(row_sum))
           if(r1tot == r2tot) Srow <- 0
           Scol <- sum(col_sum*log(col_sum))-grandtot*log(grandtot) + grandtot*log(length(col_sum))
           if(c1tot == c2tot) Scol <- 0
           # interaction
-          Sint <- sum(lt$observed * log(tabt1/lt$expected)) 
           # Grand total
-          Sgt <- sum(lt$observed*log(tabt1))-sum(lt$observed)*log(sum(lt$observed)/4)
-          
           # Sums
           exp_row <- (r1tot+r2tot)/2
           exp_col <- (c1tot+c2tot)/2
           exp_int <- grandtot/4
           
           # support for alt. H
-          Salt <- log(xah)
           SexOR_null <- Salt - S2way
           SexOR_obs <- SexOR_null - S2way
           
@@ -495,35 +675,39 @@ llrClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           ga_p <- 1-pchisq(ga,1)
           gan <- 2*abs(SexOR_null)
           gan_p <- 1-pchisq(gan,1)
-          gt_p <- 1-pchisq(2*Sgt,3)
+          gt_p <- 1-pchisq(2*res$Sgt,3)
           gr_p <- 1-pchisq(2*Srow,1)
           gc_p <- 1-pchisq(2*Scol,1)
-          gi_p <- 1-pchisq(2*Sint,1)
+          gi_p <- 1-pchisq(2*res$Sint,1)
+
+          lintlev <- toString(self$options$lint); conflev <- paste0(self$options$ciWidth,"%")
           
           table <- self$results$ctt
-          table$setRow(rowNo=1, values=list(Value=self$options$nul, ordiff= self$options$nul-rr, 
+          table$setRow(rowNo=1, values=list(Value=self$options$nul, ordiff= self$options$nul-res$risk_ratio, 
                                             S=S2way + Ac(self$options$correction,1,2), Param=paste0(c(1,2), collapse = ', '), 
-                                            G=gn, df=df, p=gn_p))
-          table$setRow(rowNo=2, values=list(Value=self$options$alt, ordiff= self$options$alt-rr, 
+                                            G=gn, df=res$g_df, p=gn_p))
+          table$setRow(rowNo=2, values=list(Value=self$options$alt, ordiff= self$options$alt-res$risk_ratio, 
                                             S=Salt + Ac(self$options$correction,2,2), Param=paste0(c(2,2), collapse = ', '), 
-                                            G=ga, df=df, p=ga_p))
+                                            G=ga, df=res$g_df, p=ga_p))
           table$setRow(rowNo=3, values=list(Value="", ordiff= self$options$alt-self$options$nul, 
                                             S=SexOR_null + Ac(self$options$correction,2,1), Param=paste0(c(2,1), collapse = ', '), 
-                                            G=gan, df=df, p=gan_p))
+                                            G=gan, df=res$g_df, p=gan_p))
           
           table <- self$results$cttma
           table$setRow(rowNo=1, values=list(Value=exp_row, S=Srow + Ac(self$options$correction,2,1), 
-                                            G=2*Srow, Param=paste0(c(2,1), collapse = ', '),df=as.integer(df), p=gr_p))
+                                            G=2*Srow, Param=paste0(c(2,1), collapse = ', '),df=as.integer(res$g_df), p=gr_p))
           table$setRow(rowNo=2, values=list(Value=exp_col, S=Scol + Ac(self$options$correction,2,1),
-                                            G=2*Scol, Param=paste0(c(2,1), collapse = ', '), df=as.integer(df), p=gc_p))
-          table$setRow(rowNo=3, values=list(Value="", S=Sint + Ac(self$options$correction,2,1), 
-                                            G=2*Sint, Param=paste0(c(2,1), collapse = ', '), df=as.integer(df), p=gi_p))
-          table$setRow(rowNo=4, values=list(Value=exp_int, S=Sgt + Ac(self$options$correction,4,1), 
-                                            G=2*Sgt, Param=paste0(c(4,1), collapse = ', '), df=as.integer(3), p=gt_p))
+                                            G=2*Scol, Param=paste0(c(2,1), collapse = ', '), df=as.integer(res$g_df), p=gc_p))
+          table$setRow(rowNo=3, values=list(Value="", S=res$Sint + Ac(self$options$correction,2,1), 
+                                            G=2*res$Sint, Param=paste0(c(2,1), collapse = ', '), df=as.integer(res$g_df), p=gi_p))
+          table$setRow(rowNo=4, values=list(Value=exp_int, S=res$Sgt + Ac(self$options$correction,4,1), 
+                                            G=2*res$Sgt, Param=paste0(c(4,1), collapse = ', '), df=as.integer(3), p=gt_p))
           table <- self$results$ctt2
-          table$setRow(rowNo=1, values=list(Level=lintlev, RR = rr, Lower=begL, Upper=endL))
-          table$setRow(rowNo=2, values=list(Level=conflev, RR = rr, Lower=beg, Upper=end))
-          if (HAc)
+          table$setRow(rowNo=1, values=list(Level=lintlev, RR = res$risk_ratio, 
+                                            Lower=res$support_interval$risk_ratio[1], Upper=res$support_interval$risk_ratio[2]))
+          table$setRow(rowNo=2, values=list(Level=conflev, RR = res$risk_ratio, 
+                                            Lower=res$confidence_interval$risk_ratio[1], Upper=res$confidence_interval$risk_ratio[2]))
+          if (res$HAc)
             table$addFootnote(rowNo=1, col="RR", "Haldane-Anscombe correction applied")      
           
           table <- self$results$ctt3
@@ -532,8 +716,8 @@ llrClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           if (isTRUE(self$options$cc))
             table$setNote('Note', "Continuity correction applied. Unlike the \u03C7\u00B2 statistic, a large S value indicates 
           that the proportions are either more different or too similar compared with those expected")
-          table$setRow(rowNo=1, values=list(var= "For RR = 1", Sv=toogood, X2=chi.s, dfv=df, 
-                                            pv=lt$p.value, pv1=1-lt$p.value))
+          table$setRow(rowNo=1, values=list(var= "For RR = 1", Sv=toogood, X2=res$chi.s, dfv=res$g_df, 
+                                            pv=res$pearson_p_value, pv1=1-res$pearson_p_value))
           
           # stats for summary        
           stats <- list(S1 = S2way+ Ac(self$options$correction,1,2),
@@ -541,9 +725,9 @@ llrClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         S3 = SexOR_null + Ac(self$options$correction,2,1),
                         S4 = Srow + Ac(self$options$correction,2,1),
                         S5 = Scol + Ac(self$options$correction,2,1),
-                        S7 = Sgt + Ac(self$options$correction,4,1),
+                        S7 = res$Sgt + Ac(self$options$correction,4,1),
                         tg = toogood,
-                        chi = chi.s)
+                        chi = res$chi.s)
           
           # Populate Explanation & table
           private$.populateSupportText(stats)
@@ -557,9 +741,9 @@ llrClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
           }
           
-          g <- data.frame(rr=rr, a=a, b=b, c=c, d=d, dvs=dvs,
-                          r1tot=r1tot, r2tot=r2tot, c1tot=c1tot, c2tot=c2tot, 
-                          nullh=nullh, xah=xah, goalL=goalL, begL=begL,endL=endL, xmin=xmin, xmax=xmax)
+          g <- data.frame(a=res$counts[1], b=res$counts[2],
+                          c=res$counts[3], d=res$counts[4])
+          
           imagec <- self$results$plotc
           imagec$setState(g)
           
@@ -651,43 +835,279 @@ llrClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         
         g <- imagec$state
         
-        res <- 100    # resolution, increase for greater resolution
-        minmarg <- min(g$r1tot,g$r2tot,g$c1tot,g$c2tot)
-        arrlen <- res*minmarg-1
-        xs <- 0; ys <- 0
-        for (i in 1:arrlen) {     # arrays to plot likelihood vs OR
-          dv <- i/res+g$dvs
-          ys[i] <- exp(-sum(g$a*log(g$a/dv), g$b*log(g$b/(g$c1tot-dv)),
-                            g$c*log(g$c/(g$r1tot-dv)), g$d*log(g$d/(g$r2tot-g$c1tot+dv))))
-          xs[i] <- dv*g$r2tot/((g$c1tot-dv)*(g$r1tot))
+        mat <- matrix(c(
+          g$a, g$b,
+          g$c, g$d
+        ), nrow = 2, byrow = TRUE)
+        
+        tab <- mat
+        likelihood_2x2_rr <- function(tab,
+                                      conf.level = self$options$ciWidth/100,
+                                      likelihood.drop = self$options$lint,
+                                      theta = self$options$alt,
+                                      nul = self$options$nul,
+                                      plot.drop = -self$options$supplot,
+                                      continuity = 0.5,
+                                      root.tol = 1e-12,
+                                      n.plot = 1001L) {
           
+          stopifnot(is.matrix(tab), identical(dim(tab), c(2L, 2L)))
+          
+          if (any(!is.finite(tab)) || any(tab < 0))
+            stop("All cell counts must be finite and non-negative.")
+          if (any(rowSums(tab) == 0) || any(colSums(tab) == 0))
+            stop("Neither a row nor a column may have a zero total.")
+          if (!is.numeric(conf.level) || length(conf.level) != 1L ||
+              !is.finite(conf.level) || conf.level <= 0 || conf.level >= 1)
+            stop("conf.level must be a finite value strictly between 0 and 1.")
+          if (length(likelihood.drop) != 1L || length(plot.drop) != 1L ||
+              !is.finite(likelihood.drop) || !is.finite(plot.drop) ||
+              likelihood.drop <= 0 || plot.drop <= 0)
+            stop("likelihood.drop and plot.drop must be finite positive numbers.")
+          if (length(continuity) != 1L || !is.finite(continuity) || continuity <= 0)
+            stop("continuity must be a finite positive number.")
+          if (length(n.plot) != 1L || !is.finite(n.plot) || n.plot < 2)
+            stop("n.plot must be at least 2.")
+          if (length(theta) != 1L || length(nul) != 1L ||
+              !is.finite(theta) || !is.finite(nul) || theta <= 0 || nul <= 0)
+            stop("theta and nul must be finite positive risk ratios.")
+          
+          observed <- tab
+          haldane_anscombe_applied <- any(tab == 0)
+          if (haldane_anscombe_applied)
+            tab <- tab + continuity
+          
+          # Use cc rather than c so base::c() is never masked.
+          a <- tab[1, 1]
+          b <- tab[1, 2]
+          cc <- tab[2, 1]
+          d <- tab[2, 2]
+          
+          r1 <- a + b
+          r2 <- cc + d
+          c1 <- a + cc
+          c2 <- b + d
+          n <- r1 + r2
+          
+          p1_hat <- a / r1
+          p2_hat <- cc / r2
+          risk_ratio <- p1_hat / p2_hat
+          log_risk_ratio <- log(risk_ratio)
+          
+          # Constant-free unconditional binomial log likelihood. Its limiting values
+          # at p = 0 or p = 1 are handled explicitly: 0 * log(0) is defined as 0.
+          xlogy <- function(x, y) {
+            ifelse(x == 0, 0, x * log(y))
+          }
+          
+          loglik_probabilities <- function(p1, p2) {
+            if (!is.finite(p1) || !is.finite(p2) || p1 < 0 || p1 > 1 ||
+                p2 < 0 || p2 > 1)
+              return(-Inf)
+            
+            xlogy(a, p1) + xlogy(b, 1 - p1) +
+              xlogy(cc, p2) + xlogy(d, 1 - p2)
+          }
+          
+          ll_max <- loglik_probabilities(p1_hat, p2_hat)
+          
+          # Under RR = rr, set p1 = rr * p2 and maximise over p2.  Optimise on the
+          # logit scale for a numerically stable interior representation:
+          # p2 = upper_p2 * plogis(eta), where upper_p2 = min(1, 1/rr).
+          # This prevents a fixed absolute tolerance from collapsing the parameter
+          # interval for very large RR values, which arises with zero-event tables.
+          profile_at_rr <- function(rr) {
+            if (!is.finite(rr) || rr <= 0)
+              stop("rr must be a finite positive risk ratio.")
+            
+            upper_p2 <- min(1, 1 / rr)
+            if (!is.finite(upper_p2) || upper_p2 <= 0)
+              stop("Could not form a valid parameter range for this risk ratio.")
+            
+            neg_loglik_eta <- function(eta) {
+              p2 <- upper_p2 * stats::plogis(eta)
+              -loglik_probabilities(rr * p2, p2)
+            }
+            
+            # A finite, broad logit interval is adequate even when upper_p2 is tiny.
+            # At +/- 40, plogis() is sufficiently close to 0/1 for profiling here.
+            opt <- optimize(
+              neg_loglik_eta,
+              interval = base::c(-40, 40),
+              tol = root.tol
+            )
+            
+            eta <- opt$minimum
+            p2 <- upper_p2 * stats::plogis(eta)
+            p1 <- rr * p2
+            fitted <- matrix(
+              base::c(r1 * p1, r1 * (1 - p1), r2 * p2, r2 * (1 - p2)),
+              nrow = 2,
+              byrow = TRUE
+            )
+            
+            list(
+              risk_ratio = rr,
+              p1 = p1,
+              p2 = p2,
+              fitted = fitted,
+              loglik = -opt$objective,
+              relative_loglik = -opt$objective - ll_max
+            )
+          }
+          
+          rel_loglik_at_rr <- function(rr) profile_at_rr(rr)$relative_loglik
+          
+          # Equivalent of the original like_function_height(). It returns the log of
+          # the likelihood ratio relative to the unconstrained RR MLE, at RR = rr.
+          like_function_height_rr <- function(rr) {
+            profile_at_rr(rr)$relative_loglik
+          }
+          
+          # Retain the original output names: xah is the likelihood height at theta,
+          # and nullh is the likelihood height at nul. The log_ versions are the
+          # corresponding relative log likelihoods.
+          log_xah <- like_function_height_rr(theta)
+          log_nullh <- like_function_height_rr(nul)
+          xah <- exp(max(log_xah, log(.Machine$double.xmin)))
+          nullh <- exp(max(log_nullh, log(.Machine$double.xmin)))
+          
+          # Find a RR endpoint at which profile log likelihood has dropped by `drop`.
+          # Work on the log(RR) scale, so ranges are symmetric multiplicatively.
+          root_for_drop <- function(drop, side = c("lower", "upper")) {
+            side <- match.arg(side)
+            eta_hat <- log_risk_ratio
+            target <- function(eta) rel_loglik_at_rr(exp(eta)) + drop
+            
+            step <- 1
+            eta_probe <- if (side == "lower") eta_hat - step else eta_hat + step
+            f_probe <- target(eta_probe)
+            
+            for (k in seq_len(100L)) {
+              if (is.finite(f_probe) && f_probe <= 0)
+                break
+              step <- step * 2
+              eta_probe <- if (side == "lower") eta_hat - step else eta_hat + step
+              f_probe <- target(eta_probe)
+            }
+            
+            if (!is.finite(f_probe) || f_probe > 0)
+              stop(sprintf("Could not bracket the profile-likelihood root for drop = %.8g on the %s side.",
+                           drop, side))
+            
+            interval <- if (side == "lower") {
+              base::c(eta_probe, eta_hat)
+            } else {
+              base::c(eta_hat, eta_probe)
+            }
+            
+            stats::uniroot(target, interval = interval, tol = root.tol)$root
+          }
+          
+          interval_for_drop <- function(drop) {
+            log_rr_limits <- base::c(
+              root_for_drop(drop, "lower"),
+              root_for_drop(drop, "upper")
+            )
+            
+            list(
+              log_risk_ratio = log_rr_limits,
+              risk_ratio = exp(log_rr_limits)
+            )
+          }
+          
+          ci_drop <- stats::qchisq(conf.level, df = 1) / 2
+          confidence_interval <- interval_for_drop(ci_drop)
+          support_interval <- interval_for_drop(likelihood.drop)
+          plot_limits <- interval_for_drop(plot.drop)
+          
+          rr1_profile <- profile_at_rr(1)
+          null_relative_loglik <- rr1_profile$relative_loglik
+          likelihood_at_rr1 <- exp(max(null_relative_loglik, log(.Machine$double.xmin)))
+          likelihood_ratio_statistic <- -2 * null_relative_loglik
+          likelihood_ratio_p_value <- stats::pchisq(
+            likelihood_ratio_statistic, df = 1, lower.tail = FALSE
+          )
+          
+          # Plot on the log(RR) scale; equally spaced values therefore have equal
+          # multiplicative spacing on the displayed x-axis.
+          log_rr_grid <- seq(
+            plot_limits$log_risk_ratio[1],
+            plot_limits$log_risk_ratio[2],
+            length.out = as.integer(n.plot)
+          )
+          rr_grid <- exp(log_rr_grid)
+          profile_grid <- lapply(rr_grid, profile_at_rr)
+          relative_loglik_grid <- vapply(profile_grid, `[[`, numeric(1), "relative_loglik")
+          likelihood_grid <- exp(pmax(relative_loglik_grid, log(.Machine$double.xmin)))
+          
+          list(
+            table = observed,
+            corrected_table = tab,
+            haldane_anscombe_applied = haldane_anscombe_applied,
+            counts = base::c(a = a, b = b, c = cc, d = d),
+            margins = base::c(row1 = r1, row2 = r2, col1 = c1, col2 = c2, total = n),
+            risks = base::c(row1 = p1_hat, row2 = p2_hat),
+            risk_ratio = risk_ratio,
+            log_risk_ratio = log_risk_ratio,
+            log_likelihood_maximum = ll_max,
+            relative_log_likelihood_at_rr1 = null_relative_loglik,
+            likelihood_at_rr1 = likelihood_at_rr1,
+            likelihood_ratio_statistic = likelihood_ratio_statistic,
+            likelihood_ratio_p_value = likelihood_ratio_p_value,
+            lint = likelihood.drop,
+            confidence_interval = c(list(level = conf.level, drop = ci_drop), confidence_interval),
+            support_interval = c(list(drop = likelihood.drop), support_interval),
+            plot_limits = c(list(drop = plot.drop), plot_limits),
+            log_xah = log_xah,
+            log_nullh = log_nullh,
+            xah = xah,
+            nullh = nullh,
+            theta = theta,
+            nul = nul,
+            theta_profile = profile_at_rr(theta),
+            nul_profile = profile_at_rr(nul),
+            plot_data = data.frame(
+              risk_ratio = rr_grid,
+              log_risk_ratio = log_rr_grid,
+              p1_profiled = vapply(profile_grid, `[[`, numeric(1), "p1"),
+              p2_profiled = vapply(profile_grid, `[[`, numeric(1), "p2"),
+              relative_log_likelihood = relative_loglik_grid,
+              likelihood = likelihood_grid
+            )
+          )
         }
         
-        # to determine x axis space for plot
-        serr <- sqrt(1/g$a - 1/g$r1tot + 1/g$b - 1/g$r2tot)
-        lolim <- exp(log(g$rr)-3*serr); hilim <- exp(log(g$rr)+3*serr)
-        if (lolim < 0) {lolim <- 0}
+        des <- likelihood_2x2_rr(mat)
         
-        #-sum(a*log(a/x), b*log(b/(c1tot-x)), c*log(c/(r1tot-x)),
-        # d*log(d/(r2tot-c1tot+x)))
-        
-        # do the plot with lines
+        # Example base-R likelihood plot.
         if(self$options$plotype=="lplot") {
-          plot <- plot(xs, ys, xlim=c(lolim,hilim),type="l", lwd = 1, xlab = "Risk Ratio", ylab = "Likelihood")        
-          lines(c(g$rr,g$rr),c(0,1),lty=2) # add MLE as dashed line
-          segments(g$begL, exp(g$goalL), g$endL, exp(g$goalL), lwd = 1, col = "red")
-          lines(c(self$options$nul,self$options$nul),c(0,g$nullh), lty=1, col = "black") # add H prob as black line
-          lines(c(self$options$alt,self$options$alt), c(0,g$xah), lty=1, col = "blue") # add H prob as blue line
+          with(des$plot_data, {
+            plot(risk_ratio, likelihood, type = "l",
+                 log = if (self$options$log_x) "x" else "",
+                 xlab = if (self$options$log_x) "Risk ratio (Log10 scale)" else "Risk ratio",
+                 ylab = "Likelihood")
+            segments(des$support_interval$risk_ratio[1], exp(-self$options$lint), 
+                     des$support_interval$risk_ratio[2], exp(-self$options$lint), lwd = 1, col = "red")
+            lines(c(des$risk_ratio,des$risk_ratio), c(0,1), lty=2) # add OR as dashed line
+            lines(c(self$options$alt,self$options$alt), c(0,des$xah), lty=1, col = "blue") # add H prob as blue line
+            lines(c(self$options$nul,self$options$nul), c(0,des$nullh), lty=1) # add null H prob as black line
+          })
         } else {
-          plot <- plot(xs, log(ys), xlim=c(g$xmin,g$xmax),type="l", lwd = 1, xlab = "Risk Ratio", 
-                       ylim=c(self$options$supplot,0), ylab = "Log Likelihood")
-          lines(c(g$rr,g$rr),c(self$options$supplot,0),lty=2) # add MLE as dashed line
-          segments(g$begL, g$goalL, g$endL, g$goalL, lwd = 1, col = "red")
-          lines(c(self$options$nul,self$options$nul),c(self$options$supplot,log(g$nullh)), lty=1, col = "black") # add H prob as black line
-          lines(c(self$options$alt,self$options$alt), c(self$options$supplot,log(g$xah)), lty=1, col = "blue") # add H prob as blue line
+          with(des$plot_data, {
+            plot(risk_ratio, log(likelihood), type = "l", ylim=c(self$options$supplot,0),
+                 log = if (self$options$log_x) "x" else "",
+                 xlab = if (self$options$log_x) "Odds ratio (Log10 scale)" else "Odds ratio",
+                 ylab = "Likelihood")
+            segments(des$support_interval$risk_ratio[1], -self$options$lint, 
+                     des$support_interval$risk_ratio[2], -self$options$lint, lwd = 1, col = "red")
+            lines(c(des$risk_ratio,des$risk_ratio), c(self$options$supplot,0), lty=2) # add OR as dashed line
+            lines(c(self$options$alt,self$options$alt), c(self$options$supplot,des$log_xah), lty=1, col = "blue") # add H prob as blue line
+            lines(c(self$options$nul,self$options$nul), c(self$options$supplot,des$log_nullh), lty=1) # add null H prob as black line
+          })
         }
         TRUE
-      },
+     },
       #### Helper functions ----
       .cleanData = function() {
         

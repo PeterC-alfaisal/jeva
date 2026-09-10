@@ -17,6 +17,7 @@ cttOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             pll = FALSE,
             plotype = "lplot",
             supplot = -10,
+            log_x = FALSE,
             varA = FALSE,
             cc = FALSE,
             text = TRUE,
@@ -110,6 +111,10 @@ cttOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 min=-100,
                 max=-1,
                 default=-10)
+            private$..log_x <- jmvcore::OptionBool$new(
+                "log_x",
+                log_x,
+                default=FALSE)
             private$..varA <- jmvcore::OptionBool$new(
                 "varA",
                 varA,
@@ -187,6 +192,7 @@ cttOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..pll)
             self$.addOption(private$..plotype)
             self$.addOption(private$..supplot)
+            self$.addOption(private$..log_x)
             self$.addOption(private$..varA)
             self$.addOption(private$..cc)
             self$.addOption(private$..text)
@@ -213,6 +219,7 @@ cttOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         pll = function() private$..pll$value,
         plotype = function() private$..plotype$value,
         supplot = function() private$..supplot$value,
+        log_x = function() private$..log_x$value,
         varA = function() private$..varA$value,
         cc = function() private$..cc$value,
         text = function() private$..text$value,
@@ -238,6 +245,7 @@ cttOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..pll = NA,
         ..plotype = NA,
         ..supplot = NA,
+        ..log_x = NA,
         ..varA = NA,
         ..cc = NA,
         ..text = NA,
@@ -418,7 +426,13 @@ cttResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="ctt3",
                 title="Variance analysis",
                 visible="(varA)",
-                rows="1 - rows - cols - counts - data - cc",
+                rows=1,
+                clearWith=list(
+                    "rows",
+                    "cols",
+                    "counts",
+                    "data",
+                    "cc"),
                 columns=list(
                     list(
                         `name`="var", 
@@ -464,7 +478,8 @@ cttResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "nul",
                     "alt",
                     "plotype",
-                    "supplot"),
+                    "supplot",
+                    "log_x"),
                 visible="(pll)"))
             self$add(jmvcore::Image$new(
                 options=options,
@@ -634,6 +649,8 @@ cttBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   function
 #' @param supplot To set the minimum likelihood display value in plot, in log
 #'   units (default = -10)  affects the x-axis range
+#' @param log_x \code{TRUE} or \code{FALSE} (default), give the plotted x-axis
+#'   as log
 #' @param varA \code{TRUE} or \code{FALSE} (default), perform variance
 #'   analysis for null and alternative hypothesis
 #' @param cc \code{TRUE} or \code{FALSE} (default), use continuity correction
@@ -692,6 +709,7 @@ ctt <- function(
     pll = FALSE,
     plotype = "lplot",
     supplot = -10,
+    log_x = FALSE,
     varA = FALSE,
     cc = FALSE,
     text = TRUE,
@@ -759,6 +777,7 @@ ctt <- function(
         pll = pll,
         plotype = plotype,
         supplot = supplot,
+        log_x = log_x,
         varA = varA,
         cc = cc,
         text = text,

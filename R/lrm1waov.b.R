@@ -74,7 +74,7 @@ lrm1waovClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       }
       
       
-      ssTypeNote <- .("Type {ssType} Sums of Squares. ")
+      ssTypeNote <- .("Type {ssType} Sums of Squares.")
       
       rmTable <- self$results$rmTable
       rmTable$setNote('Note', paste0(jmvcore::format(ssTypeNote, ssType=self$options$ss),notext))
@@ -130,7 +130,7 @@ lrm1waovClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     },
     
     .initBSTable=function() {
-      ssTypeNote <- .("Type {ssType} Sums of Squares. ")
+      ssTypeNote <- .("Type {ssType} Sums of Squares.")
       
       bsTable <- self$results$bsTable
       
@@ -150,7 +150,7 @@ lrm1waovClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       if (length(bsTerms) > 0) {
         for (term in bsTerms) {
           if (length(term) == 1 && term == 'Residual') {
-            name <- .(' ')
+            name <- ' '
           } else {
             name <- paste0("H\u2080  vs ",stringifyTerm(term))
           }
@@ -1162,7 +1162,8 @@ lrm1waovClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       
       data <- cbind(data, '.SUBJECT'=1:nrow(data))
       
-      dataLong <- as.list(reshape2:::melt.data.frame(data, id.vars=c(bsVars, '.SUBJECT'), measure.vars=rmVars, value.name='.DEPENDENT'))
+#      dataLong <- as.list(reshape2:::melt.data.frame(data, id.vars=c(bsVars, '.SUBJECT'), measure.vars=rmVars, value.name='.DEPENDENT'))
+      dataLong <- as.list(reshape2::melt(data, id.vars=c(bsVars, '.SUBJECT'), measure.vars=rmVars, value.name='.DEPENDENT'))
       
       col <- dataLong[['variable']]
       temp <- numeric(length(col))

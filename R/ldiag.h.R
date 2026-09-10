@@ -539,7 +539,13 @@ ldiagResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="ctt3",
                 title="Variance analysis",
                 visible="(varA)",
-                rows="1 - rows - cols - counts - data - cc",
+                rows=1,
+                clearWith=list(
+                    "rows",
+                    "cols",
+                    "counts",
+                    "data",
+                    "cc"),
                 columns=list(
                     list(
                         `name`="var", 

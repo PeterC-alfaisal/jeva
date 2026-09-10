@@ -361,14 +361,11 @@ mcnemClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           ao <- osp[1]; bo <- osp[2]; n <- ao + bo
           po <- ao/n
           
-          # to correct when po is either 0 or 1
-          p1 <- po
-          p2 <- po
-          if(po == 0) p1 <- 1
-          if(po == 1) p2 <- 0
-          
+          # For support calculations using log when po is either 0 or 1
+          p1 <- if (po == 0) 1 else po
+          p2 <- if (po == 1) 0 else po
+
           x=0
-          
           f <- function(x, ao, bo, po, p1, p2, goal) {
             
             (ao*log(x)+bo*log(1-x)-(ao*log(p1)+bo*log(1-p2))-goal)^2
