@@ -17,6 +17,7 @@ ctt(
   pll = FALSE,
   plotype = "lplot",
   supplot = -10,
+  log_x = FALSE,
   varA = FALSE,
   cc = FALSE,
   text = TRUE,
@@ -68,6 +69,9 @@ function}
 
 \item{supplot}{To set the minimum likelihood display value in plot, in log
 units (default = -10)  affects the x-axis range}
+
+\item{log_x}{\code{TRUE} or \code{FALSE} (default), give the plotted x-axis
+as log}
 
 \item{varA}{\code{TRUE} or \code{FALSE} (default), perform variance
 analysis for null and alternative hypothesis}
